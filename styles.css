@@ -2042,3 +2042,308 @@ a {
   transform: translateY(-1px);
 }
 
+/* ==========================================================================
+   12. USER SELECTION & SECURE SESSION STYLES (مؤمن / طه / ياسي)
+   ========================================================================== */
+.user-select-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 19, 41, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
+}
+
+.user-select-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.user-select-card {
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  max-width: 620px;
+  width: 100%;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  position: relative;
+  animation: modalSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.user-select-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-card);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.5px;
+}
+
+.user-select-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--text-main);
+  margin-bottom: 0.4rem;
+  line-height: 1.2;
+}
+
+.user-select-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  max-width: 440px;
+  margin: 0 auto 1.75rem auto;
+  line-height: 1.5;
+}
+
+.user-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .user-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.user-select-card-btn {
+  background: #ffffff;
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-xs);
+  position: relative;
+  outline: none;
+}
+
+.user-select-card-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.12);
+  border-color: var(--primary);
+  background: #f8fafc;
+}
+
+.user-select-card-btn:active {
+  transform: scale(0.97);
+}
+
+.user-btn-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.user-select-card-btn:hover .user-btn-avatar {
+  transform: scale(1.08);
+}
+
+.user-btn-avatar.momen {
+  background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.user-btn-avatar.taha {
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+}
+
+.user-btn-avatar.yasi {
+  background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+}
+
+.user-btn-name {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.user-btn-role {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.user-btn-kbd {
+  display: inline-block;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-card);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+/* Header Session Controls */
+.header-session-control {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.active-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-xs);
+  padding: 0.3rem 0.65rem 0.3rem 0.4rem;
+  border-radius: var(--radius-pill);
+}
+
+.user-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.chip-label {
+  font-size: 0.725rem;
+  color: var(--text-muted);
+}
+
+.chip-name {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.header-logout-btn {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #dc2626;
+  border-radius: var(--radius-md);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.header-logout-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.header-logout-btn:active {
+  transform: scale(0.96);
+}
+
+/* Action Buttons in Products Table */
+.btn-action-edit {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.725rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-action-edit:hover {
+  background: #dbeafe;
+}
+
+.btn-action-delete {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.725rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-action-delete:hover {
+  background: #fee2e2;
+}
+
+/* User Badges in Audit Table */
+.audit-user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.audit-user-badge.momen {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.audit-user-badge.taha {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.audit-user-badge.yasi {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+/* Locked Session User in Modals */
+.locked-user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 800;
+  width: 100%;
+}
+
+

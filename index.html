@@ -10,6 +10,47 @@
 </head>
 <body>
 
+<!-- =========================================================
+     SECURE USER SELECTION MODAL (من المستخدم؟)
+     ========================================================= -->
+<div id="userSelectOverlay" class="user-select-overlay">
+  <div class="user-select-card">
+    <div class="user-select-brand-badge">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m14 7 3 3-8.5 8.5-3.5 1 1-3.5Z"/></svg>
+      <span>ABSOLUTE DENTAL OPERATIONS HUB</span>
+    </div>
+
+    <h2 class="user-select-title">من المستخدم؟</h2>
+    <p class="user-select-subtitle">يرجى اختيار هويتك لمتابعة وتسجيل كافة العمليات الإدارية وتغييرات الأسعار والمخزون باسمك المعتمد.</p>
+
+    <div class="user-cards-grid">
+      <!-- 1. مؤمن -->
+      <button type="button" class="user-select-card-btn" onclick="loginAsUser('مؤمن')" title="الدخول بحساب مؤمن (اضغط 1)">
+        <div class="user-btn-avatar momen">مؤمن</div>
+        <div class="user-btn-name">مؤمن</div>
+        <div class="user-btn-role">المشتريات والمخزون</div>
+        <span class="user-btn-kbd">مفتاح 1</span>
+      </button>
+
+      <!-- 2. طه -->
+      <button type="button" class="user-select-card-btn" onclick="loginAsUser('طه')" title="الدخول بحساب طه (اضغط 2)">
+        <div class="user-btn-avatar taha">طه</div>
+        <div class="user-btn-name">طه</div>
+        <div class="user-btn-role">العمليات والمبيعات</div>
+        <span class="user-btn-kbd">مفتاح 2</span>
+      </button>
+
+      <!-- 3. ياسي -->
+      <button type="button" class="user-select-card-btn" onclick="loginAsUser('ياسي')" title="الدخول بحساب ياسي (اضغط 3)">
+        <div class="user-btn-avatar yasi">ياسي</div>
+        <div class="user-btn-name">ياسي</div>
+        <div class="user-btn-role">المالية والتوصيل</div>
+        <span class="user-btn-kbd">مفتاح 3</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="app-container">
 
   <!-- =========================================================
@@ -113,7 +154,7 @@
         </button>
       </div>
 
-      <div class="logout-row" onclick="showToast('تم تسجيل الخروج الآمن')">
+      <div class="logout-row" onclick="logoutCurrentUser()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         <span>تسجيل الخروج</span>
       </div>
@@ -145,7 +186,7 @@
         <!-- Date Badge -->
         <div class="header-date-badge">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span id="headerCurrentDateText">الثلاثاء، 30 سبتمبر 2026</span>
+          <span id="headerCurrentDateText">الخميس، 01 أكتوبر 2026</span>
         </div>
 
         <!-- Notification Bell -->
@@ -154,14 +195,18 @@
           <span class="header-badge-count">3</span>
         </div>
 
-        <!-- User Profile Dropdown -->
-        <div class="header-user-dropdown" onclick="navigateToScreen('partners')">
-          <div class="header-avatar">طه</div>
-          <div class="header-user-info">
-            <span class="header-user-name">طه</span>
-            <span class="header-user-role">شريك مؤسس</span>
+        <!-- Active Authorized Session User Controls -->
+        <div class="header-session-control">
+          <div class="active-user-chip" onclick="navigateToScreen('partners')" title="عرض حسابات الشركاء">
+            <span class="user-pulse-dot"></span>
+            <span class="chip-label">المستخدم الحالي:</span>
+            <strong class="chip-name" id="topHeaderUserName">مؤمن</strong>
+            <div class="header-avatar" id="topHeaderAvatar" style="width: 28px; height: 28px; font-size: 0.75rem;">مؤمن</div>
           </div>
-          <svg class="header-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+          <button class="header-logout-btn" onclick="logoutCurrentUser()" title="إنهاء الجلسة وتسجيل الخروج">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>تسجيل الخروج</span>
+          </button>
         </div>
       </div>
     </header>
@@ -704,7 +749,13 @@
             <h1 class="page-greeting">كتالوج المنتجات والتسعير</h1>
             <p class="page-subtitle">28 صنفاً من أدوات ومستلزمات طب الأسنان متصلة بالسيرفر.</p>
           </div>
-          <button class="btn-secondary" onclick="syncWithUserServer()">🔄 تحديث من السيرفر</button>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-primary" onclick="openAddProductModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              <span>+ إضافة صنف جديد</span>
+            </button>
+            <button class="btn-secondary" onclick="syncWithUserServer()">🔄 تحديث من السيرفر</button>
+          </div>
         </div>
 
         <div class="erp-table-card">
@@ -727,6 +778,7 @@
                   <th>هامش الربح</th>
                   <th>المخزون</th>
                   <th>الحالة</th>
+                  <th style="text-align: center;">الإجراءات</th>
                 </tr>
               </thead>
               <tbody id="fullProductsTableBody">
@@ -1043,6 +1095,15 @@
         </div>
 
         <div class="erp-table-card">
+          <div class="table-controls-bar">
+            <div class="table-filter-tabs">
+              <button class="table-filter-tab active" onclick="filterAuditTable('all', this)">كافة العمليات (<span id="auditTabAllCount">0</span>)</button>
+              <button class="table-filter-tab" onclick="filterAuditTable('مؤمن', this)">عمليات مؤمن</button>
+              <button class="table-filter-tab" onclick="filterAuditTable('طه', this)">عمليات طه</button>
+              <button class="table-filter-tab" onclick="filterAuditTable('ياسي', this)">عمليات ياسي</button>
+            </div>
+            <input type="text" class="search-input" id="auditSearchInput" placeholder="بحث بالعملية أو الصنف..." oninput="handleAuditSearch(this.value)" style="background: var(--bg-subtle); padding: 0.4rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-card); width: 220px;">
+          </div>
           <div style="overflow-x: auto;">
             <table class="erp-table">
               <thead>
@@ -1401,20 +1462,11 @@
           </div>
 
           <div class="form-group-custom">
-            <label class="form-label-custom">الشريك المسؤول عن الطلب</label>
-            <div style="display: flex; gap: 8px;">
-              <label class="partner-radio-label">
-                <input type="radio" name="studentOrderPartner" value="طه" checked>
-                <span>طه</span>
-              </label>
-              <label class="partner-radio-label">
-                <input type="radio" name="studentOrderPartner" value="عبدالمؤمن">
-                <span>عبدالمؤمن</span>
-              </label>
-              <label class="partner-radio-label">
-                <input type="radio" name="studentOrderPartner" value="ساسي">
-                <span>ساسي</span>
-              </label>
+            <label class="form-label-custom">المسؤول المنفّذ للطلب (المستخدم المعتمد بالجلسة):</label>
+            <div class="locked-user-badge">
+              <span class="user-pulse-dot"></span>
+              <strong id="studentOrderActiveUserBadgeName">مؤمن</strong>
+              <span style="font-size: 0.7rem; color: #166534; margin-inline-start: auto;">(موثّق تلقائياً بجلسة العمل)</span>
             </div>
           </div>
         </div>
@@ -1553,6 +1605,156 @@
 
     <div class="modal-footer" style="justify-content: center;">
       <button type="button" class="btn-secondary" onclick="closeModal('studentOrderSuccessModal')">إغلاق ومتابعة المنظومة</button>
+    </div>
+  </div>
+</div>
+
+<!-- 7. EDIT PRODUCT MODAL (تعديل بيانات الصنف والأسعار) -->
+<div id="editProductModal" class="modal-overlay" onclick="if(event.target === this) closeModal('editProductModal')">
+  <div class="modal-dialog" style="max-width: 580px;">
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="modal-title">✏️ تعديل بيانات الصنف والتسعير والمخزون</span>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal('editProductModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Active Session User Notice -->
+      <div class="locked-user-badge">
+        <span class="user-pulse-dot"></span>
+        <span>المستخدم المنفّذ للتعديل:</span>
+        <strong id="editProductAuthor">مؤمن</strong>
+        <span style="font-size: 0.7rem; color: #166534; margin-inline-start: auto;">(موثّق تلقائياً بسجل العمليات)</span>
+      </div>
+
+      <input type="hidden" id="editProductId">
+
+      <div class="form-group-custom">
+        <label class="form-label-custom">اسم الأداة / الصنف بالعربية <span style="color:#ef4444;">*</span></label>
+        <input type="text" id="editProductNameAr" class="form-input-custom" required>
+      </div>
+
+      <div class="form-row-2col">
+        <div class="form-group-custom">
+          <label class="form-label-custom">الرمز (SKU)</label>
+          <input type="text" id="editProductSku" class="form-input-custom num-mono">
+        </div>
+        <div class="form-group-custom">
+          <label class="form-label-custom">الفئة / القسم</label>
+          <select id="editProductCategory" class="form-select-custom">
+            <option value="أدوات ومستلزمات">أدوات ومستلزمات</option>
+            <option value="أدوات حفر وبورات">أدوات حفر وبورات (Burs)</option>
+            <option value="كاستات وهاندبيس">كاستات وهاندبيس</option>
+            <option value="أسنان وشمع">أسنان وشمع (Wax & Teeth)</option>
+            <option value="أدوات فحص ومعاينة">أدوات فحص ومعاينة</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row-2col" style="background: var(--bg-subtle); padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-card);">
+        <div class="form-group-custom">
+          <label class="form-label-custom" style="color: var(--primary); font-weight: 800;">سعر البيع للطالب (د.ل) <span style="color:#ef4444;">*</span></label>
+          <input type="number" id="editProductSellingPrice" class="form-input-custom num-mono" step="0.5" min="0" style="font-weight: 800; font-size: 1rem; color: var(--primary);" required>
+        </div>
+        <div class="form-group-custom">
+          <label class="form-label-custom">سعر التكلفة بالجملة (د.ل) <span style="color:#ef4444;">*</span></label>
+          <input type="number" id="editProductCostPrice" class="form-input-custom num-mono" step="0.5" min="0" required>
+        </div>
+      </div>
+
+      <div class="form-row-2col">
+        <div class="form-group-custom">
+          <label class="form-label-custom">المخزون الحالي (قطعة) <span style="color:#ef4444;">*</span></label>
+          <input type="number" id="editProductStock" class="form-input-custom num-mono" min="0" required>
+        </div>
+        <div class="form-group-custom">
+          <label class="form-label-custom">حد التنبيه الأدنى (Min Stock)</label>
+          <input type="number" id="editProductMinStock" class="form-input-custom num-mono" min="1" value="10">
+        </div>
+      </div>
+
+      <div class="form-group-custom">
+        <label class="form-label-custom">المورد / المصدر</label>
+        <input type="text" id="editProductSupplier" class="form-input-custom" value="أوراكير للتوريدات الطبية">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" onclick="closeModal('editProductModal')">إلغاء</button>
+      <button type="button" class="btn-primary" onclick="saveProductChanges()">✓ حفظ التعديلات وتوثيقها</button>
+    </div>
+  </div>
+</div>
+
+<!-- 8. ADD PRODUCT MODAL (إضافة صنف جديد) -->
+<div id="addProductModal" class="modal-overlay" onclick="if(event.target === this) closeModal('addProductModal')">
+  <div class="modal-dialog" style="max-width: 580px;">
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="modal-title">+ إضافة صنف جديد للمنظومة</span>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal('addProductModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Active Session User Notice -->
+      <div class="locked-user-badge">
+        <span class="user-pulse-dot"></span>
+        <span>المستخدم المنفّذ للإضافة:</span>
+        <strong id="addProductAuthor">مؤمن</strong>
+        <span style="font-size: 0.7rem; color: #166534; margin-inline-start: auto;">(موثّق تلقائياً بسجل العمليات)</span>
+      </div>
+
+      <div class="form-group-custom">
+        <label class="form-label-custom">اسم الأداة / الصنف بالعربية <span style="color:#ef4444;">*</span></label>
+        <input type="text" id="addProductNameAr" class="form-input-custom" placeholder="مثال: Endo Explorer DG16" required>
+      </div>
+
+      <div class="form-row-2col">
+        <div class="form-group-custom">
+          <label class="form-label-custom">الرمز (SKU)</label>
+          <input type="text" id="addProductSku" class="form-input-custom num-mono" placeholder="DEN-XXXX">
+        </div>
+        <div class="form-group-custom">
+          <label class="form-label-custom">الفئة / القسم</label>
+          <select id="addProductCategory" class="form-select-custom">
+            <option value="أدوات ومستلزمات" selected>أدوات ومستلزمات</option>
+            <option value="أدوات حفر وبورات">أدوات حفر وبورات (Burs)</option>
+            <option value="كاستات وهاندبيس">كاستات وهاندبيس</option>
+            <option value="أسنان وشمع">أسنان وشمع (Wax & Teeth)</option>
+            <option value="أدوات فحص ومعاينة">أدوات فحص ومعاينة</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row-2col" style="background: var(--bg-subtle); padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-card);">
+        <div class="form-group-custom">
+          <label class="form-label-custom" style="color: var(--primary); font-weight: 800;">سعر البيع للطالب (د.ل) <span style="color:#ef4444;">*</span></label>
+          <input type="number" id="addProductSellingPrice" class="form-input-custom num-mono" step="0.5" min="0" placeholder="0" style="font-weight: 800; font-size: 1rem; color: var(--primary);" required>
+        </div>
+        <div class="form-group-custom">
+          <label class="form-label-custom">سعر التكلفة بالجملة (د.ل) <span style="color:#ef4444;">*</span></label>
+          <input type="number" id="addProductCostPrice" class="form-input-custom num-mono" step="0.5" min="0" placeholder="0" required>
+        </div>
+      </div>
+
+      <div class="form-row-2col">
+        <div class="form-group-custom">
+          <label class="form-label-custom">المخزون الأولي (قطعة) <span style="color:#ef4444;">*</span></label>
+          <input type="number" id="addProductStock" class="form-input-custom num-mono" min="0" placeholder="10" required>
+        </div>
+        <div class="form-group-custom">
+          <label class="form-label-custom">حد التنبيه الأدنى</label>
+          <input type="number" id="addProductMinStock" class="form-input-custom num-mono" min="1" value="10">
+        </div>
+      </div>
+
+      <div class="form-group-custom">
+        <label class="form-label-custom">المورد</label>
+        <input type="text" id="addProductSupplier" class="form-input-custom" value="أوراكير للتوريدات الطبية">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" onclick="closeModal('addProductModal')">إلغاء</button>
+      <button type="button" class="btn-primary" onclick="saveNewProduct()">✓ إضافة الصنف وتوثيقه</button>
     </div>
   </div>
 </div>

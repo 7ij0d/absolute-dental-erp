@@ -19,9 +19,119 @@ if (window.supabase) {
   } catch (_) {}
 }
 
+// -------------------------------------------------------------
+// 0. AUTHORIZED USERS & SESSION GOVERNANCE (مؤمن / طه / ياسي)
+// -------------------------------------------------------------
+const AUTHORIZED_USERS = ['مؤمن', 'طه', 'ياسي'];
+
+function getCurrentUser() {
+  const sessionUser = sessionStorage.getItem('abs_erp_active_user');
+  if (sessionUser && AUTHORIZED_USERS.includes(sessionUser)) {
+    return sessionUser;
+  }
+  return null;
+}
+
+function loginAsUser(userName) {
+  if (!AUTHORIZED_USERS.includes(userName)) {
+    showToast('غير مخول بالدخول للمنظومة', 'warning');
+    return;
+  }
+
+  sessionStorage.setItem('abs_erp_active_user', userName);
+  ERP_STATE.currentPartner = userName;
+
+  const overlay = document.getElementById('userSelectOverlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+    overlay.style.display = 'none';
+  }
+
+  updateSessionUserUI(userName);
+
+  logOperation({
+    user: userName,
+    action: 'تسجيل دخول وبدء جلسة',
+    target: 'نظام Absolute Dental ERP',
+    oldVal: '-',
+    newVal: 'جلسة نشطة',
+    details: `«${userName} قام بتسجيل الدخول إلى المنظومة وبدء جلسة عمل جديدة»`
+  });
+
+  showToast(`مرحباً بك يا ${userName} 👋 — تم تفعيل جلستك بنجاح 🦷`);
+}
+
+function logoutCurrentUser() {
+  const currentUser = getCurrentUser() || ERP_STATE.currentPartner;
+  if (currentUser) {
+    logOperation({
+      user: currentUser,
+      action: 'تسجيل خروج وإنهاء الجلسة',
+      target: 'نظام Absolute Dental ERP',
+      oldVal: 'جلسة نشطة',
+      newVal: 'تم تسجيل الخروج',
+      details: `«${currentUser} قام بإنهاء الجلسة وتسجيل الخروج»`
+    });
+  }
+
+  sessionStorage.removeItem('abs_erp_active_user');
+
+  const overlay = document.getElementById('userSelectOverlay');
+  if (overlay) {
+    overlay.classList.remove('hidden');
+    overlay.style.display = 'flex';
+  }
+
+  showToast('تم إنهاء الجلسة وتسجيل الخروج الآمن');
+}
+
+function updateSessionUserUI(userName) {
+  const topName = document.getElementById('topHeaderUserName');
+  const topAvatar = document.getElementById('topHeaderAvatar');
+  const sideName = document.getElementById('sideUserName');
+  const sideAvatar = document.getElementById('sideUserAvatar');
+  const greeting = document.querySelector('.page-greeting');
+  const studentActiveBadge = document.getElementById('studentOrderActiveUserBadgeName');
+  const editAuthor = document.getElementById('editProductAuthor');
+  const addAuthor = document.getElementById('addProductAuthor');
+
+  if (topName) topName.textContent = userName;
+  if (topAvatar) topAvatar.textContent = userName;
+  if (sideName) sideName.textContent = userName;
+  if (sideAvatar) sideAvatar.textContent = userName;
+  if (greeting && ERP_STATE.activeScreen === 'dashboard') {
+    greeting.textContent = `صباح الخير، ${userName} 👋`;
+  }
+  if (studentActiveBadge) studentActiveBadge.textContent = userName;
+  if (editAuthor) editAuthor.textContent = userName;
+  if (addAuthor) addAuthor.textContent = userName;
+}
+
+function logOperation({ user, action, target, oldVal = '-', newVal = '-', details }) {
+  const author = user || getCurrentUser() || ERP_STATE.currentPartner || 'مؤمن';
+  const newLog = {
+    id: `#${1100 + ERP_STATE.auditLogs.length}`,
+    time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
+    date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }),
+    user: author,
+    action: action,
+    target: target || '-',
+    oldVal: oldVal,
+    newVal: newVal,
+    details: details || `«${author} قام بـ ${action}»`
+  };
+
+  ERP_STATE.auditLogs.unshift(newLog);
+  localStorage.setItem('abs_erp_audit', JSON.stringify(ERP_STATE.auditLogs));
+
+  if (ERP_STATE.activeScreen === 'audit') {
+    renderFullAuditTable();
+  }
+}
+
 const ERP_STATE = {
   activeScreen: 'dashboard',
-  currentPartner: 'طه',
+  currentPartner: 'مؤمن',
   currentOrderInModal: null,
 
   // Products from Seed (28 Real Items)
@@ -654,6 +764,12 @@ function renderProductsTable(searchQuery = '') {
             ${p.stock > 10 ? 'متوفر' : (p.stock > 0 ? 'منخفض' : 'نافد')}
           </span>
         </td>
+        <td style="text-align: center;">
+          <div style="display: inline-flex; gap: 4px;">
+            <button class="btn-action-edit" onclick="openEditProductModal('${p.id}')">تعديل ✏️</button>
+            <button class="btn-action-delete" onclick="deleteProduct('${p.id}')">تعطيل 🗑️</button>
+          </div>
+        </td>
       </tr>
     `;
   }).join('');
@@ -664,6 +780,226 @@ function renderProductsTable(searchQuery = '') {
 
 function handleProductsSearch(val) {
   renderProductsTable(val);
+}
+
+function openEditProductModal(productId) {
+  const user = getCurrentUser();
+  if (!user) {
+    logoutCurrentUser();
+    return;
+  }
+
+  const prod = ERP_STATE.products.find(p => p.id === productId);
+  if (!prod) return;
+
+  document.getElementById('editProductId').value = prod.id;
+  document.getElementById('editProductNameAr').value = prod.nameAr;
+  document.getElementById('editProductSku').value = prod.sku;
+  document.getElementById('editProductCategory').value = prod.category || 'أدوات ومستلزمات';
+  document.getElementById('editProductSellingPrice').value = prod.sellingPrice;
+  document.getElementById('editProductCostPrice').value = prod.costPrice;
+  document.getElementById('editProductStock').value = prod.stock;
+  document.getElementById('editProductMinStock').value = prod.minStock || 10;
+  document.getElementById('editProductSupplier').value = prod.supplier || 'أوراكير للتوريدات الطبية';
+
+  const authorBadge = document.getElementById('editProductAuthor');
+  if (authorBadge) authorBadge.textContent = user;
+
+  openModal('editProductModal');
+}
+
+function saveProductChanges() {
+  const user = getCurrentUser();
+  if (!user) {
+    logoutCurrentUser();
+    return;
+  }
+
+  const prodId = document.getElementById('editProductId').value;
+  const prod = ERP_STATE.products.find(p => p.id === prodId);
+  if (!prod) return;
+
+  const newNameAr = document.getElementById('editProductNameAr').value.trim();
+  const newSku = document.getElementById('editProductSku').value.trim();
+  const newCategory = document.getElementById('editProductCategory').value;
+  const newSellingPrice = Number(document.getElementById('editProductSellingPrice').value) || 0;
+  const newCostPrice = Number(document.getElementById('editProductCostPrice').value) || 0;
+  const newStock = Number(document.getElementById('editProductStock').value) || 0;
+  const newMinStock = Number(document.getElementById('editProductMinStock').value) || 10;
+  const newSupplier = document.getElementById('editProductSupplier').value.trim();
+
+  if (!newNameAr) {
+    showToast('يرجى إدخال اسم الصنف', 'warning');
+    return;
+  }
+
+  // Audit specific modifications directly stamped with active user
+  if (Number(prod.sellingPrice) !== newSellingPrice) {
+    logOperation({
+      user: user,
+      action: 'تعديل سعر البيع',
+      target: prod.nameAr,
+      oldVal: `${prod.sellingPrice} د.ل`,
+      newVal: `${newSellingPrice} د.ل`,
+      details: `«${user} قام بتعديل سعر بيع الصنف "${prod.nameAr}" من ${prod.sellingPrice} د.ل إلى ${newSellingPrice} د.ل»`
+    });
+  }
+
+  if (Number(prod.costPrice) !== newCostPrice) {
+    logOperation({
+      user: user,
+      action: 'تعديل سعر التكلفة',
+      target: prod.nameAr,
+      oldVal: `${prod.costPrice} د.ل`,
+      newVal: `${newCostPrice} د.ل`,
+      details: `«${user} قام بتعديل سعر تكلفة الصنف "${prod.nameAr}" من ${prod.costPrice} د.ل إلى ${newCostPrice} د.ل»`
+    });
+  }
+
+  if (Number(prod.stock) !== newStock) {
+    logOperation({
+      user: user,
+      action: 'تعديل كمية المخزون',
+      target: prod.nameAr,
+      oldVal: `${prod.stock} قطعة`,
+      newVal: `${newStock} قطعة`,
+      details: `«${user} قام بتعديل مخزون الصنف "${prod.nameAr}" من ${prod.stock} إلى ${newStock} قطعة»`
+    });
+  }
+
+  if (prod.nameAr !== newNameAr || prod.category !== newCategory || prod.sku !== newSku) {
+    logOperation({
+      user: user,
+      action: 'تعديل بيانات الصنف',
+      target: prod.nameAr,
+      oldVal: prod.nameAr,
+      newVal: newNameAr,
+      details: `«${user} قام بتحديث البيانات الأساسية للصنف "${newNameAr}"»`
+    });
+  }
+
+  // Apply changes to product
+  prod.nameAr = newNameAr;
+  prod.sku = newSku;
+  prod.category = newCategory;
+  prod.sellingPrice = newSellingPrice;
+  prod.costPrice = newCostPrice.toFixed(1);
+  prod.stock = newStock;
+  prod.minStock = newMinStock;
+  prod.supplier = newSupplier;
+  prod.status = (newStock > 10) ? 'متوفر' : (newStock > 0 ? 'منخفض' : 'نافد');
+
+  closeModal('editProductModal');
+  renderProductsTable();
+  renderInventoryTable();
+  updateDashboardRealUI();
+
+  showToast(`تم حفظ وتوثيق تعديلات الصنف "${newNameAr}" باسم ${user} بنجاح 🟢`);
+}
+
+function openAddProductModal() {
+  const user = getCurrentUser();
+  if (!user) {
+    logoutCurrentUser();
+    return;
+  }
+
+  document.getElementById('addProductNameAr').value = '';
+  document.getElementById('addProductSku').value = `DEN-${Math.floor(1000 + Math.random() * 9000)}`;
+  document.getElementById('addProductCategory').value = 'أدوات ومستلزمات';
+  document.getElementById('addProductSellingPrice').value = '';
+  document.getElementById('addProductCostPrice').value = '';
+  document.getElementById('addProductStock').value = '20';
+  document.getElementById('addProductMinStock').value = '10';
+
+  const authorBadge = document.getElementById('addProductAuthor');
+  if (authorBadge) authorBadge.textContent = user;
+
+  openModal('addProductModal');
+}
+
+function saveNewProduct() {
+  const user = getCurrentUser();
+  if (!user) {
+    logoutCurrentUser();
+    return;
+  }
+
+  const nameAr = document.getElementById('addProductNameAr').value.trim();
+  const sku = document.getElementById('addProductSku').value.trim();
+  const category = document.getElementById('addProductCategory').value;
+  const sellingPrice = Number(document.getElementById('addProductSellingPrice').value) || 0;
+  const costPrice = Number(document.getElementById('addProductCostPrice').value) || 0;
+  const stock = Number(document.getElementById('addProductStock').value) || 0;
+  const minStock = Number(document.getElementById('addProductMinStock').value) || 10;
+  const supplier = document.getElementById('addProductSupplier').value.trim();
+
+  if (!nameAr) {
+    showToast('يرجى إدخال اسم الصنف الجديد', 'warning');
+    return;
+  }
+
+  const newProd = {
+    id: `custom-prod-${Date.now()}`,
+    nameAr: nameAr,
+    nameEn: nameAr,
+    sku: sku,
+    category: category,
+    costPrice: costPrice.toFixed(1),
+    sellingPrice: sellingPrice,
+    stock: stock,
+    minStock: minStock,
+    supplier: supplier || 'أوراكير للتوريدات الطبية',
+    status: (stock > 10) ? 'متوفر' : (stock > 0 ? 'منخفض' : 'نافد')
+  };
+
+  ERP_STATE.products.unshift(newProd);
+
+  logOperation({
+    user: user,
+    action: 'إضافة صنف جديد',
+    target: nameAr,
+    oldVal: '-',
+    newVal: `${sellingPrice} د.ل (${stock} قطعة)`,
+    details: `«${user} قام بإضافة الصنف الجديد "${nameAr}" بسعر بيع ${sellingPrice} د.ل ومخزون ${stock} قطعة»`
+  });
+
+  closeModal('addProductModal');
+  renderProductsTable();
+  renderInventoryTable();
+  updateDashboardRealUI();
+
+  showToast(`تمت إضافة الصنف "${nameAr}" بنجاح باسم ${user} 🎉`);
+}
+
+function deleteProduct(productId) {
+  const user = getCurrentUser();
+  if (!user) {
+    logoutCurrentUser();
+    return;
+  }
+
+  const prod = ERP_STATE.products.find(p => p.id === productId);
+  if (!prod) return;
+
+  if (confirm(`هل أنت متأكد من تعطيل/حذف الصنف "${prod.nameAr}"؟`)) {
+    ERP_STATE.products = ERP_STATE.products.filter(p => p.id !== productId);
+
+    logOperation({
+      user: user,
+      action: 'تعطيل / حذف صنف',
+      target: prod.nameAr,
+      oldVal: 'نشط بالكتالوج',
+      newVal: 'تم التعطيل',
+      details: `«${user} قام بتعطيل / حذف الصنف "${prod.nameAr}" من كتالوج المنتجات»`
+    });
+
+    renderProductsTable();
+    renderInventoryTable();
+    updateDashboardRealUI();
+
+    showToast(`تم تعطيل الصنف "${prod.nameAr}" وتوثيق العملية باسم ${user}`);
+  }
 }
 
 // -------------------------------------------------------------
@@ -802,23 +1138,71 @@ function updateReportsScreenMetrics() {
 }
 
 // -------------------------------------------------------------
-// 12. AUDIT LOG SCREEN
+// 12. AUDIT LOG SCREEN & FILTERING
 // -------------------------------------------------------------
-function renderFullAuditTable() {
+let currentAuditFilter = 'all';
+
+function filterAuditTable(userFilter, btn) {
+  currentAuditFilter = userFilter;
+  document.querySelectorAll('.table-filter-tabs .table-filter-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const searchVal = document.getElementById('auditSearchInput') ? document.getElementById('auditSearchInput').value : '';
+  renderFullAuditTable(userFilter, searchVal);
+}
+
+function handleAuditSearch(val) {
+  renderFullAuditTable(currentAuditFilter, val);
+}
+
+function renderFullAuditTable(userFilter = currentAuditFilter, searchQuery = '') {
   const tbody = document.getElementById('fullAuditTableBody');
+  const countEl = document.getElementById('auditTabAllCount');
   if (!tbody) return;
 
-  tbody.innerHTML = ERP_STATE.auditLogs.map(a => `
-    <tr>
-      <td class="num-mono" style="font-weight: 800; color: var(--primary);">${a.id}</td>
-      <td class="num-mono" style="color: var(--text-muted); font-size: 0.75rem;">${a.time}</td>
-      <td class="num-mono" style="color: var(--text-muted); font-size: 0.75rem;">${a.date}</td>
-      <td><strong>${a.user}</strong></td>
-      <td style="color: var(--primary); font-weight: 700;">${a.action}</td>
-      <td style="color: var(--text-body);">${a.details}</td>
-      <td class="num-mono" style="font-size: 0.75rem; color: var(--text-muted);">${a.oldVal} → <strong style="color: var(--text-main);">${a.newVal}</strong></td>
-    </tr>
-  `).join('');
+  if (countEl) countEl.textContent = ERP_STATE.auditLogs.length;
+
+  let list = [...ERP_STATE.auditLogs];
+
+  if (userFilter && userFilter !== 'all') {
+    list = list.filter(a => (a.user || '').includes(userFilter) || (userFilter === 'ياسي' && a.user === 'ساسي') || (userFilter === 'مؤمن' && a.user === 'عبدالمؤمن'));
+  }
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase().trim();
+    list = list.filter(a =>
+      (a.details || '').toLowerCase().includes(q) ||
+      (a.action || '').toLowerCase().includes(q) ||
+      (a.user || '').toLowerCase().includes(q) ||
+      (a.target || '').toLowerCase().includes(q)
+    );
+  }
+
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">لا توجد عمليات مسجلة مطابقة للمرشح المختار</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(a => {
+    let userBadgeClass = 'taha';
+    if (a.user === 'مؤمن' || a.user === 'عبدالمؤمن') userBadgeClass = 'momen';
+    else if (a.user === 'ياسي' || a.user === 'ساسي') userBadgeClass = 'yasi';
+
+    return `
+      <tr>
+        <td class="num-mono" style="font-weight: 800; color: var(--primary);">${a.id}</td>
+        <td class="num-mono" style="color: var(--text-muted); font-size: 0.75rem;">${a.time}</td>
+        <td class="num-mono" style="color: var(--text-muted); font-size: 0.75rem;">${a.date}</td>
+        <td>
+          <span class="audit-user-badge ${userBadgeClass}">
+            <strong>${a.user}</strong>
+          </span>
+        </td>
+        <td style="color: var(--primary); font-weight: 700;">${a.action}</td>
+        <td style="color: var(--text-body); font-size: 0.825rem;">${a.details}</td>
+        <td class="num-mono" style="font-size: 0.75rem; color: var(--text-muted);">${a.oldVal} → <strong style="color: var(--text-main);">${a.newVal}</strong></td>
+      </tr>
+    `;
+  }).join('');
 }
 
 // -------------------------------------------------------------
@@ -1103,11 +1487,9 @@ function openStudentOrderModal() {
   if (deliverySelect) deliverySelect.value = 'faculty';
   if (paymentSelect) paymentSelect.value = 'cash_on_delivery';
 
-  // Set default partner radio
-  const partnerRadios = document.querySelectorAll('input[name="studentOrderPartner"]');
-  partnerRadios.forEach(r => {
-    r.checked = (r.value === ERP_STATE.currentPartner);
-  });
+  const activeUser = getCurrentUser() || ERP_STATE.currentPartner || 'مؤمن';
+  const badgeName = document.getElementById('studentOrderActiveUserBadgeName');
+  if (badgeName) badgeName.textContent = activeUser;
 
   STUDENT_ORDER_STATE.cart = [];
   STUDENT_ORDER_STATE.deliveryFee = 0;
@@ -1378,8 +1760,7 @@ async function submitStudentOrder() {
   else if (deliveryType === 'office') deliveryText = 'استلام من مقر Absolute Dental';
 
   const userNotes = notesInput ? notesInput.value.trim() : '';
-  const academicYear = yearSelect ? yearSelect.value : '';
-  const partnerName = partnerRadio ? partnerRadio.value : ERP_STATE.currentPartner;
+  const partnerName = getCurrentUser() || ERP_STATE.currentPartner || 'مؤمن';
   const paymentMethod = paymentSelect ? paymentSelect.value : 'cash_on_delivery';
 
   // Calculate totals
@@ -1582,20 +1963,56 @@ function printSlipFromSuccessModal() {
 // 17. INITIALIZATION
 // -------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
-  // Set current date string
+  // 1. Session verification & Startup User Selection
+  const activeUser = getCurrentUser();
+  const overlay = document.getElementById('userSelectOverlay');
+
+  if (activeUser) {
+    ERP_STATE.currentPartner = activeUser;
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.style.display = 'none';
+    }
+    updateSessionUserUI(activeUser);
+  } else {
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      overlay.style.display = 'flex';
+    }
+  }
+
+  // 2. Keyboard shortcuts for instant selection (1 = مؤمن, 2 = طه, 3 = ياسي)
+  window.addEventListener('keydown', (e) => {
+    const isOverlayOpen = overlay && overlay.style.display !== 'none' && !overlay.classList.contains('hidden');
+    if (isOverlayOpen) {
+      if (e.key === '1') {
+        e.preventDefault();
+        loginAsUser('مؤمن');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        loginAsUser('طه');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        loginAsUser('ياسي');
+      }
+    }
+  });
+
+  // 3. Set current date string
   const dateEl = document.getElementById('headerCurrentDateText');
   if (dateEl) {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     try {
       dateEl.textContent = new Date().toLocaleDateString('ar-LY', options);
     } catch (_) {
-      dateEl.textContent = 'الثلاثاء، 30 سبتمبر 2026';
+      dateEl.textContent = 'الخميس، 01 أكتوبر 2026';
     }
   }
 
-  // Initial Calculation & UI population from Real Database Seed
+  // 4. Initial Calculation & UI population from Real Database Seed
   updateDashboardRealUI();
 
-  // Background Live Sync with Supabase
+  // 5. Background Live Sync with Supabase
   syncWithUserServer();
 });
+
