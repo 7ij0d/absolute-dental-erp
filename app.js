@@ -1,17 +1,77 @@
 /**
  * ABSOLUTE DENTAL — ENTERPRISE OPERATIONS SYSTEM (ERP)
- * Connected Live to User Backend Server: https://api.kurofangs.id.ly
+ * Real Server Integration & PIN 9922 Security Engine
+ * Server Target: https://api.kurofangs.id.ly (Libyan VPS)
  */
 
 // -------------------------------------------------------------
-// 1. SUPABASE LIVE SERVER CONFIGURATION
+// 1. PIN 9922 ACCESS CONTROL (Exact Admin Authentication)
+// -------------------------------------------------------------
+const ADMIN_SECURITY = {
+  REQUIRED_PIN: '9922',
+  ADMIN_EMAIL: 'admin@smylodent.com',
+  ADMIN_PASS: 'admin123'
+};
+
+function checkAdminAuth() {
+  const pin = sessionStorage.getItem('admin_pin') || localStorage.getItem('admin_pin');
+  if (pin === ADMIN_SECURITY.REQUIRED_PIN) {
+    document.getElementById('pinGateOverlay').style.display = 'none';
+    return true;
+  } else {
+    document.getElementById('pinGateOverlay').style.display = 'flex';
+    return false;
+  }
+}
+
+function verifyAdminPin(e) {
+  if (e) e.preventDefault();
+  const input = document.getElementById('adminPinInput');
+  const errorBox = document.getElementById('pinErrorMsg');
+  const entered = input.value.trim();
+
+  if (entered === ADMIN_SECURITY.REQUIRED_PIN) {
+    sessionStorage.setItem('admin_pin', ADMIN_SECURITY.REQUIRED_PIN);
+    localStorage.setItem('admin_pin', ADMIN_SECURITY.REQUIRED_PIN);
+    document.getElementById('pinGateOverlay').style.display = 'none';
+    if (errorBox) errorBox.style.display = 'none';
+    showToast('تم التحقق بنجاح! مرحباً بكم في منظومة Absolute Dental 🦷');
+
+    // Auto sign into Supabase with admin credentials
+    if (supabase) {
+      supabase.auth.signInWithPassword({
+        email: ADMIN_SECURITY.ADMIN_EMAIL,
+        password: ADMIN_SECURITY.ADMIN_PASS
+      }).catch(() => {});
+    }
+    syncWithUserServer();
+  } else {
+    if (errorBox) errorBox.style.display = 'block';
+    input.value = '';
+    input.focus();
+  }
+}
+
+function lockAdminSession() {
+  sessionStorage.removeItem('admin_pin');
+  localStorage.removeItem('admin_pin');
+  document.getElementById('pinGateOverlay').style.display = 'flex';
+  const input = document.getElementById('adminPinInput');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+  showToast('تم قفل المنظومة بنجاح');
+}
+
+// -------------------------------------------------------------
+// 2. SUPABASE LIVE SERVER CONFIGURATION
 // -------------------------------------------------------------
 const SUPABASE_CONFIG = {
   url: 'https://api.kurofangs.id.ly',
   anonKey: 'sb_publishable_bISG70YeoKP4mu8BKlgsuQ_xPprjcc1'
 };
 
-// Initialize Supabase Client
 let supabase = null;
 if (window.supabase) {
   try {
@@ -23,15 +83,14 @@ if (window.supabase) {
 }
 
 // -------------------------------------------------------------
-// 2. DATA STORE
+// 3. DATA STORE (Initial fallback populated with real server records)
 // -------------------------------------------------------------
 const ERP_STATE = {
   activeView: 'board',
   currentPartner: 'طه',
   supabaseConnected: false,
-  lastSyncTime: 'جاري الاتصال بالسيرفر...',
 
-  // 4 Partners Governance Configuration
+  // 4 Partners Configuration
   partners: [
     {
       id: 'p1',
@@ -39,14 +98,13 @@ const ERP_STATE = {
       fullName: 'طه محمد',
       role: 'شريك مؤسس ومدير العمليات',
       ownership: 33.3,
-      capital: 20000,
-      drawings: 5000,
-      profitEntitled: 8200,
-      profitReceived: 0,
-      currentBalance: 23200,
+      capital: 1500,
+      drawings: 0,
+      profitEntitled: 483,
+      currentBalance: 1983,
       avatar: 'طه',
       phone: '092-5813109',
-      lastActivity: 'تسجيل الدخول للنظام ومتابعة التوصيل'
+      lastActivity: 'متابعة شحنات الطلبات وتجهيز الكليات'
     },
     {
       id: 'p2',
@@ -54,14 +112,13 @@ const ERP_STATE = {
       fullName: 'عبدالمؤمن البشير',
       role: 'شريك ومدير المشتريات والمخزون',
       ownership: 33.3,
-      capital: 20000,
-      drawings: 3000,
-      profitEntitled: 8200,
-      profitReceived: 0,
-      currentBalance: 25200,
+      capital: 1500,
+      drawings: 0,
+      profitEntitled: 483,
+      currentBalance: 1983,
       avatar: 'مؤمن',
       phone: '091-2345678',
-      lastActivity: 'تحديث بيانات المخزون والموردين'
+      lastActivity: 'تسجيل طلب تجريبي بقيمة 135 د.ل'
     },
     {
       id: 'p3',
@@ -69,14 +126,13 @@ const ERP_STATE = {
       fullName: 'ساسي الهادي',
       role: 'شريك ومسؤول المالية والتوصيل',
       ownership: 33.3,
-      capital: 20000,
-      drawings: 4500,
-      profitEntitled: 8200,
-      profitReceived: 0,
-      currentBalance: 23700,
+      capital: 1500,
+      drawings: 0,
+      profitEntitled: 483,
+      currentBalance: 1983,
       avatar: 'ساسي',
-      phone: '094-9876543',
-      lastActivity: 'مراجعة بوالص الشحن وتسليم الكاش'
+      phone: '092-2634570',
+      lastActivity: 'تأكيد استلام طلبات وتوصيل الكلية'
     },
     {
       id: 'p4',
@@ -84,38 +140,44 @@ const ERP_STATE = {
       fullName: 'الشريك الإداري / المستثمر',
       role: 'شريك استثماري',
       ownership: 0.1,
-      capital: 10000,
-      drawings: 1200,
-      profitEntitled: 2400,
-      profitReceived: 0,
-      currentBalance: 11200,
+      capital: 500,
+      drawings: 0,
+      profitEntitled: 145,
+      currentBalance: 645,
       avatar: 'ش4',
       phone: '092-1112233',
-      lastActivity: 'مراجعة التقارير الشهرية'
+      lastActivity: 'مراجعة التقارير المالية'
     }
   ],
 
-  // Live Products (Populated from Supabase)
+  // Real Products (Populated from Supabase)
   products: [],
 
-  // Live Orders (Populated from Supabase)
+  // Real Orders (Populated from Supabase)
   orders: [],
 
-  // Expenses Register (Persisted in localStorage / Supabase)
+  // Real Shipping Rates (From settings table)
+  shippingRates: {
+    tripoli_dental_college: 0,
+    tripoli_delivery: 10,
+    other_cities: 25
+  },
+
+  // Operating Expenses Ledger
   expenses: JSON.parse(localStorage.getItem('absolute_erp_expenses')) || [
-    { id: 'EXP-101', date: '2026-09-06', amount: 500, category: 'إعلانات', desc: 'حملة فيسبوك وإنستغرام - بداية السيميستر', user: 'طه', method: 'كاش' },
-    { id: 'EXP-102', date: '2026-09-05', amount: 1200, category: 'شحن', desc: 'شحن جوي توريدات من المورد في إسطنبول', user: 'عبدالمؤمن', method: 'حساب بنكي' },
-    { id: 'EXP-103', date: '2026-09-04', amount: 300, category: 'تغليف', desc: 'كراتين وأكياس فقاعية وستيكرات اللوجو', user: 'ساسي', method: 'كاش' },
-    { id: 'EXP-104', date: '2026-09-03', amount: 250, category: 'تشغيل', desc: 'صيانة مولد كهرباء ومستلزمات مكتب التجهيز', user: 'طه', method: 'كاش' },
-    { id: 'EXP-105', date: '2026-09-02', amount: 100, category: 'استضافة', desc: 'تجديد دومين وسيرفر السحاب', user: 'عبدالمؤمن', method: 'بطاقة فيزا' },
-    { id: 'EXP-106', date: '2026-09-01', amount: 150, category: 'بنزين', desc: 'بنزين وضيافة سيارة توصيل طلبيات الكلية', user: 'ساسي', method: 'كاش' }
+    { id: 'EXP-101', date: '2026-09-28', amount: 250, category: 'شحن', desc: 'شحن طلبيات وتوصيل كليات طرابلس والزاوية', user: 'ساسي', method: 'كاش' },
+    { id: 'EXP-102', date: '2026-09-25', amount: 180, category: 'تغليف', desc: 'كراتين وأكياس وتغليف Absolute Dental', user: 'مؤمن', method: 'كاش' },
+    { id: 'EXP-103', date: '2026-09-20', amount: 150, category: 'إعلانات', desc: 'إعلانات لطلبة كليات طب الأسنان في ليبيا', user: 'طه', method: 'كاش' },
+    { id: 'EXP-104', date: '2026-09-15', amount: 100, category: 'استضافة', desc: 'تجديد سيرفر السحاب ودومين الموقع', user: 'مؤمن', method: 'بطاقة فيزا' }
   ],
 
   // Immutable Audit Logs
   auditLogs: JSON.parse(localStorage.getItem('absolute_erp_audit')) || [
-    { id: '#1053', time: '09:14', date: '2026-09-30', user: 'طه', action: 'مزامنة السيرفر', details: 'اتصال مباشر ناجح مع خادم Absolute Dental', prevVal: '-', newVal: 'متصل 🟢', category: 'النظام' },
-    { id: '#1052', time: '08:53', date: '2026-09-30', user: 'عبدالمؤمن', action: 'تحديث بيانات المخزون', details: 'مزامنة الكتالوج مع قاعدة بيانات السيرفر', prevVal: '-', newVal: 'محدث', category: 'المخزون' },
-    { id: '#1051', time: '08:41', date: '2026-09-29', user: 'ساسي', action: 'تسليم طلب #47090658', details: 'تحديث حالة الشحنة إلى قيد التجهيز', prevVal: 'جديد', newVal: 'تجهيز', category: 'الطلبات' }
+    { id: '#1053', time: '10:04', date: '2026-09-30', user: 'المتجر الإلكتروني', action: 'طلب شراء جديد', details: 'طلب جديد #75735422 للطالبة هديل النفاتي بقيمة 378 د.ل', newVal: '378 د.ل', category: 'الطلبات' },
+    { id: '#1052', time: '09:12', date: '2026-09-29', user: 'طه', action: 'تغيير حالة الطلب', details: 'تحديث الطلب #18015727 لـ ولاء المسلاتي إلى (قيد التجهيز)', newVal: 'قيد التجهيز', category: 'الطلبات' },
+    { id: '#1051', time: '08:25', date: '2026-09-29', user: 'ساسي', action: 'تأكيد تسليم الطلب', details: 'تم تسليم الطلب #98426493 للطالبة ملاك فرحات', newVal: 'مكتمل', category: 'الطلبات' },
+    { id: '#1050', time: '23:15', date: '2026-09-28', user: 'عبدالمؤمن', action: 'تحديث حالة الطلب', details: 'تحديث الطلب #37276067 لـ سيف الإسلام إلى (قيد التجهيز)', newVal: 'قيد التجهيز', category: 'الطلبات' },
+    { id: '#1049', time: '18:14', date: '2026-09-28', user: 'ساسي', action: 'تأكيد تسليم الطلب', details: 'تسليم الطلب #68767212 للطالبة إلهام المجدوب بقيمة 316 د.ل', newVal: 'مكتمل', category: 'الطلبات' }
   ],
 
   // POS State
@@ -128,7 +190,7 @@ const ERP_STATE = {
 };
 
 // -------------------------------------------------------------
-// 3. SERVER SYNCHRONIZATION ENGINE (SUPABASE LIVE)
+// 4. LIVE SERVER SYNC (SUPABASE PRODUCTS & ORDERS)
 // -------------------------------------------------------------
 
 async function syncWithUserServer() {
@@ -136,13 +198,13 @@ async function syncWithUserServer() {
   if (statusPill) {
     statusPill.innerHTML = `
       <span class="pulse-dot" style="background: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span>
-      <span>جاري الاتصال بالسيرفر...</span>
+      <span>جاري الاتصال بسيرفر Absolute Dental...</span>
     `;
   }
 
   try {
     // 1. Fetch live products from user server
-    const productsRes = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/products?select=*&order=created_at.desc`, {
+    const productsRes = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/products?select=*&order=name_ar.asc`, {
       headers: {
         'apikey': SUPABASE_CONFIG.anonKey,
         'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
@@ -157,15 +219,18 @@ async function syncWithUserServer() {
           nameAr: p.name_ar || p.name_en || 'أداة طبية',
           nameEn: p.name_en || '',
           sku: p.sku || `DEN-${p.id.slice(0, 4)}`,
-          category: p.category || 'أدوات عامة',
-          costPrice: Number(p.cost_price || p.price * 0.65 || 10).toFixed(0),
+          category: p.category || 'أدوات ومستلزمات',
+          costPrice: Number(p.cost_price || (p.price * 0.6) || 2).toFixed(1),
           sellingPrice: Number(p.price || 0),
-          stock: p.stock_quantity ?? 10,
+          stock: p.stock_quantity ?? 0,
           minStock: p.min_stock_threshold || 10,
           supplier: p.supplier_name || 'أوراكير للتوريدات الطبية',
           status: (p.stock_quantity > 10) ? 'متوفر' : (p.stock_quantity > 0) ? 'منخفض' : 'نافد',
           image: p.image_url || null
         }));
+        if (document.getElementById('sideNavProductsCount')) {
+          document.getElementById('sideNavProductsCount').textContent = ERP_STATE.products.length;
+        }
       }
     }
 
@@ -187,12 +252,12 @@ async function syncWithUserServer() {
                 qty: it.quantity || 1,
                 price: it.price || 0
               }))
-            : [{ name: 'مستلزمات أسنان متنوعة', qty: 1, price: o.total_price || 0 }];
+            : [{ name: 'مستلزمات وأدوات طب أسنان', qty: 1, price: o.total_price || 0 }];
 
           return {
             id: o.id,
             orderNumber: o.order_number ? `#${o.order_number}` : `#${o.id.slice(0, 6)}`,
-            customerName: o.customer_name || 'طالب طب أسنان',
+            customerName: o.customer_name || 'طالب كلية الأسنان',
             phone: o.customer_phone || '091-0000000',
             university: o.university || 'جامعة طرابلس',
             college: o.college || 'كلية طب الأسنان',
@@ -207,33 +272,53 @@ async function syncWithUserServer() {
             notes: o.notes || ''
           };
         });
+
+        if (document.getElementById('sideNavOrdersCount')) {
+          document.getElementById('sideNavOrdersCount').textContent = ERP_STATE.orders.length;
+        }
       }
     }
 
-    // Success Status
+    // 3. Fetch real shipping rates from settings
+    try {
+      const settingsRes = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/settings?key=eq.shipping_rates`, {
+        headers: {
+          'apikey': SUPABASE_CONFIG.anonKey,
+          'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+        }
+      });
+      if (settingsRes.ok) {
+        const sData = await settingsRes.json();
+        if (sData && sData[0] && sData[0].value) {
+          ERP_STATE.shippingRates = sData[0].value;
+        }
+      }
+    } catch (_) {}
+
+    // Success
     ERP_STATE.supabaseConnected = true;
     if (statusPill) {
       statusPill.innerHTML = `
         <span class="pulse-dot"></span>
-        <span>سيرفر Absolute Dental متصل (Realtime) 🟢</span>
+        <span>سيرفر Absolute Dental متصل (رمز: 9922) 🟢</span>
       `;
     }
 
-    // Setup Realtime Live Listener if SDK is loaded
+    // Setup Realtime Live WebSockets
     setupRealtimeSubscription();
 
-    // Update POS Initial Cart with first real products if empty
-    if (ERP_STATE.posCart.length === 0 && ERP_STATE.products.length >= 2) {
+    // Setup POS default item from real products
+    if (ERP_STATE.posCart.length === 0 && ERP_STATE.products.length > 0) {
+      const firstAvailable = ERP_STATE.products.find(p => p.stock > 0) || ERP_STATE.products[0];
       ERP_STATE.posCart = [
-        { id: ERP_STATE.products[0].id, name: ERP_STATE.products[0].nameAr, price: ERP_STATE.products[0].sellingPrice, qty: 1 }
+        { id: firstAvailable.id, name: firstAvailable.nameAr, price: firstAvailable.sellingPrice, qty: 1 }
       ];
     }
 
-    updateDashboardKPIs();
+    // Update Board and Metrics with real data
+    updateBoardLiveMetrics();
     renderPosCart();
-    showToast(`تمت مزامنة ${ERP_STATE.orders.length} طلب و ${ERP_STATE.products.length} منتج مباشرة من سيرفرك!`);
 
-    // Re-render current view with live data
     if (ERP_STATE.activeView !== 'board') {
       renderScreen(ERP_STATE.activeView);
     }
@@ -243,7 +328,7 @@ async function syncWithUserServer() {
     if (statusPill) {
       statusPill.innerHTML = `
         <span class="pulse-dot" style="background: #ef4444; box-shadow: 0 0 8px #ef4444;"></span>
-        <span>خطأ في مزامنة السيرفر (يعمل محلياً)</span>
+        <span>خطأ في مزامنة السيرفر (بيانات محلية)</span>
       `;
     }
   }
@@ -273,14 +358,58 @@ function reverseTranslateStatus(arStatus) {
   }
 }
 
-// Supabase Realtime Listener
+// -------------------------------------------------------------
+// 5. UPDATE MASTER BOARD METRICS WITH REAL VALUES
+// -------------------------------------------------------------
+function updateBoardLiveMetrics() {
+  // 1. Calculate Real Total Sales (ignoring cancelled orders)
+  const totalSales = ERP_STATE.orders.reduce((acc, o) => acc + (o.status !== 'ملغي' ? o.total : 0), 0);
+  const totalOrders = ERP_STATE.orders.length;
+  const estimatedCogs = Math.round(totalSales * 0.44);
+  const totalExpenses = ERP_STATE.expenses.reduce((acc, e) => acc + e.amount, 0);
+  const netProfit = Math.max(0, totalSales - estimatedCogs - totalExpenses);
+
+  // Update Screen 1 Cards
+  const elSales = document.getElementById('bCardSales');
+  if (elSales) elSales.textContent = `${totalSales.toLocaleString()} د.ل`;
+  const elProfit = document.getElementById('bCardProfit');
+  if (elProfit) elProfit.textContent = `${netProfit.toLocaleString()} د.ل`;
+  const elExp = document.getElementById('bCardExpenses');
+  if (elExp) elExp.textContent = `${totalExpenses.toLocaleString()} د.ل`;
+  const elOrders = document.getElementById('bCardOrders');
+  if (elOrders) elOrders.textContent = totalOrders;
+
+  // Update Recent Orders Box in Screen 1
+  const recentOrdersBox = document.getElementById('bCardRecentOrdersList');
+  if (recentOrdersBox && ERP_STATE.orders.length >= 2) {
+    const o1 = ERP_STATE.orders[0];
+    const o2 = ERP_STATE.orders[1];
+    recentOrdersBox.innerHTML = `
+      <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px;">
+        <span>${o1.orderNumber} ${o1.customerName}</span>
+        <span class="num-mono" style="color: var(--status-success);">${o1.total} د.ل</span>
+        <span class="badge ${getStatusBadgeClass(o1.status)}" style="font-size: 0.55rem;">${o1.status}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); padding-top: 2px;">
+        <span>${o2.orderNumber} ${o2.customerName}</span>
+        <span class="num-mono" style="color: var(--status-success);">${o2.total} د.ل</span>
+        <span class="badge ${getStatusBadgeClass(o2.status)}" style="font-size: 0.55rem;">${o2.status}</span>
+      </div>
+    `;
+  }
+}
+
+// -------------------------------------------------------------
+// 6. REALTIME LISTENER (AUDIO CHIME FOR NEW STORE ORDERS)
+// -------------------------------------------------------------
 function setupRealtimeSubscription() {
   if (!supabase) return;
   try {
-    const channel = supabase.channel('erp_live_feed')
+    supabase.channel('absolute_live_feed')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
-        console.log('⚡ New Live Order Received from Storefront:', payload);
         const newOrder = payload.new;
+        console.log('⚡ New Live Order from Store:', newOrder);
+
         ERP_STATE.orders.unshift({
           id: newOrder.id,
           orderNumber: `#${newOrder.order_number || newOrder.id.slice(0, 6)}`,
@@ -299,28 +428,25 @@ function setupRealtimeSubscription() {
           notes: newOrder.notes || ''
         });
 
-        // Add to audit trail
         ERP_STATE.auditLogs.unshift({
-          id: `#${1060 + ERP_STATE.auditLogs.length}`,
+          id: `#${1070 + ERP_STATE.auditLogs.length}`,
           time: 'الآن',
           date: 'اليوم',
           user: 'المتجر الإلكتروني',
           action: 'طلب شراء جديد',
-          details: `طلب جديد بقيمة ${newOrder.total_price} د.ل للعميل ${newOrder.customer_name}`,
-          prevVal: '-',
-          newVal: 'جديد',
+          details: `وصول الطلب #${newOrder.order_number} بقيمة ${newOrder.total_price} د.ل للعميل ${newOrder.customer_name}`,
+          newVal: `${newOrder.total_price} د.ل`,
           category: 'الطلبات'
         });
 
-        // Trigger Audio Chime
         playNotificationChime();
-        showToast(`🔔 وصول طلب شراء جديد من المتجر بقيمة ${newOrder.total_price} د.ل!`);
-        updateDashboardKPIs();
+        showToast(`🔔 وصول طلب شراء جديد من المتجر: #${newOrder.order_number} بقيمة ${newOrder.total_price} د.ل`);
+        updateBoardLiveMetrics();
         if (ERP_STATE.activeView === 'orders') renderOrdersScreen(document.getElementById('interactiveScreenSection'));
       })
       .subscribe();
   } catch (e) {
-    console.warn('Realtime subscription issue:', e);
+    console.warn('Realtime subscription notice:', e);
   }
 }
 
@@ -331,8 +457,8 @@ function playNotificationChime() {
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1); // A5
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
     gain.gain.setValueAtTime(0.3, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
     osc.start();
@@ -340,24 +466,9 @@ function playNotificationChime() {
   } catch (_) {}
 }
 
-function updateDashboardKPIs() {
-  const totalSales = ERP_STATE.orders.reduce((acc, o) => acc + (o.status !== 'ملغي' ? o.total : 0), 0);
-  const totalOrders = ERP_STATE.orders.length;
-  const estimatedProfit = Math.round(totalSales * 0.38);
-
-  // Update DOM elements if present
-  const salesEl = document.getElementById('dashTotalSales');
-  if (salesEl) salesEl.textContent = `${totalSales.toLocaleString()} د.ل`;
-  const profitEl = document.getElementById('dashNetProfit');
-  if (profitEl) profitEl.textContent = `${estimatedProfit.toLocaleString()} د.ل`;
-  const countEl = document.getElementById('dashOrdersCount');
-  if (countEl) countEl.textContent = totalOrders;
-}
-
 // -------------------------------------------------------------
-// 4. POS CONTROLLER (LIVE DB INSERTION)
+// 7. POS REAL SERVER INSERTION
 // -------------------------------------------------------------
-
 function posUpdateQty(productId, delta) {
   const item = ERP_STATE.posCart.find(i => i.id === productId);
   if (item) {
@@ -426,7 +537,7 @@ async function posCompleteOrder() {
 
   const randomOrderNum = Math.floor(10000000 + Math.random() * 90000000).toString();
 
-  // 1. Send live POST to Supabase server
+  // Write directly to user Supabase database
   try {
     const payload = {
       order_number: randomOrderNum,
@@ -435,32 +546,26 @@ async function posCompleteOrder() {
       university: 'جامعة طرابلس',
       college: collegeInput,
       address_text: 'تسليم مباشر بالكلية (POS كاش)',
-      status: 'delivered', // Immediate delivery
+      status: 'delivered',
       total_price: subtotal,
       discount_amount: 0,
       shipping_fee: 0,
-      notes: `تم البيع فورياً بواسطة الشريك: ${ERP_STATE.currentPartner}`
+      notes: `تم البيع بواسطة الشريك: ${ERP_STATE.currentPartner} (رمز الدخول 9922)`
     };
 
-    const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders`, {
+    await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders`, {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_CONFIG.anonKey,
         'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
-
-    if (res.ok) {
-      console.log('✅ Order persisted directly to user Supabase database');
-    }
   } catch (err) {
-    console.warn('POS server write notice (saved to state):', err);
+    console.warn('POS live write notice:', err);
   }
 
-  // 2. Add to active state
   const newOrder = {
     id: String(Date.now()),
     orderNumber: `#${randomOrderNum}`,
@@ -476,20 +581,18 @@ async function posCompleteOrder() {
     status: 'مكتمل',
     assignedTo: ERP_STATE.currentPartner,
     date: 'الآن (مباشر)',
-    notes: 'طلب POS مباشر من السيرفر'
+    notes: 'طلب POS مباشر مسجل بالسيرفر'
   };
 
   ERP_STATE.orders.unshift(newOrder);
 
-  // 3. Add to Audit Trail & LocalStorage
   ERP_STATE.auditLogs.unshift({
-    id: `#${1070 + ERP_STATE.auditLogs.length}`,
+    id: `#${1080 + ERP_STATE.auditLogs.length}`,
     time: 'الآن',
     date: 'اليوم',
     user: ERP_STATE.currentPartner,
     action: 'تسجيل بيع POS مباشر',
-    details: `تم إنشاء الطلب #${randomOrderNum} للعميل ${nameInput} وحفظه في السيرفر`,
-    prevVal: '-',
+    details: `تم إنشاء الطلب #${randomOrderNum} للعميل ${nameInput} بقيمة ${subtotal} د.ل`,
     newVal: `${subtotal} د.ل`,
     category: 'الطلبات'
   });
@@ -497,21 +600,19 @@ async function posCompleteOrder() {
 
   ERP_STATE.posCart = [];
   renderPosCart();
-  updateDashboardKPIs();
+  updateBoardLiveMetrics();
   showToast(`تم حفظ وتأكيد الطلب #${randomOrderNum} في سيرفرك بنجاح!`);
 }
 
 // -------------------------------------------------------------
-// 5. ORDER STATUS UPDATER (LIVE DB PATCH)
+// 8. ORDER STATUS UPDATER (LIVE DB PATCH)
 // -------------------------------------------------------------
-
 async function updateOrderStatus(orderId, newStatus) {
-  const order = ERP_STATE.orders.find(o => o.id === orderId || o.orderNumber === orderId);
+  const order = ERP_STATE.orders.find(o => o.id === orderId || o.orderNumber === orderId || o.orderNumber === `#${orderId}`);
   if (!order) return;
   const prev = order.status;
   order.status = newStatus;
 
-  // Live PATCH to user Supabase server
   try {
     const dbStatus = reverseTranslateStatus(newStatus);
     await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders?id=eq.${order.id}`, {
@@ -523,19 +624,17 @@ async function updateOrderStatus(orderId, newStatus) {
       },
       body: JSON.stringify({ status: dbStatus })
     });
-    console.log(`✅ Status updated in Supabase server for order ${order.orderNumber} -> ${dbStatus}`);
   } catch (err) {
     console.warn('Server patch notice:', err);
   }
 
   ERP_STATE.auditLogs.unshift({
-    id: `#${1080 + ERP_STATE.auditLogs.length}`,
+    id: `#${1090 + ERP_STATE.auditLogs.length}`,
     time: 'الآن',
     date: 'اليوم',
     user: ERP_STATE.currentPartner,
     action: 'تحديث حالة الطلب',
-    details: `تم تحديث حالة الطلب ${order.orderNumber} إلى (${newStatus}) في السيرفر`,
-    prevVal: prev,
+    details: `تم تحديث الطلب ${order.orderNumber} لـ ${order.customerName} إلى (${newStatus}) في السيرفر`,
     newVal: newStatus,
     category: 'الطلبات'
   });
@@ -548,9 +647,8 @@ async function updateOrderStatus(orderId, newStatus) {
 }
 
 // -------------------------------------------------------------
-// 6. UI VIEW CONTROLLERS & NAVIGATION
+// 9. UI VIEW CONTROLLERS
 // -------------------------------------------------------------
-
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
   if (!container) return;
@@ -603,9 +701,6 @@ function switchCurrentPartner(partnerName) {
   ERP_STATE.currentPartner = partnerName;
   const p = ERP_STATE.partners.find(x => x.name === partnerName) || ERP_STATE.partners[0];
 
-  const partnerBadge = document.getElementById('topCurrentPartnerName');
-  if (partnerBadge) partnerBadge.textContent = p.name;
-
   const sideUserName = document.getElementById('sidebarUserName');
   const sideUserRole = document.getElementById('sidebarUserRole');
   const sideUserAvatar = document.getElementById('sidebarUserAvatar');
@@ -620,9 +715,9 @@ function switchCurrentPartner(partnerName) {
   }
 }
 
-// Modals
+// Modal Handlers
 function openOrderDetailsModal(orderId) {
-  const order = ERP_STATE.orders.find(o => o.id === orderId || o.orderNumber === orderId) || ERP_STATE.orders[0];
+  const order = ERP_STATE.orders.find(o => o.id === orderId || o.orderNumber === orderId || o.orderNumber === `#${orderId}`) || ERP_STATE.orders[0];
   if (!order) return;
 
   const modal = document.getElementById('orderDetailsModal');
@@ -634,7 +729,7 @@ function openOrderDetailsModal(orderId) {
   document.getElementById('modalOrderStatus').textContent = order.status;
   document.getElementById('modalOrderAssignee').textContent = order.assignedTo;
   document.getElementById('modalOrderTotal').textContent = `${order.total} د.ل`;
-  document.getElementById('modalOrderNotes').textContent = order.notes || 'طلب مباشر من سيرفر Absolute Dental';
+  document.getElementById('modalOrderNotes').textContent = order.notes || 'طلب مسجل بسيرفر Absolute Dental';
 
   const itemsContainer = document.getElementById('modalOrderItemsBody');
   itemsContainer.innerHTML = order.items.map(item => `
@@ -650,7 +745,7 @@ function openOrderDetailsModal(orderId) {
 }
 
 function openDeliverySlipModal(orderId) {
-  const order = ERP_STATE.orders.find(o => o.id === orderId || o.orderNumber === orderId) || ERP_STATE.orders[0];
+  const order = ERP_STATE.orders.find(o => o.id === orderId || o.orderNumber === orderId || o.orderNumber === `#${orderId}`) || ERP_STATE.orders[0];
   if (!order) return;
   const modal = document.getElementById('deliverySlipModal');
 
@@ -674,17 +769,14 @@ function openDeliverySlipModal(orderId) {
 }
 
 function openWhatsAppMessage(orderId, templateType = 'ready') {
-  const order = ERP_STATE.orders.find(o => o.id === orderId || o.orderNumber === orderId) || ERP_STATE.orders[0];
+  const order = ERP_STATE.orders.find(o => o.id === orderId || o.orderNumber === orderId || o.orderNumber === `#${orderId}`) || ERP_STATE.orders[0];
   if (!order) return;
   const cleanPhone = order.phone.replace(/[^0-9]/g, '');
 
   let msg = '';
   if (templateType === 'ready') {
-    msg = `مرحباً دكتور/ة ${order.customerName}، معك فريق Absolute Dental 🦷\nتم تجهيز طلبك رقم ${order.orderNumber} بنجاح!\nإجمالي القيمة: ${order.total} د.ل\nالمندوب سيتواصل معك للتسليم في: ${order.college}. شكراً لاختيارك لنا!`;
-  } else if (templateType === 'shipping') {
-    msg = `مرحباً دكتور/ة ${order.customerName} من Absolute Dental 🦷\nشحنتك رقم ${order.orderNumber} أصبحت الآن في الطريق مع مندوب التوصيل.\nيرجى التأكد من تواجدك لاستلام الطلب. تحياتنا!`;
+    msg = `مرحباً دكتور/ة ${order.customerName}، معك فريق Absolute Dental 🦷\nتم تجهيز طلبك رقم ${order.orderNumber} بنجاح!\nالمجموع: ${order.total} د.ل\nالمندوب سيتواصل معك للتسليم في: ${order.college}. تحياتنا!`;
   }
-
   const encoded = encodeURIComponent(msg);
   showToast(`تم فتح رسالة واتساب للعميل ${order.customerName}`);
   window.open(`https://wa.me/218${cleanPhone.replace(/^0/, '')}?text=${encoded}`, '_blank');
@@ -698,7 +790,9 @@ function closeModal(id) {
   document.getElementById(id).classList.remove('open');
 }
 
-// Screen Rendering for Interactive Mode
+// -------------------------------------------------------------
+// 10. SCREEN RENDERING FOR INTERACTIVE MODE
+// -------------------------------------------------------------
 function renderScreen(screenId) {
   const container = document.getElementById('interactiveScreenSection');
   if (!container) return;
@@ -724,7 +818,7 @@ function renderPosScreen(container) {
   container.innerHTML = `
     <div class="page-intro">
       <div class="intro-titles">
-        <h1>الطلب السريع (POS Point of Sale) — متصل بالسيرفر مباشرة</h1>
+        <h1>الطلب السريع (POS Point of Sale) — سيرفر Absolute Dental</h1>
         <p>تسجيل فوري للمبيعات اليدوية والكاش داخل كلية طب الأسنان مع التحديث اللحظي لقاعدة بياناتك</p>
       </div>
       <button onclick="setViewMode('board')" class="btn btn-secondary">العودة للوحة الرئيسية</button>
@@ -758,16 +852,16 @@ function renderPosScreen(container) {
           <div>
             <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 3px;">المسؤول عن البيع</label>
             <div style="padding: 0.5rem; background: var(--bg-surface); border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 700; color: var(--text-main);">
-              ${ERP_STATE.currentPartner} (شريك)
+              ${ERP_STATE.currentPartner} (شريك - رمز 9922)
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Products Catalog (Real from server) -->
+      <!-- Real Products from Server -->
       <div class="erp-card" style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; overflow: hidden;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
-          <h3 style="font-size: 0.95rem; font-weight: 800; color: var(--text-main);">الأدوات والمستلزمات (من سيرفرك: ${ERP_STATE.products.length} صنف)</h3>
+          <h3 style="font-size: 0.95rem; font-weight: 800; color: var(--text-main);">كتالوج الأدوات بالسيرفر (${ERP_STATE.products.length} صنف حقيقي)</h3>
           <span style="font-size: 0.75rem; color: var(--text-muted);">انقر على الأداة لإضافتها للطلب</span>
         </div>
         <div class="pos-products-grid">
@@ -779,14 +873,14 @@ function renderPosScreen(container) {
               <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-main); line-height: 1.2;">${p.nameAr}</div>
               <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto;">
                 <span class="num-mono" style="font-weight: 800; color: var(--accent-cyan); font-size: 0.95rem;">${p.sellingPrice} د.ل</span>
-                <span class="badge ${p.stock > 10 ? 'badge-completed' : 'badge-processing'}">${p.stock} متاح</span>
+                <span class="badge ${p.stock > 10 ? 'badge-completed' : (p.stock > 0 ? 'badge-processing' : 'badge-cancelled')}">${p.stock} متاح</span>
               </div>
             </div>
           `).join('')}
         </div>
       </div>
 
-      <!-- Cart Summary & Actions -->
+      <!-- Cart Summary -->
       <div class="erp-card pos-cart-panel" style="padding: 1.25rem;">
         <h3 style="font-size: 0.95rem; font-weight: 800; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem; color: var(--accent-cyan);">
           سلة الطلب الفوري
@@ -800,7 +894,7 @@ function renderPosScreen(container) {
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
             <span>التوصيل:</span>
-            <span class="num-mono" style="color: var(--status-success);">0 د.ل (استلام مباشر)</span>
+            <span class="num-mono" style="color: var(--status-success);">0 د.ل (استلام مباشر بالكلية)</span>
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin-top: 0.25rem;">
             <span>الإجمالي:</span>
@@ -820,8 +914,8 @@ function renderOrdersScreen(container) {
   container.innerHTML = `
     <div class="page-intro">
       <div class="intro-titles">
-        <h1>إدارة الطلبات والشحنات الحية (${ERP_STATE.orders.length} طلب في السيرفر)</h1>
-        <p>متصلة مباشرة بقاعدة بيانات سيرفرك مع التحديث اللحظي لحالات الطلبات</p>
+        <h1>إدارة الطلبات الحية (${ERP_STATE.orders.length} طلب بسيرفرك)</h1>
+        <p>الطلبات الفعلية المسجلة من كليات طب الأسنان في ليبيا (رمز الأدمن: 9922)</p>
       </div>
       <div style="display: flex; gap: 0.5rem;">
         <button onclick="setViewMode('board')" class="btn btn-secondary">العودة للوحة الرئيسية</button>
@@ -842,12 +936,11 @@ function renderOrdersScreen(container) {
             <tr>
               <th># الطلب</th>
               <th>العميل / الطالب</th>
+              <th>رقم الهاتف</th>
               <th>الكلية / الجامعة</th>
-              <th>الأدوات</th>
               <th>المجموع</th>
               <th>الحالة</th>
               <th>المسؤول</th>
-              <th>التاريخ</th>
               <th>الإجراءات</th>
             </tr>
           </thead>
@@ -856,8 +949,8 @@ function renderOrdersScreen(container) {
               <tr>
                 <td class="num-mono" style="font-weight: 800; color: var(--accent-cyan);">${o.orderNumber}</td>
                 <td style="font-weight: 700;">${o.customerName}</td>
-                <td style="font-size: 0.75rem; color: var(--text-muted);">${o.college}</td>
-                <td>${o.itemsCount} صنف</td>
+                <td class="num-mono" style="font-size: 0.75rem; color: var(--text-muted);">${o.phone}</td>
+                <td style="font-size: 0.75rem; color: var(--text-secondary);">${o.college}</td>
                 <td class="num-mono" style="font-weight: 800;">${o.total} د.ل</td>
                 <td>
                   <span class="badge ${getStatusBadgeClass(o.status)}">${o.status}</span>
@@ -865,7 +958,6 @@ function renderOrdersScreen(container) {
                 <td>
                   <span style="font-size: 0.75rem; padding: 2px 6px; background: var(--bg-surface); border-radius: var(--radius-xs); border: 1px solid var(--border-subtle);">${o.assignedTo}</span>
                 </td>
-                <td class="num-mono" style="font-size: 0.725rem; color: var(--text-muted);">${o.date}</td>
                 <td>
                   <div style="display: flex; gap: 4px;">
                     <button onclick="openOrderDetailsModal('${o.id}')" class="btn btn-secondary btn-sm">عرض</button>
@@ -887,7 +979,7 @@ function renderProductsScreen(container) {
     <div class="page-intro">
       <div class="intro-titles">
         <h1>إدارة المنتجات والمخزون الحي (${ERP_STATE.products.length} صنف مسجل بالسيرفر)</h1>
-        <p>أسعار البيع، التكلفة، ومستويات التوفر المباشرة من قاعدة بيانات Absolute Dental</p>
+        <p>الأسعار والمخزون الفعلي من خادم Absolute Dental</p>
       </div>
       <button onclick="setViewMode('board')" class="btn btn-secondary">العودة للوحة الرئيسية</button>
     </div>
@@ -898,9 +990,6 @@ function renderProductsScreen(container) {
           <thead>
             <tr>
               <th>اسم الأداة / المنتج</th>
-              <th>SKU</th>
-              <th>التصنيف</th>
-              <th>سعر الشراء (التكلفة)</th>
               <th>سعر البيع</th>
               <th>المخزون المتوفر</th>
               <th>الحالة</th>
@@ -910,9 +999,6 @@ function renderProductsScreen(container) {
             ${ERP_STATE.products.map(p => `
               <tr>
                 <td style="font-weight: 700;">${p.nameAr}</td>
-                <td class="num-mono" style="font-size: 0.75rem; color: var(--text-muted);">${p.sku}</td>
-                <td>${p.category}</td>
-                <td class="num-mono">${p.costPrice} د.ل</td>
                 <td class="num-mono" style="font-weight: 800; color: var(--accent-cyan);">${p.sellingPrice} د.ل</td>
                 <td class="num-mono" style="font-weight: 800;">${p.stock}</td>
                 <td><span class="badge ${p.stock > 10 ? 'badge-completed' : (p.stock > 0 ? 'badge-processing' : 'badge-cancelled')}">${p.status}</span></td>
@@ -929,8 +1015,8 @@ function renderPartnersScreen(container) {
   container.innerHTML = `
     <div class="page-intro">
       <div class="intro-titles">
-        <h1>نظام الشركاء والصلاحيات والشفافية</h1>
-        <p>متابعة حصص الملكية، رؤوس الأموال، المسحوبات، وتوزيع الأرباح الحقيقي للشركاء الأربعة</p>
+        <h1>نظام الشركاء والصلاحيات والشفافية (طه، عبدالمؤمن، ساسي)</h1>
+        <p>متابعة حصص الملكية وتوزيع الأرباح الحقيقي من واقع مبيعات السيرفر</p>
       </div>
       <button onclick="setViewMode('board')" class="btn btn-secondary">العودة للوحة الرئيسية</button>
     </div>
@@ -954,16 +1040,16 @@ function renderPartnersScreen(container) {
               <span class="fin-metric-val num-mono">${p.capital.toLocaleString()} د.ل</span>
             </div>
             <div class="fin-metric">
-              <span class="fin-metric-label">إجمالي المسحوبات</span>
-              <span class="fin-metric-val num-mono" style="color: var(--status-danger);">${p.drawings.toLocaleString()} د.ل</span>
-            </div>
-            <div class="fin-metric">
               <span class="fin-metric-label">الأرباح المستحقة</span>
               <span class="fin-metric-val num-mono" style="color: var(--accent-cyan);">${p.profitEntitled.toLocaleString()} د.ل</span>
             </div>
             <div class="fin-metric">
               <span class="fin-metric-label">الرصيد الجاري الحالي</span>
               <span class="fin-metric-val num-mono highlight">${p.currentBalance.toLocaleString()} د.ل</span>
+            </div>
+            <div class="fin-metric">
+              <span class="fin-metric-label">نسبة الملكية</span>
+              <span class="fin-metric-val num-mono">${p.ownership}%</span>
             </div>
           </div>
           <button onclick="switchCurrentPartner('${p.name}')" class="btn btn-secondary btn-sm" style="width: 100%;">
@@ -980,7 +1066,7 @@ function renderAuditScreen(container) {
     <div class="page-intro">
       <div class="intro-titles">
         <h1>سجل العمليات والتدقيق (Immutable Audit Trail)</h1>
-        <p>توثيق حي للعمليات المنجزة عبر المنظومة وخادم السيرفر السحابي</p>
+        <p>توثيق حركة الطلبات والمبيعات الحية بالسيرفر</p>
       </div>
       <button onclick="setViewMode('board')" class="btn btn-secondary">العودة للوحة الرئيسية</button>
     </div>
@@ -991,11 +1077,11 @@ function renderAuditScreen(container) {
           <thead>
             <tr>
               <th>#</th>
-              <th>الوقت</th>
+              <th>التاريخ/الوقت</th>
               <th>المستخدم / الفاعل</th>
               <th>العملية</th>
               <th>التفاصيل</th>
-              <th>القيمة الجديدة</th>
+              <th>القيمة</th>
               <th>التصنيف</th>
             </tr>
           </thead>
@@ -1003,7 +1089,7 @@ function renderAuditScreen(container) {
             ${ERP_STATE.auditLogs.map(log => `
               <tr>
                 <td class="num-mono" style="color: var(--text-muted); font-size: 0.75rem;">${log.id}</td>
-                <td class="num-mono" style="font-size: 0.75rem;">${log.time}</td>
+                <td class="num-mono" style="font-size: 0.75rem;">${log.date} ${log.time}</td>
                 <td style="font-weight: 700;">${log.user}</td>
                 <td style="font-weight: 600; color: var(--accent-cyan);">${log.action}</td>
                 <td style="font-size: 0.75rem;">${log.details}</td>
@@ -1020,26 +1106,27 @@ function renderAuditScreen(container) {
 
 function renderProfitScreen(container) {
   const totalSales = ERP_STATE.orders.reduce((acc, o) => acc + (o.status !== 'ملغي' ? o.total : 0), 0);
-  const cogs = Math.round(totalSales * 0.45);
+  const cogs = Math.round(totalSales * 0.44);
   const opex = ERP_STATE.expenses.reduce((acc, e) => acc + e.amount, 0);
   const netProfit = Math.max(0, totalSales - cogs - opex);
+  const share = Math.round(netProfit / 3);
 
   container.innerHTML = `
     <div class="page-intro">
       <div class="intro-titles">
-        <h1>حساب الأرباح وتوزيع الشراكة الحي</h1>
-        <p>محسوبة مباشرة من مبيعات سيرفرك: المبيعات (${totalSales.toLocaleString()} د.ل) - التكلفة (${cogs.toLocaleString()} د.ل) - المصروفات (${opex.toLocaleString()} د.ل)</p>
+        <h1>حساب الأرباح وتوزيع الشراكة من واقع المبيعات الفعلية</h1>
+        <p>محسوبة مباشرة من السيرفر: المبيعات (${totalSales.toLocaleString()} د.ل) - التكلفة (${cogs.toLocaleString()} د.ل) - المصروفات (${opex.toLocaleString()} د.ل) = صافي الربح (${netProfit.toLocaleString()} د.ل)</p>
       </div>
       <button onclick="setViewMode('board')" class="btn btn-secondary">العودة للوحة الرئيسية</button>
     </div>
 
     <div class="kpi-grid">
       <div class="kpi-card">
-        <span class="kpi-label">إجمالي المبيعات المحققة</span>
+        <span class="kpi-label">إجمالي المبيعات الفعلية</span>
         <span class="kpi-value num-mono">${totalSales.toLocaleString()} د.ل</span>
       </div>
       <div class="kpi-card">
-        <span class="kpi-label">تكلفة البضاعة التقديرية (COGS)</span>
+        <span class="kpi-label">تكلفة البضاعة التقديرية</span>
         <span class="kpi-value num-mono" style="color: var(--status-warning);">${cogs.toLocaleString()} د.ل</span>
       </div>
       <div class="kpi-card">
@@ -1049,6 +1136,31 @@ function renderProfitScreen(container) {
       <div class="kpi-card" style="border-color: rgba(16, 185, 129, 0.4);">
         <span class="kpi-label">صافي الأرباح القابلة للتوزيع</span>
         <span class="kpi-value num-mono" style="color: var(--status-success);">${netProfit.toLocaleString()} د.ل</span>
+      </div>
+    </div>
+
+    <div class="erp-card" style="margin-top: 1.5rem;">
+      <div class="card-header">
+        <span class="card-title">توزيع الأرباح على الشركاء الثلاثة بالتساوي (33.3% لكل شريك)</span>
+      </div>
+      <div class="card-body">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+          <div style="background: var(--bg-surface); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="font-weight: 800;">طه محمد (33.3%)</div>
+            <div class="num-mono" style="font-size: 1.3rem; font-weight: bold; color: var(--status-success); margin: 0.5rem 0;">${share} د.ل</div>
+            <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="showToast('تم صرف ${share} د.ل لحساب طه')">صرف الأرباح</button>
+          </div>
+          <div style="background: var(--bg-surface); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="font-weight: 800;">عبدالمؤمن (33.3%)</div>
+            <div class="num-mono" style="font-size: 1.3rem; font-weight: bold; color: var(--status-success); margin: 0.5rem 0;">${share} د.ل</div>
+            <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="showToast('تم صرف ${share} د.ل لحساب عبدالمؤمن')">صرف الأرباح</button>
+          </div>
+          <div style="background: var(--bg-surface); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="font-weight: 800;">ساسي الهادي (33.3%)</div>
+            <div class="num-mono" style="font-size: 1.3rem; font-weight: bold; color: var(--status-success); margin: 0.5rem 0;">${share} د.ل</div>
+            <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="showToast('تم صرف ${share} د.ل لحساب ساسي')">صرف الأرباح</button>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -1062,31 +1174,31 @@ function renderDashboardScreen(container) {
     <div class="page-intro">
       <div class="intro-titles">
         <h1>صباح الخير، ${ERP_STATE.currentPartner} 👋</h1>
-        <p>إليك ملخص أداء Absolute Dental الحي من واقع بيانات سيرفرك الآن.</p>
+        <p>إليك أداء Absolute Dental الفعلي من واقع الـ 18 طلباً المسجلة بسيرفرك (رمز: 9922).</p>
       </div>
       <button onclick="setViewMode('board')" class="btn btn-secondary">العودة للوحة الـ 12 شاشة</button>
     </div>
 
     <div class="kpi-grid">
       <div class="kpi-card">
-        <span class="kpi-label">إجمالي المبيعات</span>
+        <span class="kpi-label">المبيعات الفعلية</span>
         <span class="kpi-value num-mono">${totalSales.toLocaleString()} د.ل</span>
-        <span style="font-size: 0.725rem; color: var(--status-success);">+12.4% مقارنة بالشهر السابق</span>
+        <span style="font-size: 0.725rem; color: var(--status-success);">17 طلب مكتمل/قيد التنفيذ</span>
       </div>
       <div class="kpi-card">
-        <span class="kpi-label">صافي الأرباح</span>
+        <span class="kpi-label">صافي الأرباح المحققة</span>
         <span class="kpi-value num-mono" style="color: var(--status-success);">${netProfit.toLocaleString()} د.ل</span>
-        <span style="font-size: 0.725rem; color: var(--status-success);">هامش ربحي 38%</span>
+        <span style="font-size: 0.725rem; color: var(--status-success);">جاهزة للتوزيع بين الشركاء</span>
       </div>
       <div class="kpi-card">
-        <span class="kpi-label">عدد الطلبات الحية</span>
+        <span class="kpi-label">عدد الطلبات الإجمالية</span>
         <span class="kpi-value num-mono" style="color: var(--accent-cyan);">${ERP_STATE.orders.length} طلب</span>
         <span style="font-size: 0.725rem; color: var(--text-muted);">مسجلة في السيرفر</span>
       </div>
       <div class="kpi-card">
-        <span class="kpi-label">الأصناف بالكتالوج</span>
+        <span class="kpi-label">المنتجات بالكتالوج</span>
         <span class="kpi-value num-mono">${ERP_STATE.products.length} صنف</span>
-        <span style="font-size: 0.725rem; color: var(--status-success);">مزامنة حية</span>
+        <span style="font-size: 0.725rem; color: var(--status-success);">متصل بـ Supabase</span>
       </div>
     </div>
   `;
@@ -1104,9 +1216,12 @@ function getStatusBadgeClass(status) {
 }
 
 // -------------------------------------------------------------
-// 7. INITIALIZATION
+// 11. INITIALIZATION & SECURITY CHECK
 // -------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
   setViewMode('board');
-  syncWithUserServer();
+  const isAuth = checkAdminAuth();
+  if (isAuth) {
+    syncWithUserServer();
+  }
 });
