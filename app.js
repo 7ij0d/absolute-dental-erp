@@ -950,7 +950,37 @@ async function syncWithUserServer() {
       }
     }
 
-    // 2. Fetch Orders
+    // 2. Fetch Order Items from Server
+    let orderItems = [];
+    try {
+      const orderItemsRes = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/order_items?select=*`, {
+        headers: {
+          'apikey': SUPABASE_CONFIG.anonKey,
+          'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+        }
+      });
+      if (orderItemsRes.ok) {
+        orderItems = await orderItemsRes.json();
+      }
+    } catch (_) {}
+
+    const productsMap = {};
+    ERP_STATE.products.forEach(p => { productsMap[p.id] = p; });
+
+    const itemsByOrderId = {};
+    if (Array.isArray(orderItems)) {
+      orderItems.forEach(item => {
+        if (!itemsByOrderId[item.order_id]) itemsByOrderId[item.order_id] = [];
+        const prod = productsMap[item.product_id];
+        itemsByOrderId[item.order_id].push({
+          name: prod ? prod.nameAr : 'أداة طبية',
+          qty: Number(item.quantity) || 1,
+          price: Number(item.price) || (prod ? Number(prod.sellingPrice) : 0)
+        });
+      });
+    }
+
+    // 3. Fetch Orders from Server
     const ordersRes = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders?select=*&order=created_at.desc`, {
       headers: {
         'apikey': SUPABASE_CONFIG.anonKey,
@@ -961,44 +991,81 @@ async function syncWithUserServer() {
     if (ordersRes.ok) {
       const dbOrders = await ordersRes.json();
       if (Array.isArray(dbOrders) && dbOrders.length > 0) {
-        ERP_STATE.orders = dbOrders.map(o => {
-          let itemsList = [];
-          try {
-            itemsList = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []);
-          } catch (_) { itemsList = []; }
+        const initialOrdersMap = {};
+        if (typeof INITIAL_ORDERS !== 'undefined' && Array.isArray(INITIAL_ORDERS)) {
+          INITIAL_ORDERS.forEach(io => {
+            initialOrdersMap[io.id] = io;
+            if (io.orderNumber) initialOrdersMap[io.orderNumber.replace('#', '')] = io;
+          });
+        }
 
+        ERP_STATE.orders = dbOrders.map(o => {
+          const fallbackOrder = initialOrdersMap[o.id] || initialOrdersMap[o.order_number] || null;
+
+          // Items mapping
+          let itemsList = itemsByOrderId[o.id];
+          if (!itemsList || itemsList.length === 0) {
+            if (fallbackOrder && fallbackOrder.items && fallbackOrder.items.length > 0) {
+              itemsList = fallbackOrder.items;
+            } else if (typeof o.items === 'string') {
+              try { itemsList = JSON.parse(o.items); } catch (_) { itemsList = []; }
+            } else if (Array.isArray(o.items)) {
+              itemsList = o.items;
+            } else {
+              itemsList = [];
+            }
+          }
+
+          // Status mapping (handling 'delivered', 'preparing', 'new', 'cancelled')
           let cleanStatus = 'جديد';
-          if (o.status === 'completed' || o.status === 'مكتمل') cleanStatus = 'مكتمل';
-          else if (o.status === 'processing' || o.status === 'قيد التجهيز') cleanStatus = 'قيد التجهيز';
-          else if (o.status === 'ready' || o.status === 'جاهز للتوصيل') cleanStatus = 'جاهز للتوصيل';
-          else if (o.status === 'cancelled' || o.status === 'ملغي') cleanStatus = 'ملغي';
+          const rawStatus = (o.status || '').toLowerCase().trim();
+          if (rawStatus === 'delivered' || rawStatus === 'completed' || rawStatus === 'مكتمل') {
+            cleanStatus = 'مكتمل';
+          } else if (rawStatus === 'preparing' || rawStatus === 'processing' || rawStatus === 'قيد التجهيز') {
+            cleanStatus = 'قيد التجهيز';
+          } else if (rawStatus === 'ready' || rawStatus === 'جاهز للتوصيل' || rawStatus === 'shipping') {
+            cleanStatus = 'جاهز للتوصيل';
+          } else if (rawStatus === 'cancelled' || rawStatus === 'canceled' || rawStatus === 'ملغي') {
+            cleanStatus = 'ملغي';
+          } else {
+            cleanStatus = 'جديد';
+          }
+
+          // Total calculation (using total_price, fallback to items sum or seed)
+          const itemsSum = itemsList.reduce((sum, it) => sum + (Number(it.price || 0) * Number(it.qty || 1)), 0);
+          const finalTotal = Number(o.total_price) || itemsSum || (fallbackOrder ? fallbackOrder.total : 0) || Number(o.total) || 0;
+
+          // Phone mapping
+          const phone = o.customer_phone || o.phone_number || o.customer_phone_secondary || (fallbackOrder ? fallbackOrder.phone : '') || '';
 
           return {
             id: o.id,
             orderNumber: `#${o.order_number || o.id.slice(0, 8)}`,
-            customerName: o.customer_name || 'طالب كلية الأسنان',
-            phone: o.phone_number || '',
+            customerName: (o.customer_name || (fallbackOrder ? fallbackOrder.customerName : 'طالب كلية الأسنان')).trim(),
+            phone: phone,
             university: o.university || 'جامعة طرابلس',
-            college: o.faculty_name || o.college || 'كلية طب الأسنان',
-            address: o.address || 'طرابلس',
-            itemsCount: itemsList.reduce((sum, it) => sum + (Number(it.qty || it.quantity) || 1), 0),
-            items: itemsList.map(it => ({
-              name: it.name || it.name_ar || 'أداة طبية',
-              qty: Number(it.qty || it.quantity) || 1,
-              price: Number(it.price) || 0
-            })),
-            total: Number(o.total_amount || 0),
-            shippingFee: Number(o.shipping_cost || 0),
+            college: o.college || o.faculty_name || 'كلية طب الأسنان',
+            address: o.address_text || o.address || (fallbackOrder ? fallbackOrder.address : 'طرابلس'),
+            itemsCount: itemsList.reduce((sum, it) => sum + (Number(it.qty) || 1), 0),
+            items: itemsList,
+            total: finalTotal,
+            shippingFee: Number(o.shipping_fee || o.shipping_cost || 0),
             status: cleanStatus,
             assignedTo: 'طه',
             date: o.created_at ? new Date(o.created_at).toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '30/09',
-            notes: o.notes || ''
+            notes: o.notes || o.delivery_notes || ''
           };
         });
       }
     }
 
     updateDashboardRealUI();
+    if (ERP_STATE.activeScreen === 'orders') renderOrdersTable();
+    else if (ERP_STATE.activeScreen === 'products') renderProductsTable();
+    else if (ERP_STATE.activeScreen === 'inventory') renderInventoryTable();
+    else if (ERP_STATE.activeScreen === 'finance') updateFinanceScreenMetrics();
+    else if (ERP_STATE.activeScreen === 'partners') updatePartnersScreenMetrics();
+    else if (ERP_STATE.activeScreen === 'reports') updateReportsScreenMetrics();
     showToast('تمت مزامنة البيانات بنجاح مع سيرفر Absolute Dental 🟢');
   } catch (err) {
     console.warn('Sync notice:', err);
