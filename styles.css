@@ -1128,7 +1128,7 @@ html, body {
 }
 
 .modal-overlay.open {
-  display: flex;
+  display: flex !important;
 }
 
 .modal-dialog {
@@ -1220,6 +1220,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  pointer-events: none;
 }
 
 .toast {
@@ -1235,6 +1236,25 @@ html, body {
   animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 0.8rem;
   font-weight: 600;
+  pointer-events: auto;
+}
+
+.mobile-toggle-btn {
+  display: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.mobile-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-hover);
 }
 
 @keyframes toastSlideIn {
@@ -1259,8 +1279,12 @@ html, body {
 }
 
 @media (max-width: 992px) {
+  .mobile-toggle-btn {
+    display: inline-flex;
+  }
   .sidebar {
     transform: translateX(100%);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7);
   }
   .sidebar.mobile-open {
     transform: translateX(0);

@@ -5,64 +5,13 @@
  */
 
 // -------------------------------------------------------------
-// 1. PIN 9922 ACCESS CONTROL (Exact Admin Authentication)
+// 1. SYSTEM SECURITY & ADMIN CONTEXT (PIN: 9922)
 // -------------------------------------------------------------
 const ADMIN_SECURITY = {
   REQUIRED_PIN: '9922',
   ADMIN_EMAIL: 'admin@smylodent.com',
   ADMIN_PASS: 'admin123'
 };
-
-function checkAdminAuth() {
-  const pin = sessionStorage.getItem('admin_pin') || localStorage.getItem('admin_pin');
-  if (pin === ADMIN_SECURITY.REQUIRED_PIN) {
-    document.getElementById('pinGateOverlay').style.display = 'none';
-    return true;
-  } else {
-    document.getElementById('pinGateOverlay').style.display = 'flex';
-    return false;
-  }
-}
-
-function verifyAdminPin(e) {
-  if (e) e.preventDefault();
-  const input = document.getElementById('adminPinInput');
-  const errorBox = document.getElementById('pinErrorMsg');
-  const entered = input.value.trim();
-
-  if (entered === ADMIN_SECURITY.REQUIRED_PIN) {
-    sessionStorage.setItem('admin_pin', ADMIN_SECURITY.REQUIRED_PIN);
-    localStorage.setItem('admin_pin', ADMIN_SECURITY.REQUIRED_PIN);
-    document.getElementById('pinGateOverlay').style.display = 'none';
-    if (errorBox) errorBox.style.display = 'none';
-    showToast('تم التحقق بنجاح! مرحباً بكم في منظومة Absolute Dental 🦷');
-
-    // Auto sign into Supabase with admin credentials
-    if (supabase) {
-      supabase.auth.signInWithPassword({
-        email: ADMIN_SECURITY.ADMIN_EMAIL,
-        password: ADMIN_SECURITY.ADMIN_PASS
-      }).catch(() => {});
-    }
-    syncWithUserServer();
-  } else {
-    if (errorBox) errorBox.style.display = 'block';
-    input.value = '';
-    input.focus();
-  }
-}
-
-function lockAdminSession() {
-  sessionStorage.removeItem('admin_pin');
-  localStorage.removeItem('admin_pin');
-  document.getElementById('pinGateOverlay').style.display = 'flex';
-  const input = document.getElementById('adminPinInput');
-  if (input) {
-    input.value = '';
-    input.focus();
-  }
-  showToast('تم قفل المنظومة بنجاح');
-}
 
 // -------------------------------------------------------------
 // 2. SUPABASE LIVE SERVER CONFIGURATION
@@ -150,11 +99,11 @@ const ERP_STATE = {
     }
   ],
 
-  // Real Products (Populated from Supabase)
-  products: [],
+  // Real Products (Populated from live server with instant fallback seed)
+  products: (typeof INITIAL_PRODUCTS !== 'undefined' && Array.isArray(INITIAL_PRODUCTS)) ? [...INITIAL_PRODUCTS] : [],
 
-  // Real Orders (Populated from Supabase)
-  orders: [],
+  // Real Orders (Populated from live server with instant fallback seed)
+  orders: (typeof INITIAL_ORDERS !== 'undefined' && Array.isArray(INITIAL_ORDERS)) ? [...INITIAL_ORDERS] : [],
 
   // Real Shipping Rates (From settings table)
   shippingRates: {
@@ -685,6 +634,10 @@ function setViewMode(mode) {
 function openScreenFromBoard(screenId) {
   setViewMode(screenId);
   updateSidebarActive(screenId);
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar && sidebar.classList.contains('mobile-open')) {
+    sidebar.classList.remove('mobile-open');
+  }
 }
 
 function updateSidebarActive(screenId) {
@@ -741,6 +694,7 @@ function openOrderDetailsModal(orderId) {
     </tr>
   `).join('');
 
+  modal.style.display = 'flex';
   modal.classList.add('open');
 }
 
@@ -765,6 +719,7 @@ function openDeliverySlipModal(orderId) {
     </tr>
   `).join('');
 
+  modal.style.display = 'flex';
   modal.classList.add('open');
 }
 
@@ -783,12 +738,38 @@ function openWhatsAppMessage(orderId, templateType = 'ready') {
 }
 
 function openCourierModal() {
-  document.getElementById('courierAppModal').classList.add('open');
+  const modal = document.getElementById('courierAppModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('open');
+  }
 }
 
 function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
+  const modal = document.getElementById(id);
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
 }
+
+function toggleMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) {
+    sidebar.classList.toggle('mobile-open');
+  }
+}
+
+// Global click dismiss for mobile sidebar
+document.addEventListener('click', (e) => {
+  const sidebar = document.querySelector('.sidebar');
+  const toggleBtn = document.querySelector('.mobile-toggle-btn');
+  if (sidebar && sidebar.classList.contains('mobile-open')) {
+    if (!sidebar.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
+      sidebar.classList.remove('mobile-open');
+    }
+  }
+});
 
 // -------------------------------------------------------------
 // 10. SCREEN RENDERING FOR INTERACTIVE MODE
@@ -1216,12 +1197,11 @@ function getStatusBadgeClass(status) {
 }
 
 // -------------------------------------------------------------
-// 11. INITIALIZATION & SECURITY CHECK
+// 11. INITIALIZATION & IMMEDIATE STARTUP
 // -------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
   setViewMode('board');
-  const isAuth = checkAdminAuth();
-  if (isAuth) {
-    syncWithUserServer();
-  }
+  updateBoardLiveMetrics();
+  renderPosCart();
+  syncWithUserServer();
 });
