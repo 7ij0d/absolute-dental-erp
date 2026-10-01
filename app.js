@@ -105,6 +105,11 @@ function updateSessionUserUI(userName) {
   if (studentActiveBadge) studentActiveBadge.textContent = userName;
   if (editAuthor) editAuthor.textContent = userName;
   if (addAuthor) addAuthor.textContent = userName;
+
+  const newOrderBadge = document.getElementById('newOrderActiveUserBadge');
+  const posSessionNotice = document.getElementById('posActiveUserSessionNotice');
+  if (newOrderBadge) newOrderBadge.textContent = userName;
+  if (posSessionNotice) posSessionNotice.textContent = userName;
 }
 
 function logOperation({ user, action, target, oldVal = '-', newVal = '-', details }) {
@@ -170,12 +175,23 @@ const ERP_STATE = {
 // -------------------------------------------------------------
 function calculateRealMetrics() {
   const activeOrders = ERP_STATE.orders.filter(o => o.status !== 'ملغي');
-  const totalSales = activeOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  
+  // Gross sales = sum of subtotal or (total + discountAmount)
+  const grossSales = activeOrders.reduce((sum, o) => {
+    const sub = o.subtotal ? Number(o.subtotal) : (Number(o.total) + (Number(o.discountAmount) || 0));
+    return sum + (sub || 0);
+  }, 0);
+
+  // Total commercial discounts granted (discounts are reductions in sales, NOT expenses)
+  const totalDiscounts = activeOrders.reduce((sum, o) => sum + (Number(o.discountAmount) || 0), 0);
+
+  // Net sales = Gross Sales - Total Discounts = sum of order total
+  const netSales = activeOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
   const totalExpenses = ERP_STATE.expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   
-  // Real COGS estimated at 44% of sales
-  const cogs = Math.round(totalSales * 0.44);
-  const netProfit = Math.max(0, totalSales - cogs - totalExpenses);
+  // Real COGS estimated at 44% of net sales
+  const cogs = Math.round(netSales * 0.44);
+  const netProfit = Math.max(0, netSales - cogs - totalExpenses);
   const profitPerPartner = Math.round(netProfit / 3);
 
   // Inventory stats
@@ -184,7 +200,10 @@ function calculateRealMetrics() {
   const outStockCount = ERP_STATE.products.filter(p => p.stock === 0).length;
 
   return {
-    totalSales,
+    grossSales,
+    totalDiscounts,
+    netSales,
+    totalSales: netSales,
     totalExpenses,
     cogs,
     netProfit,
@@ -349,6 +368,8 @@ function navigateToScreen(screenId, subSection = null) {
     updateReportsScreenMetrics();
   } else if (screenId === 'audit') {
     renderFullAuditTable();
+  } else if (screenId === 'newOrder') {
+    initNewOrderScreen();
   }
 
   // Auto-close mobile sidebar if open
@@ -506,6 +527,23 @@ function openOrderDetailsById(orderId) {
   document.getElementById('modalCustomerAddress').textContent = order.address || 'طرابلس';
   document.getElementById('modalOrderTotal').textContent = `${order.total} د.ل`;
 
+  const invNumEl = document.getElementById('modalOrderInvoiceNum');
+  if (invNumEl) {
+    const invNum = order.invoiceNumber || `#INV-2026-${(order.orderNumber || '').replace('#', '')}`;
+    invNumEl.textContent = invNum;
+  }
+
+  const discountWrap = document.getElementById('modalOrderDiscountInfoWrap');
+  if (discountWrap) {
+    if (order.hasDiscount && Number(order.discountAmount) > 0) {
+      discountWrap.innerHTML = `🏷️ يتضمن خصماً تجارياً بقيمة <strong>${order.discountAmount} د.ل</strong> (${order.discountReason || 'خصم خاص'})`;
+      discountWrap.style.color = '#16a34a';
+    } else {
+      discountWrap.innerHTML = `بدون خصومات تجارية (السعر الرسمي)`;
+      discountWrap.style.color = 'var(--text-muted)';
+    }
+  }
+
   const statusBadge = document.getElementById('modalOrderStatus');
   if (statusBadge) {
     statusBadge.textContent = order.status;
@@ -575,6 +613,12 @@ function openWhatsAppForOrder(orderId) {
 function openSlipForCurrentModal() {
   if (ERP_STATE.currentOrderInModal) {
     openDeliverySlipById(ERP_STATE.currentOrderInModal.id);
+  }
+}
+
+function openInvoiceForCurrentModal() {
+  if (ERP_STATE.currentOrderInModal) {
+    openInvoiceModal(ERP_STATE.currentOrderInModal.id);
   }
 }
 
@@ -1135,6 +1179,61 @@ function updateReportsScreenMetrics() {
 
   const aovEl = document.getElementById('reportAovDisplay');
   if (aovEl) aovEl.textContent = `${aov} د.ل`;
+
+  // Gross vs Net Sales & Discounts Ledger
+  const grossEl = document.getElementById('reportGrossSalesVal');
+  if (grossEl) grossEl.textContent = `${m.grossSales.toLocaleString()} د.ل`;
+
+  const discountsEl = document.getElementById('reportTotalDiscountsVal');
+  if (discountsEl) discountsEl.textContent = `${m.totalDiscounts.toLocaleString()} د.ل`;
+
+  const netEl = document.getElementById('reportNetSalesVal');
+  if (netEl) netEl.textContent = `${m.netSales.toLocaleString()} د.ل`;
+
+  const expEl = document.getElementById('reportExpensesVal');
+  if (expEl) expEl.textContent = `${m.totalExpenses.toLocaleString()} د.ل`;
+
+  // Partner discounts distribution
+  const grid = document.getElementById('reportPartnerDiscountsGrid');
+  if (grid) {
+    const partners = ['طه', 'مؤمن', 'ياسي'];
+    const partnerData = partners.map(name => {
+      const pOrders = ERP_STATE.orders.filter(o => 
+        ((o.assignedTo === name) || 
+         (name === 'مؤمن' && (o.assignedTo === 'عبدالمؤمن' || o.assignedTo === 'عيد المؤمن')) ||
+         (name === 'ياسي' && o.assignedTo === 'ساسي'))
+      );
+      const discountOrders = pOrders.filter(o => o.hasDiscount || (Number(o.discountAmount) > 0));
+      const totalDisc = discountOrders.reduce((sum, o) => sum + (Number(o.discountAmount) || 0), 0);
+      return {
+        name,
+        totalDisc,
+        ordersCount: discountOrders.length,
+        allOrdersCount: pOrders.length
+      };
+    });
+
+    grid.innerHTML = partnerData.map(p => {
+      let badgeColor = '#1d4ed8';
+      let bg = '#eff6ff';
+      if (p.name === 'مؤمن') { badgeColor = '#059669'; bg = '#f0fdf4'; }
+      if (p.name === 'ياسي') { badgeColor = '#7c3aed'; bg = '#f5f3ff'; }
+
+      return `
+        <div style="background: ${bg}; border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 0.85rem; display: flex; flex-direction: column; gap: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: ${badgeColor}; font-size: 0.95rem;">${p.name}</strong>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">${p.allOrdersCount} طلب مسؤول</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
+            <span style="font-size: 0.75rem; color: var(--text-muted);">إجمالي الخصومات:</span>
+            <span class="num-mono" style="font-weight: 900; font-size: 1.15rem; color: ${badgeColor};">${p.totalDisc.toLocaleString()} د.ل</span>
+          </div>
+          <div style="font-size: 0.7rem; color: var(--text-muted);">منح خصومات لـ ${p.ordersCount} طلبات معتمدة</div>
+        </div>
+      `;
+    }).join('');
+  }
 }
 
 // -------------------------------------------------------------
@@ -1957,6 +2056,710 @@ function printSlipFromSuccessModal() {
   if (!order) return;
   closeModal('studentOrderSuccessModal');
   openDeliverySlipById(order.id);
+}
+
+// -------------------------------------------------------------
+// 16.5 NEW POS ORDER CREATION, SMART DISCOUNT ENGINE & OFFICIAL INVOICES
+// -------------------------------------------------------------
+const POS_ORDER_STATE = {
+  customerPreset: 'new',
+  customerName: '',
+  phone: '',
+  college: 'جامعة طرابلس — كلية طب الأسنان',
+  deliveryType: 'faculty',
+  deliveryFee: 0,
+  address: 'طرابلس — الكلية',
+  notes: '',
+  cart: [],
+  discountEnabled: false,
+  discountType: 'fixed',
+  discountValue: 0,
+  discountReason: 'خصم زميل كلية أسنان',
+  calculatedDiscount: 0,
+  subtotal: 0,
+  netTotal: 0,
+  lastCreatedInvoiceOrder: null
+};
+
+function initNewOrderScreen() {
+  const activeUser = getCurrentUser() || ERP_STATE.currentPartner || 'طه';
+  const badge = document.getElementById('newOrderActiveUserBadge');
+  const notice = document.getElementById('posActiveUserSessionNotice');
+  if (badge) badge.textContent = activeUser;
+  if (notice) notice.textContent = activeUser;
+
+  // Next invoice sequence preview
+  const nextSeq = ERP_STATE.orders.length + 1;
+  const nextInvNum = `#INV-2026-${String(nextSeq).padStart(4, '0')}`;
+  const invTag = document.getElementById('posNextInvoiceNum');
+  if (invTag) invTag.textContent = nextInvNum;
+
+  // Populate customer presets
+  populateCustomerPresets();
+
+  // Render product catalog
+  renderPosProductsCatalog();
+
+  // Render cart
+  renderPosCartItems();
+
+  // Recalculate
+  calculatePosTotals();
+}
+
+function populateCustomerPresets() {
+  const select = document.getElementById('posCustomerPresetSelect');
+  if (!select) return;
+
+  const seen = new Set();
+  const customers = [];
+
+  ERP_STATE.orders.forEach(o => {
+    const name = (o.customerName || '').trim();
+    if (name && !seen.has(name) && !name.includes('طالب كلية الأسنان')) {
+      seen.add(name);
+      customers.push({
+        name: name,
+        phone: o.phone || '',
+        college: o.college || 'كلية طب الأسنان',
+        address: o.address || 'طرابلس',
+        notes: o.notes || ''
+      });
+    }
+  });
+
+  select.innerHTML = `
+    <option value="new" selected>+ طالب جديد / إدخال يدوي مباشر</option>
+    ${customers.map(c => `
+      <option value="${encodeURIComponent(JSON.stringify(c))}">
+        👤 ${c.name} — ${c.phone ? c.phone : ''} (${c.college})
+      </option>
+    `).join('')}
+  `;
+}
+
+function handleCustomerPresetSelect(val) {
+  if (val === 'new') {
+    document.getElementById('posCustomerName').value = '';
+    document.getElementById('posCustomerPhone').value = '';
+    document.getElementById('posCustomerCollege').value = 'جامعة طرابلس — كلية طب الأسنان';
+    document.getElementById('posDeliveryAddress').value = 'طرابلس — الكلية';
+    document.getElementById('posOrderNotes').value = '';
+    POS_ORDER_STATE.customerName = '';
+    POS_ORDER_STATE.phone = '';
+    POS_ORDER_STATE.address = 'طرابلس — الكلية';
+    POS_ORDER_STATE.notes = '';
+    return;
+  }
+
+  try {
+    const cust = JSON.parse(decodeURIComponent(val));
+    document.getElementById('posCustomerName').value = cust.name;
+    document.getElementById('posCustomerPhone').value = cust.phone;
+    if (cust.college && document.getElementById('posCustomerCollege')) {
+      const opt = Array.from(document.getElementById('posCustomerCollege').options).find(o => o.value.includes(cust.college) || cust.college.includes(o.value));
+      if (opt) opt.selected = true;
+    }
+    document.getElementById('posDeliveryAddress').value = cust.address || 'طرابلس';
+    document.getElementById('posOrderNotes').value = cust.notes || '';
+
+    POS_ORDER_STATE.customerName = cust.name;
+    POS_ORDER_STATE.phone = cust.phone;
+    POS_ORDER_STATE.address = cust.address;
+    POS_ORDER_STATE.notes = cust.notes;
+
+    showToast(`تم استرجاع بيانات العميل: ${cust.name}`);
+  } catch (_) {}
+}
+
+let posCatalogSearchFilter = '';
+let posCatalogCategoryFilter = 'all';
+
+function handlePosCatalogSearch(val) {
+  posCatalogSearchFilter = (val || '').toLowerCase().trim();
+  renderPosProductsCatalog(posCatalogSearchFilter, posCatalogCategoryFilter);
+}
+
+function filterPosCatalogCategory(cat, btn) {
+  posCatalogCategoryFilter = cat;
+  if (btn) {
+    document.querySelectorAll('#newOrderScreen .student-filter-chips .filter-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  renderPosProductsCatalog(posCatalogSearchFilter, cat);
+}
+
+function renderPosProductsCatalog(query = posCatalogSearchFilter, category = posCatalogCategoryFilter) {
+  const container = document.getElementById('posProductsCatalogGrid');
+  const countEl = document.getElementById('posCatalogTotalCount');
+  if (!container) return;
+
+  let filtered = [...ERP_STATE.products];
+
+  // Category filter
+  if (category && category !== 'all') {
+    filtered = filtered.filter(p => {
+      const cat = (p.category || '').toLowerCase();
+      const name = (p.nameAr || '').toLowerCase();
+      if (category === 'burs') return cat.includes('بور') || name.includes('bur') || name.includes('بور');
+      if (category === 'sets') return cat.includes('كاست') || name.includes('cast') || name.includes('handpiece') || name.includes('هاندبيس');
+      if (category === 'teeth') return cat.includes('شمع') || cat.includes('أسنان') || name.includes('wax') || name.includes('teeth') || name.includes('شمع');
+      if (category === 'exam') return cat.includes('فحص') || name.includes('mirror') || name.includes('probe') || name.includes('spatula') || name.includes('مرآة');
+      return true;
+    });
+  }
+
+  // Search filter
+  if (query) {
+    const q = query.toLowerCase();
+    filtered = filtered.filter(p =>
+      (p.nameAr && p.nameAr.toLowerCase().includes(q)) ||
+      (p.nameEn && p.nameEn.toLowerCase().includes(q)) ||
+      (p.sku && p.sku.toLowerCase().includes(q))
+    );
+  }
+
+  if (countEl) countEl.textContent = `${filtered.length} صنف متاح`;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem;">
+        🔍 لا توجد أصناف مطابقة لكلمة البحث
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(p => {
+    let stockClass = 'in';
+    let stockLabel = `${p.stock} متوفر`;
+    if (p.stock <= 0) {
+      stockClass = 'out';
+      stockLabel = 'نافد';
+    } else if (p.stock <= 10) {
+      stockClass = 'low';
+      stockLabel = `${p.stock} متبقي`;
+    }
+
+    const isOutOfStock = p.stock <= 0;
+    const defaultImg = 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/d02e821e-91e3-4ed4-869e-f636142d8247.jpg';
+    const prodImg = p.image || defaultImg;
+
+    return `
+      <div class="pos-product-card" id="posProdCard-${p.id}">
+        <div class="pos-prod-thumb-wrap">
+          <img src="${prodImg}" alt="${p.nameAr}" class="pos-prod-img" loading="lazy" onerror="this.onerror=null; this.src='${defaultImg}';">
+        </div>
+        <div class="pos-prod-body">
+          <div class="pos-prod-name-ar" title="${p.nameAr}">${p.nameAr}</div>
+          <div class="pos-prod-name-en">${p.sku || p.nameEn || ''}</div>
+        </div>
+        <div class="pos-prod-footer">
+          <div>
+            <span class="pos-prod-price num-mono">${p.sellingPrice} <span style="font-size: 0.7rem;">د.ل</span></span>
+            <div style="margin-top: 2px;">
+              <span class="pos-prod-stock-pill ${stockClass}">${stockLabel}</span>
+            </div>
+          </div>
+          <button type="button" class="pos-prod-add-btn" onclick="posAddToCart('${p.id}')" ${isOutOfStock ? 'disabled title="المنتج نافد من المخزون"' : 'title="إضافة للطلب"'}>
+            +
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function posAddToCart(productId) {
+  const prod = ERP_STATE.products.find(p => p.id === productId);
+  if (!prod) return;
+
+  if (prod.stock <= 0) {
+    showToast(`عذراً، الصنف "${prod.nameAr}" غير متوفر حالياً في المخزون`, 'warning');
+    return;
+  }
+
+  const existing = POS_ORDER_STATE.cart.find(i => i.id === productId);
+  if (existing) {
+    if (existing.qty >= prod.stock) {
+      showToast(`الكمية المتاحة من "${prod.nameAr}" هي ${prod.stock} قطع فقط`, 'warning');
+      return;
+    }
+    existing.qty += 1;
+  } else {
+    POS_ORDER_STATE.cart.push({
+      id: prod.id,
+      nameAr: prod.nameAr,
+      nameEn: prod.nameEn || '',
+      sku: prod.sku || '',
+      price: Number(prod.sellingPrice) || 0,
+      qty: 1,
+      image: prod.image,
+      maxStock: prod.stock
+    });
+  }
+
+  renderPosCartItems();
+  calculatePosTotals();
+  showToast(`تمت إضافة "${prod.nameAr}" إلى السلة 🛒`);
+}
+
+function posUpdateCartQty(productId, delta) {
+  const item = POS_ORDER_STATE.cart.find(i => i.id === productId);
+  if (!item) return;
+
+  const prod = ERP_STATE.products.find(p => p.id === productId);
+  const maxStock = prod ? prod.stock : item.maxStock;
+
+  if (delta > 0 && item.qty >= maxStock) {
+    showToast(`وصلت لأقصى كمية متاحة في المخزون (${maxStock} قطع)`, 'warning');
+    return;
+  }
+
+  item.qty += delta;
+  if (item.qty <= 0) {
+    posRemoveCartItem(productId);
+    return;
+  }
+
+  renderPosCartItems();
+  calculatePosTotals();
+}
+
+function posRemoveCartItem(productId) {
+  POS_ORDER_STATE.cart = POS_ORDER_STATE.cart.filter(i => i.id !== productId);
+  renderPosCartItems();
+  calculatePosTotals();
+  showToast('تم حذف الصنف من سلة الطلب');
+}
+
+function clearPosCartAndReset() {
+  POS_ORDER_STATE.cart = [];
+  POS_ORDER_STATE.discountEnabled = false;
+  POS_ORDER_STATE.discountValue = 0;
+
+  const toggle = document.getElementById('posDiscountEnabled');
+  if (toggle) toggle.checked = false;
+
+  const wrap = document.getElementById('posDiscountControlsWrap');
+  if (wrap) wrap.style.display = 'none';
+
+  const valInput = document.getElementById('posDiscountValue');
+  if (valInput) valInput.value = 0;
+
+  renderPosCartItems();
+  calculatePosTotals();
+  showToast('تم تفريغ سلة الطلب بنجاح');
+}
+
+function renderPosCartItems() {
+  const container = document.getElementById('posCartItemsContainer');
+  const countBadge = document.getElementById('posCartItemsCount');
+  if (!container) return;
+
+  const totalPieces = POS_ORDER_STATE.cart.reduce((s, i) => s + i.qty, 0);
+  if (countBadge) countBadge.textContent = totalPieces;
+
+  if (POS_ORDER_STATE.cart.length === 0) {
+    container.innerHTML = `
+      <div class="pos-cart-empty-state" id="posCartEmptyState">
+        <div class="empty-cart-icon">🛒</div>
+        <div style="font-weight: 700; color: var(--text-main); font-size: 0.9rem;">السلة فارغة حالياً</div>
+        <div style="font-size: 0.775rem; color: var(--text-muted); max-width: 280px; text-align: center;">اختر الأدوات والمستلزمات من الكتالوج أدناه لإضافتها فورياً للطلب وتطبيق الخصومات.</div>
+      </div>
+    `;
+    return;
+  }
+
+  const defaultImg = 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/d02e821e-91e3-4ed4-869e-f636142d8247.jpg';
+
+  container.innerHTML = POS_ORDER_STATE.cart.map(item => `
+    <div class="pos-cart-item-row">
+      <img src="${item.image || defaultImg}" alt="${item.nameAr}" class="pos-cart-thumb" onerror="this.onerror=null; this.src='${defaultImg}';">
+      <div class="pos-cart-info">
+        <div class="pos-cart-item-title" title="${item.nameAr}">${item.nameAr}</div>
+        <div class="pos-cart-item-meta">
+          <span class="num-mono" style="font-weight: 700; color: var(--primary);">${item.price} د.ل / قطعة</span>
+          <span style="font-size: 0.65rem; color: var(--text-muted);">${item.sku || ''}</span>
+        </div>
+      </div>
+      <div class="pos-cart-qty-ctrl">
+        <button type="button" class="qty-stepper-btn" onclick="posUpdateCartQty('${item.id}', -1)">-</button>
+        <span class="num-mono" style="font-weight: 800; font-size: 0.85rem; min-width: 20px; text-align: center;">${item.qty}</span>
+        <button type="button" class="qty-stepper-btn" onclick="posUpdateCartQty('${item.id}', 1)">+</button>
+      </div>
+      <div class="num-mono" style="font-weight: 900; font-size: 0.9rem; color: var(--text-main); min-width: 55px; text-align: left;">
+        ${(item.price * item.qty).toLocaleString()} د.ل
+      </div>
+      <button type="button" class="cart-item-delete-btn" onclick="posRemoveCartItem('${item.id}')" title="حذف">✕</button>
+    </div>
+  `).join('');
+}
+
+function togglePosDiscount(enabled) {
+  POS_ORDER_STATE.discountEnabled = enabled;
+  const wrap = document.getElementById('posDiscountControlsWrap');
+  const lineItem = document.getElementById('posDiscountLineItem');
+  if (wrap) wrap.style.display = enabled ? 'block' : 'none';
+  if (lineItem) lineItem.style.display = enabled ? 'flex' : 'none';
+
+  calculatePosTotals();
+}
+
+function setPosDiscountType(type) {
+  POS_ORDER_STATE.discountType = type;
+  const btnFixed = document.getElementById('btnDiscountFixed');
+  const btnPercent = document.getElementById('btnDiscountPercent');
+  const label = document.getElementById('posDiscountValueLabel');
+
+  if (type === 'fixed') {
+    if (btnFixed) btnFixed.classList.add('active');
+    if (btnPercent) btnPercent.classList.remove('active');
+    if (label) label.innerHTML = 'قيمة الخصم بالدينار (د.ل) <span style="color:#ef4444;">*</span>';
+  } else {
+    if (btnPercent) btnPercent.classList.add('active');
+    if (btnFixed) btnFixed.classList.remove('active');
+    if (label) label.innerHTML = 'نسبة الخصم المئوية (%) <span style="color:#ef4444;">*</span>';
+  }
+
+  calculatePosTotals();
+}
+
+function handleDiscountReasonChange(val) {
+  POS_ORDER_STATE.discountReason = val;
+}
+
+function handlePosDeliveryTypeChange(val) {
+  POS_ORDER_STATE.deliveryType = val;
+  const feeMap = {
+    'faculty': 0,
+    'store': 0,
+    'tripoli_home': 10,
+    'outside_tripoli': 15
+  };
+  POS_ORDER_STATE.deliveryFee = feeMap[val] || 0;
+  calculatePosTotals();
+}
+
+function calculatePosTotals() {
+  const subtotal = POS_ORDER_STATE.cart.reduce((s, i) => s + (i.price * i.qty), 0);
+  POS_ORDER_STATE.subtotal = subtotal;
+
+  let discountAmount = 0;
+  if (POS_ORDER_STATE.discountEnabled) {
+    const rawVal = Number(document.getElementById('posDiscountValue')?.value) || 0;
+    POS_ORDER_STATE.discountValue = rawVal;
+
+    if (POS_ORDER_STATE.discountType === 'percent') {
+      discountAmount = Math.round(subtotal * (Math.min(100, Math.max(0, rawVal)) / 100));
+    } else {
+      discountAmount = Math.min(subtotal, Math.max(0, rawVal));
+    }
+  }
+
+  POS_ORDER_STATE.calculatedDiscount = discountAmount;
+  const netTotal = Math.max(0, (subtotal - discountAmount) + POS_ORDER_STATE.deliveryFee);
+  POS_ORDER_STATE.netTotal = netTotal;
+
+  // Update UI Elements
+  const subtotalEl = document.getElementById('posSubtotalDisplay');
+  if (subtotalEl) subtotalEl.textContent = `${subtotal.toLocaleString()} د.ل`;
+
+  const calcDiscountBadge = document.getElementById('posCalculatedDiscountDisplay');
+  if (calcDiscountBadge) calcDiscountBadge.textContent = `${discountAmount.toLocaleString()} د.ل`;
+
+  const discountLine = document.getElementById('posDiscountLineItem');
+  const discountTotalEl = document.getElementById('posDiscountTotalDisplay');
+  if (discountLine) {
+    discountLine.style.display = (POS_ORDER_STATE.discountEnabled && discountAmount > 0) ? 'flex' : 'none';
+  }
+  if (discountTotalEl) {
+    discountTotalEl.textContent = `-${discountAmount.toLocaleString()} د.ل`;
+  }
+
+  const shippingEl = document.getElementById('posShippingDisplay');
+  if (shippingEl) {
+    shippingEl.textContent = POS_ORDER_STATE.deliveryFee > 0
+      ? `+${POS_ORDER_STATE.deliveryFee} د.ل`
+      : 'مجاني (0 د.ل)';
+  }
+
+  const netTotalEl = document.getElementById('posNetTotalDisplay');
+  if (netTotalEl) {
+    netTotalEl.innerHTML = `${netTotal.toLocaleString()} <span style="font-size: 1rem;">د.ل</span>`;
+  }
+}
+
+function submitNewOrderWithInvoice() {
+  // 1. Validation
+  if (POS_ORDER_STATE.cart.length === 0) {
+    showToast('يرجى اختيار أداة واحدة على الأقل لإضافتها للطلب', 'warning');
+    return;
+  }
+
+  const customerName = (document.getElementById('posCustomerName')?.value || '').trim();
+  const phone = (document.getElementById('posCustomerPhone')?.value || '').trim();
+  const college = document.getElementById('posCustomerCollege')?.value || 'جامعة طرابلس — كلية طب الأسنان';
+  const address = (document.getElementById('posDeliveryAddress')?.value || 'طرابلس — الكلية').trim();
+  const notes = (document.getElementById('posOrderNotes')?.value || '').trim();
+
+  if (!customerName) {
+    showToast('يرجى إدخال اسم الطالب / العميل', 'warning');
+    document.getElementById('posCustomerName')?.focus();
+    return;
+  }
+
+  if (!phone || phone.length < 6) {
+    showToast('يرجى إدخال رقم هاتف واتساب صالح للتواصل', 'warning');
+    document.getElementById('posCustomerPhone')?.focus();
+    return;
+  }
+
+  // 2. Active Session User
+  const activeUser = getCurrentUser() || ERP_STATE.currentPartner || 'طه';
+
+  // 3. Serial Numbers Generation
+  const orderNum = `#${Math.floor(10000000 + Math.random() * 90000000)}`;
+  const invSeq = ERP_STATE.orders.length + 1;
+  const invoiceNum = `#INV-2026-${String(invSeq).padStart(4, '0')}`;
+
+  // 4. Financials
+  calculatePosTotals();
+  const subtotal = POS_ORDER_STATE.subtotal;
+  const discountAmount = POS_ORDER_STATE.calculatedDiscount;
+  const shippingFee = POS_ORDER_STATE.deliveryFee;
+  const total = POS_ORDER_STATE.netTotal;
+  const hasDiscount = POS_ORDER_STATE.discountEnabled && discountAmount > 0;
+  const discountReason = POS_ORDER_STATE.discountReason;
+
+  // 5. Construct Order Object
+  const newOrder = {
+    id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'ord-' + Date.now(),
+    orderNumber: orderNum,
+    invoiceNumber: invoiceNum,
+    customerName: customerName,
+    phone: phone,
+    university: college.includes('بنغازي') ? 'جامعة بنغازي' : (college.includes('مصراتة') ? 'جامعة مصراتة' : 'جامعة طرابلس'),
+    college: college,
+    address: address,
+    notes: notes,
+    itemsCount: POS_ORDER_STATE.cart.reduce((s, i) => s + i.qty, 0),
+    items: POS_ORDER_STATE.cart.map(i => ({
+      name: i.nameAr,
+      sku: i.sku,
+      qty: i.qty,
+      price: i.price,
+      total: i.qty * i.price
+    })),
+    subtotal: subtotal,
+    hasDiscount: hasDiscount,
+    discountType: POS_ORDER_STATE.discountType,
+    discountValue: POS_ORDER_STATE.discountValue,
+    discountAmount: discountAmount,
+    discountReason: discountReason,
+    shippingFee: shippingFee,
+    total: total,
+    status: 'جديد',
+    paymentMethod: 'cash_on_delivery',
+    paymentStatus: 'كاش عند الاستلام',
+    assignedTo: activeUser,
+    date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }) + ' ' + new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
+    createdAt: new Date().toISOString()
+  };
+
+  // 6. Deduct Inventory Stock
+  POS_ORDER_STATE.cart.forEach(cartItem => {
+    const prod = ERP_STATE.products.find(p => p.id === cartItem.id);
+    if (prod) {
+      prod.stock = Math.max(0, prod.stock - cartItem.qty);
+      if (prod.stock === 0) {
+        prod.status = 'نافد';
+      } else if (prod.stock <= 10) {
+        prod.status = 'منخفض';
+      } else {
+        prod.status = 'متوفر';
+      }
+    }
+  });
+
+  // 7. Add to Global Orders List
+  ERP_STATE.orders.unshift(newOrder);
+
+  // 8. Stamped Audit Log
+  const discountDetails = hasDiscount
+    ? `مع تطبيق خصم تجاري بقيمة ${discountAmount} د.ل (${discountReason})`
+    : `بالسعر الرسمي ${total} د.ل`;
+
+  logOperation({
+    user: activeUser,
+    action: hasDiscount ? 'إنشاء طلب مع خصم تجاري' : 'إنشاء طلب وإصدار فاتورة',
+    target: `${newOrder.orderNumber} (${newOrder.invoiceNumber})`,
+    oldVal: '-',
+    newVal: `${newOrder.total} د.ل`,
+    details: `«${activeUser} قام بإنشاء الطلب ${newOrder.orderNumber} والفاتورة ${newOrder.invoiceNumber} للطالب ${newOrder.customerName} ${discountDetails}»`
+  });
+
+  // 9. Persist to LocalStorage
+  try {
+    localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+    localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
+  } catch (_) {}
+
+  // 10. Update Dashboard and App Metrics
+  updateDashboardRealUI();
+
+  // 11. Clear Cart
+  POS_ORDER_STATE.cart = [];
+  POS_ORDER_STATE.lastCreatedInvoiceOrder = newOrder;
+  clearPosCartAndReset();
+
+  // 12. Open Official Invoice View Modal
+  openInvoiceModal(newOrder.id);
+
+  showToast(`تم حفظ الطلب وإصدار الفاتورة الرسمية ${newOrder.invoiceNumber} بنجاح! 🧾✨`);
+}
+
+// -------------------------------------------------------------
+// OFFICIAL INVOICE DISPLAY & ACTIONS
+// -------------------------------------------------------------
+function openInvoiceModal(orderId) {
+  const order = ERP_STATE.orders.find(o => o.id === orderId || o.orderNumber === orderId || o.orderNumber === `#${orderId}`) || POS_ORDER_STATE.lastCreatedInvoiceOrder || ERP_STATE.orders[0];
+  if (!order) return;
+
+  POS_ORDER_STATE.lastCreatedInvoiceOrder = order;
+
+  const invNumber = order.invoiceNumber || `#INV-2026-${order.orderNumber.replace('#', '')}`;
+  const orderNumber = order.orderNumber;
+  const activeUser = order.assignedTo || getCurrentUser() || 'طه';
+
+  // Header & Meta Elements
+  const headerNum = document.getElementById('invHeaderNumber');
+  if (headerNum) headerNum.textContent = invNumber;
+
+  const docNum = document.getElementById('invDocNumber');
+  if (docNum) docNum.textContent = invNumber;
+
+  const docOrderRef = document.getElementById('invDocOrderRef');
+  if (docOrderRef) docOrderRef.textContent = orderNumber;
+
+  const docDate = document.getElementById('invDocDate');
+  if (docDate) docDate.textContent = order.date || new Date().toLocaleString('ar-LY');
+
+  const docAuthor = document.getElementById('invDocAuthor');
+  if (docAuthor) docAuthor.textContent = `${activeUser} (شريك مؤسس)`;
+
+  // Customer Elements
+  const custName = document.getElementById('invDocCustomerName');
+  if (custName) custName.textContent = order.customerName;
+
+  const custPhone = document.getElementById('invDocCustomerPhone');
+  if (custPhone) custPhone.textContent = `هاتف: ${order.phone || '091-0000000'}`;
+
+  const custCollege = document.getElementById('invDocCollege');
+  if (custCollege) custCollege.textContent = `${order.university || 'جامعة طرابلس'} — ${order.college || 'كلية طب الأسنان'}`;
+
+  const custAddress = document.getElementById('invDocAddress');
+  if (custAddress) custAddress.textContent = `مكان التسليم: ${order.address || 'طرابلس'}`;
+
+  const custPayment = document.getElementById('invDocPaymentStatus');
+  if (custPayment) custPayment.textContent = order.paymentStatus || 'كاش عند الاستلام';
+
+  const notesEl = document.getElementById('invDocNotes');
+  if (notesEl) notesEl.textContent = order.notes ? order.notes : 'لا توجد ملاحظات خاصة';
+
+  // Items Table
+  const tbody = document.getElementById('invDocItemsBody');
+  if (tbody) {
+    const items = order.items || [];
+    tbody.innerHTML = items.map((it, idx) => `
+      <tr>
+        <td style="text-align: center; color: var(--text-muted);">${idx + 1}</td>
+        <td><strong>${it.name}</strong></td>
+        <td class="num-mono" style="text-align: center; font-weight: 700;">${it.qty}</td>
+        <td class="num-mono" style="text-align: left;">${it.price} د.ل</td>
+        <td class="num-mono" style="text-align: left; font-weight: 800; color: var(--text-main);">${(it.price * it.qty).toLocaleString()} د.ل</td>
+      </tr>
+    `).join('');
+  }
+
+  // Financial Breakdown
+  const subtotal = order.subtotal || (order.items || []).reduce((s, i) => s + (i.price * i.qty), 0) || order.total;
+  const discountAmount = order.discountAmount || 0;
+  const shippingFee = order.shippingFee || 0;
+  const netTotal = order.total;
+
+  const subtotalEl = document.getElementById('invDocSubtotal');
+  if (subtotalEl) subtotalEl.textContent = `${subtotal.toLocaleString()} د.ل`;
+
+  const discountRow = document.getElementById('invDocDiscountRow');
+  const discountBadge = document.getElementById('invDocDiscountBadge');
+  const discountVal = document.getElementById('invDocDiscountVal');
+  if (discountRow) {
+    if (order.hasDiscount || discountAmount > 0) {
+      discountRow.style.display = 'flex';
+      if (discountBadge) discountBadge.textContent = order.discountReason || 'تخفيض تجاري معتمد';
+      if (discountVal) discountVal.textContent = `-${discountAmount.toLocaleString()} د.ل`;
+    } else {
+      discountRow.style.display = 'none';
+    }
+  }
+
+  const shippingVal = document.getElementById('invDocShippingVal');
+  if (shippingVal) {
+    shippingVal.textContent = shippingFee > 0 ? `${shippingFee} د.ل` : 'مجاني (0 د.ل)';
+  }
+
+  const netTotalEl = document.getElementById('invDocNetTotal');
+  if (netTotalEl) netTotalEl.textContent = `${netTotal.toLocaleString()} د.ل`;
+
+  openModal('invoiceViewModal');
+}
+
+function printInvoiceFromModal() {
+  window.print();
+}
+
+function downloadInvoicePDFFromModal() {
+  const order = POS_ORDER_STATE.lastCreatedInvoiceOrder;
+  const invNum = order ? (order.invoiceNumber || order.orderNumber).replace('#', '') : 'INV-2026';
+  const originalTitle = document.title;
+  document.title = `Absolute_Dental_Invoice_${invNum}`;
+  window.print();
+  setTimeout(() => { document.title = originalTitle; }, 1000);
+}
+
+function shareInvoiceWhatsAppFromModal() {
+  const order = POS_ORDER_STATE.lastCreatedInvoiceOrder;
+  if (!order) return;
+
+  const cleanPhone = (order.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '');
+  const invNum = order.invoiceNumber || `#INV-2026-${order.orderNumber.replace('#', '')}`;
+  const itemsText = (order.items || []).map(i => `• ${i.name} (${i.qty}x) = ${(i.price * i.qty)} د.ل`).join('\n');
+  const discountText = (order.hasDiscount && order.discountAmount > 0)
+    ? `🏷️ *الخصم التجاري الممنوح:* -${order.discountAmount} د.ل (${order.discountReason || 'خصم خاص'})\n`
+    : '';
+
+  const msg = `🦷 *فاتورة مبيعات معتمدة — Absolute Dental*
+مرحباً دكتور/ة *${order.customerName}*، نرفق لكم تفاصيل فاتورتكم الرسمية:
+
+📄 *رقم الفاتورة:* ${invNum}
+📦 *رقم الطلب:* ${order.orderNumber}
+🏛️ *الكلية / الجامعة:* ${order.college}
+📍 *مكان التسليم:* ${order.address}
+
+🛒 *الأصناف:*
+${itemsText}
+
+💵 *المجموع الفرعي:* ${order.subtotal || order.total} د.ل
+${discountText}🚚 *رسوم التوصيل:* ${order.shippingFee > 0 ? order.shippingFee + ' د.ل' : 'مجاني'}
+✨ *الصافي المطلوب دفعه:* *${order.total} د.ل*
+💳 *طريقة السداد:* كاش عند الاستلام
+
+بضاعتكم مفحوصة ومضمونة 🦷
+لأي استفسار تواصلوا معنا مباشرة على 091-2801073
+*Absolute Dental Operations Hub*`;
+
+  window.open(`https://wa.me/218${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 // -------------------------------------------------------------
