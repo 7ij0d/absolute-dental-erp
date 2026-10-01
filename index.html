@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Absolute Dental — Enterprise Operations System & ERP</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- =========================================================
+       1. FIXED RIGHT SIDEBAR (RTL NAVIGATION)
+       ========================================================= -->
+  <aside class="sidebar">
+    <!-- Brand Header -->
+    <div class="sidebar-header">
+      <a href="#" class="brand-badge" onclick="setViewMode('board'); return false;">
+        <div class="brand-logo-icon">
+          <!-- Dental Tooth SVG Emblem -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2C8.5 2 6 4 6 7.5c0 2.5 1 4 1.5 6.5.6 2.8 1.5 6 4.5 6s3.9-3.2 4.5-6c.5-2.5 1.5-4 1.5-6.5C18 4 15.5 2 12 2z"/>
+            <path d="M12 2v7"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-name">ABSOLUTE DENTAL</span>
+          <span class="brand-sub">Operations ERP</span>
+        </div>
+      </a>
+      <span class="brand-tag">v2.4</span>
+    </div>
+
+    <!-- Navigation List (15 Core Sections) -->
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">العمليات والمبيعات</div>
+      <a class="nav-item active" data-screen="dashboard" onclick="openScreenFromBoard('dashboard');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        <span>لوحة التحكم</span>
+      </a>
+      <a class="nav-item" data-screen="orders" onclick="openScreenFromBoard('orders');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+        <span>الطلبات</span>
+        <span class="nav-badge">5</span>
+      </a>
+      <a class="nav-item" data-screen="pos" onclick="openScreenFromBoard('pos');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+        <span>الطلب السريع (POS)</span>
+        <span class="nav-badge" style="background: rgba(16, 185, 129, 0.2); color: var(--status-success);">سريع</span>
+      </a>
+      <a class="nav-item" data-screen="products" onclick="openScreenFromBoard('products');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        <span>المنتجات والتسعير</span>
+      </a>
+      <a class="nav-item" data-screen="inventory" onclick="openScreenFromBoard('inventory');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+        <span>المخزون والبوكسات</span>
+        <span class="nav-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--status-danger);">3 منخفض</span>
+      </a>
+      <a class="nav-item" data-screen="delivery" onclick="openScreenFromBoard('delivery');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="14" height="10" x="2" y="7" rx="2"/><circle cx="6" cy="17" r="2"/><circle cx="16" cy="17" r="2"/><path d="M16 8h4l3 3v6h-4"/></svg>
+        <span>التوصيل والمناديب</span>
+      </a>
+
+      <div class="nav-section-title">المالية والشركاء</div>
+      <a class="nav-item" data-screen="partners" onclick="openScreenFromBoard('partners');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>الشركاء والملكيات</span>
+      </a>
+      <a class="nav-item" data-screen="profit" onclick="openScreenFromBoard('profit');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>حساب الأرباح وتوزيعها</span>
+      </a>
+      <a class="nav-item" data-screen="expenses" onclick="openScreenFromBoard('expenses');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span>دفتر المصروفات</span>
+      </a>
+      <a class="nav-item" data-screen="treasury" onclick="openScreenFromBoard('treasury');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+        <span>الخزينة والسيولة</span>
+      </a>
+      <a class="nav-item" data-screen="reports" onclick="openScreenFromBoard('reports');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>التقارير المالية</span>
+      </a>
+
+      <div class="nav-section-title">التدقيق والأمان</div>
+      <a class="nav-item" data-screen="audit" onclick="openScreenFromBoard('audit');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        <span>سجل العمليات والتدقيق</span>
+      </a>
+      <a class="nav-item" data-screen="settings" onclick="openScreenFromBoard('settings');">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>إعدادات المنظومة</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer / User Profile -->
+    <div class="sidebar-footer">
+      <div class="user-card" onclick="openScreenFromBoard('partners')">
+        <div class="user-avatar" id="sidebarUserAvatar">
+          طه
+          <span class="online-dot"></span>
+        </div>
+        <div class="user-info">
+          <span class="user-name" id="sidebarUserName">طه محمد</span>
+          <span class="user-role" id="sidebarUserRole">شريك مؤسس ومدير العمليات</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =========================================================
+       2. MAIN CONTENT WRAPPER
+       ========================================================= -->
+  <div class="main-wrapper">
+
+    <!-- Top Sticky Header -->
+    <header class="top-header">
+      <div class="header-right">
+        <!-- Dual Mode Switcher -->
+        <div class="view-mode-toggle">
+          <button id="btnViewBoard" class="view-mode-btn active" onclick="setViewMode('board');">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+            لوحة الـ 12 شاشة (Master Board)
+          </button>
+          <button id="btnViewInteractive" class="view-mode-btn" onclick="setViewMode('dashboard');">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            المنظومة التفاعلية الحية
+          </button>
+        </div>
+
+        <!-- Global Search Input -->
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="بحث سريع في المنظومة (طلب، منتج، طالب)...">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
+      </div>
+
+      <div class="header-left">
+        <!-- Supabase Cloud Connection Status -->
+        <div class="system-status-pill" title="متصل بـ Supabase Live WebSockets">
+          <span class="pulse-dot"></span>
+          <span>Supabase متصل (Realtime)</span>
+        </div>
+
+        <!-- Quick Switch Partner Account -->
+        <div class="partner-quick-selector" title="تبديل حساب الشريك النشط">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>الشريك:</span>
+          <select onchange="switchCurrentPartner(this.value)" style="background: transparent; border: none; color: var(--accent-cyan); font-weight: 800; font-family: var(--font-arabic); cursor: pointer; outline: none;">
+            <option value="طه" selected>طه (مؤسس 33.3%)</option>
+            <option value="عبدالمؤمن">عبدالمؤمن (مؤسس 33.3%)</option>
+            <option value="ساسي">ساسي (مؤسس 33.3%)</option>
+            <option value="الشريك الرابع">الشريك الرابع (مستثمر)</option>
+          </select>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <button class="btn btn-primary btn-sm" onclick="openScreenFromBoard('pos');">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          <span>+ طلب سريع (POS)</span>
+        </button>
+
+        <button class="btn btn-secondary btn-sm" onclick="openCourierModal();" title="محاكي تطبيق المندوب">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+          <span>واجهة المندوب</span>
+        </button>
+
+        <!-- Notification Bell -->
+        <div class="btn-icon" onclick="showToast('لديك 3 طلبات تحتاج تأكيد و2 تنبيهات مخزون')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span class="badge-dot"></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- =========================================================
+         3. SECTION A: THE 12-SCREEN MASTER DESIGN BOARD
+         ========================================================= -->
+    <main id="masterBoardSection" class="page-content">
+      
+      <div class="page-intro">
+        <div class="intro-titles">
+          <h1>لوحة النظرة الشاملة لمنظومة Absolute Dental (12 شاشة متكاملة)</h1>
+          <p>نظام تخطيط موارد المؤسسة وإدارة العمليات — صُمم خصيصاً للشراكة الرباعية ومستلزمات طب الأسنان بليبيا</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 0.75rem; color: var(--text-muted);">انقر على أي شاشة للدخول إلى بيئة العمل التفاعلية الحية:</span>
+        </div>
+      </div>
+
+      <!-- Master 12-Screen Bento Grid -->
+      <div class="board-container">
+
+        <!-- ----------------------------------------------------
+             SCREEN 1: لوحة التحكم الرئيسية
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openScreenFromBoard('dashboard');">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">1- لوحة التحكم الرئيسية</span>
+            <span class="board-screen-indicator">عرض تفاعلي ↗</span>
+          </div>
+          <div class="board-screen-preview">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; color: var(--text-main);">الثلاثاء، 9 سبتمبر 2026 👋</span>
+              <span style="color: var(--text-muted); font-size: 0.65rem;">طه (شريك ومدير)</span>
+            </div>
+
+            <!-- Mini KPI 4 Cards -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
+              <div style="background: #111625; padding: 4px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                <div style="color: var(--text-muted); font-size: 0.6rem;">المبيعات</div>
+                <div class="num-mono" style="font-weight: 800; color: #fff; font-size: 0.75rem;">48,750 د.ل</div>
+                <div style="color: var(--status-success); font-size: 0.55rem;">+12%</div>
+              </div>
+              <div style="background: #111625; padding: 4px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                <div style="color: var(--text-muted); font-size: 0.6rem;">صافي الأرباح</div>
+                <div class="num-mono" style="font-weight: 800; color: var(--status-success); font-size: 0.75rem;">18,420 د.ل</div>
+                <div style="color: var(--status-success); font-size: 0.55rem;">+8%</div>
+              </div>
+              <div style="background: #111625; padding: 4px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                <div style="color: var(--text-muted); font-size: 0.6rem;">المصروفات</div>
+                <div class="num-mono" style="font-weight: 800; color: var(--status-danger); font-size: 0.75rem;">12,300 د.ل</div>
+                <div style="color: var(--status-danger); font-size: 0.55rem;">-3%</div>
+              </div>
+              <div style="background: #111625; padding: 4px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                <div style="color: var(--text-muted); font-size: 0.6rem;">الطلبات</div>
+                <div class="num-mono" style="font-weight: 800; color: var(--accent-cyan); font-size: 0.75rem;">156</div>
+                <div style="color: var(--status-success); font-size: 0.55rem;">+24%</div>
+              </div>
+            </div>
+
+            <!-- Mini Sales Chart & Categories -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 6px; flex: 1;">
+              <!-- Area curve chart -->
+              <div style="background: #111625; border-radius: 6px; padding: 6px; display: flex; flex-direction: column;">
+                <span style="font-size: 0.65rem; color: var(--text-muted);">المبيعات خلال آخر 30 يوم</span>
+                <svg viewBox="0 0 200 80" style="width: 100%; height: 75px; margin-top: auto;">
+                  <defs>
+                    <linearGradient id="chartGrad1" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.4"/>
+                      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.0"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M 0 65 Q 30 50, 60 55 T 120 30 T 160 40 T 200 15 L 200 80 L 0 80 Z" fill="url(#chartGrad1)"/>
+                  <path d="M 0 65 Q 30 50, 60 55 T 120 30 T 160 40 T 200 15" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+                  <circle cx="160" cy="40" r="3.5" fill="#38bdf8"/>
+                </svg>
+              </div>
+
+              <!-- Mini Donut -->
+              <div style="background: #111625; border-radius: 6px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <span style="font-size: 0.6rem; color: var(--text-muted); align-self: flex-start;">توزيع الفئات</span>
+                <svg viewBox="0 0 36 36" style="width: 45px; height: 45px; transform: rotate(-90deg); margin: 4px 0;">
+                  <circle cx="18" cy="18" r="14" fill="transparent" stroke="#0284c7" stroke-width="5" stroke-dasharray="35 65"/>
+                  <circle cx="18" cy="18" r="14" fill="transparent" stroke="#10b981" stroke-width="5" stroke-dasharray="25 75" stroke-dashoffset="-35"/>
+                  <circle cx="18" cy="18" r="14" fill="transparent" stroke="#f59e0b" stroke-width="5" stroke-dasharray="20 80" stroke-dashoffset="-60"/>
+                  <circle cx="18" cy="18" r="14" fill="transparent" stroke="#8b5cf6" stroke-width="5" stroke-dasharray="20 80" stroke-dashoffset="-80"/>
+                </svg>
+                <span style="font-size: 0.55rem; color: var(--text-secondary);">35% أدوات عامة</span>
+              </div>
+            </div>
+
+            <!-- Mini Recent Orders List -->
+            <div style="background: #111625; border-radius: 6px; padding: 5px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px;">
+                <span>#1068 أحمد محمد</span>
+                <span class="num-mono" style="color: var(--status-success);">280 د.ل</span>
+                <span class="badge badge-new" style="font-size: 0.55rem;">جديد</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); padding-top: 2px;">
+                <span>#1067 سارة علي</span>
+                <span class="num-mono" style="color: var(--status-success);">150 د.ل</span>
+                <span class="badge badge-processing" style="font-size: 0.55rem;">تجهيز</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+             SCREEN 2: نظام الشركاء والصلاحيات
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openScreenFromBoard('partners');">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">2- نظام الشركاء والصلاحيات</span>
+            <span class="board-screen-indicator">عرض تفاعلي ↗</span>
+          </div>
+          <div class="board-screen-preview">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; color: var(--text-main);">الشركاء والملكيات المالية</span>
+              <span class="badge badge-new">+ إضافة شريك</span>
+            </div>
+
+            <!-- Mini Partner Cards -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
+              <div style="background: #111625; padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle); text-align: center;">
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: #0284c7; color: #fff; margin: 0 auto; font-weight: bold; font-size: 0.7rem; display: flex; align-items: center; justify-content: center;">طه</div>
+                <div style="font-weight: 700; font-size: 0.7rem; margin-top: 2px;">طه</div>
+                <div style="color: var(--accent-cyan); font-size: 0.6rem;">33.3%</div>
+              </div>
+              <div style="background: #111625; padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle); text-align: center;">
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: #0369a1; color: #fff; margin: 0 auto; font-weight: bold; font-size: 0.7rem; display: flex; align-items: center; justify-content: center;">مؤمن</div>
+                <div style="font-weight: 700; font-size: 0.7rem; margin-top: 2px;">عبدالمؤمن</div>
+                <div style="color: var(--accent-cyan); font-size: 0.6rem;">33.3%</div>
+              </div>
+              <div style="background: #111625; padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle); text-align: center;">
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: #075985; color: #fff; margin: 0 auto; font-weight: bold; font-size: 0.7rem; display: flex; align-items: center; justify-content: center;">ساسي</div>
+                <div style="font-weight: 700; font-size: 0.7rem; margin-top: 2px;">ساسي</div>
+                <div style="color: var(--accent-cyan); font-size: 0.6rem;">33.3%</div>
+              </div>
+            </div>
+
+            <!-- Mini Financial Table -->
+            <div style="background: #111625; border-radius: 6px; padding: 6px; flex: 1; display: flex; flex-direction: column;">
+              <span style="font-size: 0.65rem; color: var(--accent-cyan); font-weight: 700; margin-bottom: 4px;">جدول الشفافية والمسحوبات والأرباح</span>
+              <table style="width: 100%; font-size: 0.6rem; border-collapse: collapse; text-align: right;">
+                <tr style="color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <th>الشريك</th>
+                  <th>المساهمة</th>
+                  <th>المسحوبات</th>
+                  <th>الرصيد</th>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700;">طه</td>
+                  <td class="num-mono">20,000</td>
+                  <td class="num-mono" style="color: var(--status-danger);">5,000</td>
+                  <td class="num-mono" style="color: var(--status-success); font-weight: bold;">23,200 د.ل</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700;">عبدالمؤمن</td>
+                  <td class="num-mono">20,000</td>
+                  <td class="num-mono" style="color: var(--status-danger);">3,000</td>
+                  <td class="num-mono" style="color: var(--status-success); font-weight: bold;">25,200 د.ل</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700;">ساسي</td>
+                  <td class="num-mono">20,000</td>
+                  <td class="num-mono" style="color: var(--status-danger);">4,500</td>
+                  <td class="num-mono" style="color: var(--status-success); font-weight: bold;">23,700 د.ل</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="font-size: 0.6rem; color: var(--text-muted); text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px;">
+              + حساب الشريك الرابع متاح بكامل الصلاحيات المقيدة
+            </div>
+          </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+             SCREEN 3: سجل العمليات والتدقيق
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openScreenFromBoard('audit');">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">3- سجل العمليات والتدقيق</span>
+            <span class="board-screen-indicator">عرض تفاعلي ↗</span>
+          </div>
+          <div class="board-screen-preview">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; color: var(--text-main);">Audit Trail (غير قابل للتعديل)</span>
+              <span style="color: var(--accent-cyan); font-size: 0.65rem;">مشفر سحابياً</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; overflow: hidden;">
+              <div style="background: #111625; padding: 4px 6px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; font-size: 0.65rem;">
+                <span style="color: var(--text-muted);" class="num-mono">09:14</span>
+                <span style="font-weight: bold; color: var(--text-main);">طه: إضافة طلب سريع #1068</span>
+                <span class="badge badge-new" style="font-size: 0.55rem;">280 د.ل</span>
+              </div>
+              <div style="background: #111625; padding: 4px 6px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; font-size: 0.65rem;">
+                <span style="color: var(--text-muted);" class="num-mono">08:53</span>
+                <span style="font-weight: bold; color: var(--text-main);">عبدالمؤمن: تعديل سعر مرآة فحص</span>
+                <span class="badge badge-processing" style="font-size: 0.55rem;">45 د.ل</span>
+              </div>
+              <div style="background: #111625; padding: 4px 6px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; font-size: 0.65rem;">
+                <span style="color: var(--text-muted);" class="num-mono">08:41</span>
+                <span style="font-weight: bold; color: var(--text-main);">ساسي: تأكيد تسليم طلب #1065</span>
+                <span class="badge badge-completed" style="font-size: 0.55rem;">مكتمل</span>
+              </div>
+              <div style="background: #111625; padding: 4px 6px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; font-size: 0.65rem;">
+                <span style="color: var(--text-muted);" class="num-mono">08:20</span>
+                <span style="font-weight: bold; color: var(--text-main);">طه: إضافة مصروف إعلانات</span>
+                <span class="badge badge-cancelled" style="font-size: 0.55rem;">500 د.ل</span>
+              </div>
+              <div style="background: #111625; padding: 4px 6px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; font-size: 0.65rem;">
+                <span style="color: var(--text-muted);" class="num-mono">07:55</span>
+                <span style="font-weight: bold; color: var(--text-main);">عبدالمؤمن: إضافة كيت جراحة متكامل</span>
+                <span class="badge badge-new" style="font-size: 0.55rem;">5 قطع</span>
+              </div>
+              <div style="background: #111625; padding: 4px 6px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; font-size: 0.65rem;">
+                <span style="color: var(--text-muted);" class="num-mono">07:32</span>
+                <span style="font-weight: bold; color: var(--text-main);">ساسي: تسجيل سحب من الخزينة</span>
+                <span class="badge badge-processing" style="font-size: 0.55rem;">1,000 د.ل</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+             SCREEN 4: إدارة الطلبات والتجهيز
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openScreenFromBoard('orders');">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">4- إدارة الطلبات والتجهيز</span>
+            <span class="board-screen-indicator">عرض تفاعلي ↗</span>
+          </div>
+          <div class="board-screen-preview">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; gap: 3px;">
+                <span class="badge badge-new">جديد (2)</span>
+                <span class="badge badge-processing">تجهيز (1)</span>
+                <span class="badge badge-shipping">توصيل (1)</span>
+              </div>
+              <span class="btn btn-primary btn-sm" style="padding: 2px 6px; font-size: 0.6rem;">+ POS</span>
+            </div>
+
+            <!-- Mini Orders Table -->
+            <div style="background: #111625; border-radius: 6px; padding: 4px; flex: 1;">
+              <table style="width: 100%; font-size: 0.6rem; border-collapse: collapse; text-align: right;">
+                <tr style="color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <th>#</th>
+                  <th>العميل</th>
+                  <th>المجموع</th>
+                  <th>الحالة</th>
+                  <th>المسؤول</th>
+                </tr>
+                <tr>
+                  <td class="num-mono" style="font-weight: bold; color: var(--accent-cyan);">#1068</td>
+                  <td>أحمد محمد</td>
+                  <td class="num-mono">280 د.ل</td>
+                  <td><span class="badge badge-new" style="font-size: 0.55rem;">جديد</span></td>
+                  <td>مؤمن</td>
+                </tr>
+                <tr>
+                  <td class="num-mono" style="font-weight: bold; color: var(--accent-cyan);">#1067</td>
+                  <td>سارة علي</td>
+                  <td class="num-mono">150 د.ل</td>
+                  <td><span class="badge badge-processing" style="font-size: 0.55rem;">قيد التجهيز</span></td>
+                  <td>طه</td>
+                </tr>
+                <tr>
+                  <td class="num-mono" style="font-weight: bold; color: var(--accent-cyan);">#1066</td>
+                  <td>محمد خالد</td>
+                  <td class="num-mono">420 د.ل</td>
+                  <td><span class="badge badge-shipping" style="font-size: 0.55rem;">قيد التوصيل</span></td>
+                  <td>ساسي</td>
+                </tr>
+                <tr>
+                  <td class="num-mono" style="font-weight: bold; color: var(--accent-cyan);">#1065</td>
+                  <td>نور الهدى</td>
+                  <td class="num-mono">95 د.ل</td>
+                  <td><span class="badge badge-completed" style="font-size: 0.55rem;">مكتمل</span></td>
+                  <td>مؤمن</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="display: flex; gap: 4px; justify-content: flex-end;">
+              <span class="btn btn-secondary btn-sm" style="font-size: 0.6rem; padding: 2px 6px;">واتساب سريع</span>
+              <span class="btn btn-secondary btn-sm" style="font-size: 0.6rem; padding: 2px 6px;">طباعة بوالص</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+             SCREEN 5: صفحة تفاصيل الطلب
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openOrderDetailsModal('1067');">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">5- صفحة تفاصيل الطلب</span>
+            <span class="board-screen-indicator">فتح المعاينة ↗</span>
+          </div>
+          <div class="board-screen-preview">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 800; color: var(--text-main);">الطلب #1067 (سارة علي)</span>
+              <span class="badge badge-processing">قيد التجهيز</span>
+            </div>
+
+            <!-- Client & Map Box -->
+            <div style="background: #111625; padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+              <div style="display: flex; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 700;">سارة علي (091-2345678)</div>
+                  <div style="color: var(--text-muted); font-size: 0.6rem;">جامعة طرابلس - كلية طب الأسنان</div>
+                </div>
+                <div style="width: 45px; height: 35px; background: #1e293b; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--accent-cyan);">
+                  📍 خريطة
+                </div>
+              </div>
+            </div>
+
+            <!-- Items -->
+            <div style="background: #111625; padding: 6px; border-radius: 6px; flex: 1;">
+              <div style="color: var(--text-muted); font-size: 0.6rem; margin-bottom: 2px;">الأدوات المطلوبة:</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.65rem;">
+                <span>مرآة فحص معدنية ×2</span>
+                <span class="num-mono">90 د.ل</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.65rem;">
+                <span>بروب سوندا مزدوج ×1</span>
+                <span class="num-mono">30 د.ل</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.65rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 4px; padding-top: 2px; font-weight: bold;">
+                <span>الإجمالي (شامل التوصيل 30 د.ل)</span>
+                <span class="num-mono" style="color: var(--accent-cyan);">150 د.ل</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-success btn-sm" style="flex: 1; font-size: 0.65rem; padding: 3px;" onclick="event.stopPropagation(); openWhatsAppMessage('1067');">تواصل واتساب</button>
+              <button class="btn btn-secondary btn-sm" style="flex: 1; font-size: 0.65rem; padding: 3px;" onclick="event.stopPropagation(); openDeliverySlipModal('1067');">بوليصة الشحن</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+             SCREEN 6: الطلب السريع (POS)
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openScreenFromBoard('pos');">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">6- الطلب السريع (POS)</span>
+            <span class="board-screen-indicator">فتح البيع الفوري ↗</span>
+          </div>
+          <div class="board-screen-preview">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; color: var(--text-main);">كاشير الكلية السريع</span>
+              <span class="badge badge-completed">تسليم كاش</span>
+            </div>
+
+            <!-- Mini POS Catalog -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; flex: 1;">
+              <div style="background: #111625; padding: 4px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                <div style="font-weight: 700; font-size: 0.65rem;">مرآة فحص</div>
+                <div class="num-mono" style="color: var(--accent-cyan); font-weight: bold; font-size: 0.7rem;">45 د.ل</div>
+                <div style="font-size: 0.55rem; color: var(--status-success);">[ + إضافة ]</div>
+              </div>
+              <div style="background: #111625; padding: 4px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                <div style="font-weight: 700; font-size: 0.65rem;">بروب سوندا</div>
+                <div class="num-mono" style="color: var(--accent-cyan); font-weight: bold; font-size: 0.7rem;">30 د.ل</div>
+                <div style="font-size: 0.55rem; color: var(--status-success);">[ + إضافة ]</div>
+              </div>
+              <div style="background: #111625; padding: 4px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                <div style="font-weight: 700; font-size: 0.65rem;">كيت جراحة</div>
+                <div class="num-mono" style="color: var(--accent-cyan); font-weight: bold; font-size: 0.7rem;">250 د.ل</div>
+                <div style="font-size: 0.55rem; color: var(--status-success);">[ + إضافة ]</div>
+              </div>
+              <div style="background: #111625; padding: 4px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                <div style="font-weight: 700; font-size: 0.65rem;">ماسك طبي (علبة)</div>
+                <div class="num-mono" style="color: var(--accent-cyan); font-weight: bold; font-size: 0.7rem;">20 د.ل</div>
+                <div style="font-size: 0.55rem; color: var(--status-success);">[ + إضافة ]</div>
+              </div>
+            </div>
+
+            <!-- Mini Cart -->
+            <div style="background: #111625; padding: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 0.6rem; color: var(--text-muted);">السلة الحالية: 2 أدوات</div>
+                <div class="num-mono" style="font-weight: 800; color: #fff; font-size: 0.8rem;">75 د.ل</div>
+              </div>
+              <span class="btn btn-success btn-sm" style="font-size: 0.6rem; padding: 3px 6px;">حفظ الطلب</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+             SCREEN 7: إدارة المنتجات والمخزون
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openScreenFromBoard('products');">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">7- إدارة المنتجات والمخزون</span>
+            <span class="board-screen-indicator">عرض تفاعلي ↗</span>
+          </div>
+          <div class="board-screen-preview">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; color: var(--text-main);">الكتالوج ومستوى المخزون</span>
+              <span class="badge badge-new">+ منتج جديد</span>
+            </div>
+
+            <!-- Mini Products Table -->
+            <div style="background: #111625; border-radius: 6px; padding: 4px; flex: 1;">
+              <table style="width: 100%; font-size: 0.6rem; border-collapse: collapse; text-align: right;">
+                <tr style="color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <th>المنتج</th>
+                  <th>سعر الشراء</th>
+                  <th>سعر البيع</th>
+                  <th>المخزون</th>
+                  <th>الحالة</th>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700;">مرآة فحص</td>
+                  <td class="num-mono">20 د.ل</td>
+                  <td class="num-mono" style="font-weight: bold; color: var(--accent-cyan);">45 د.ل</td>
+                  <td class="num-mono">30</td>
+                  <td><span class="badge badge-completed" style="font-size: 0.55rem;">متوفر</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700;">بروب سوندا</td>
+                  <td class="num-mono">15 د.ل</td>
+                  <td class="num-mono" style="font-weight: bold; color: var(--accent-cyan);">30 د.ل</td>
+                  <td class="num-mono" style="color: var(--status-warning);">8</td>
+                  <td><span class="badge badge-processing" style="font-size: 0.55rem;">منخفض</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700;">كيت جراحة</td>
+                  <td class="num-mono">120 د.ل</td>
+                  <td class="num-mono" style="font-weight: bold; color: var(--accent-cyan);">250 د.ل</td>
+                  <td class="num-mono" style="color: var(--status-danger);">5</td>
+                  <td><span class="badge badge-cancelled" style="font-size: 0.55rem;">حرج</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700;">ماسك طبي</td>
+                  <td class="num-mono">8 د.ل</td>
+                  <td class="num-mono" style="font-weight: bold; color: var(--accent-cyan);">20 د.ل</td>
+                  <td class="num-mono">100</td>
+                  <td><span class="badge badge-completed" style="font-size: 0.55rem;">متوفر</span></td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Low stock alert box -->
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 4px; padding: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.6rem; color: var(--status-danger);">
+              <span>⚠️ تنبيه: 3 أصناف تقترب من النفاد</span>
+              <span style="font-weight: bold; text-decoration: underline;">طلب توريد</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+             SCREEN 8: دفتر المصروفات
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openScreenFromBoard('expenses');">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">8- دفتر المصروفات</span>
+            <span class="board-screen-indicator">عرض تفاعلي ↗</span>
+          </div>
+          <div class="board-screen-preview">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; color: var(--text-main);">سجل المصروفات والتشغيل</span>
+              <span class="btn btn-primary btn-sm" style="font-size: 0.6rem; padding: 2px 6px;">+ مصروف جديد</span>
+            </div>
+
+            <div style="background: #111625; border-radius: 6px; padding: 4px; flex: 1;">
+              <table style="width: 100%; font-size: 0.6rem; border-collapse: collapse; text-align: right;">
+                <tr style="color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <th>الفئة</th>
+                  <th>الوصف</th>
+                  <th>المبلغ</th>
+                  <th>المستخدم</th>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-processing" style="font-size: 0.55rem;">إعلانات</span></td>
+                  <td>حملة فيسبوك وإنستغرام</td>
+                  <td class="num-mono" style="font-weight: bold; color: var(--status-danger);">500 د.ل</td>
+                  <td>طه</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-shipping" style="font-size: 0.55rem;">شحن</span></td>
+                  <td>شحن جوي توريدات إسطنبول</td>
+                  <td class="num-mono" style="font-weight: bold; color: var(--status-danger);">1,200 د.ل</td>
+                  <td>مؤمن</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-new" style="font-size: 0.55rem;">تغليف</span></td>
+                  <td>كراتين وستيكرات Absolute</td>
+                  <td class="num-mono" style="font-weight: bold; color: var(--status-danger);">300 د.ل</td>
+                  <td>ساسي</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-processing" style="font-size: 0.55rem;">تشغيل</span></td>
+                  <td>صيانة ومستلزمات مكتبية</td>
+                  <td class="num-mono" style="font-weight: bold; color: var(--status-danger);">250 د.ل</td>
+                  <td>طه</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.65rem; padding: 4px; background: #111625; border-radius: 4px;">
+              <span style="color: var(--text-muted);">إجمالي مصروفات الشهر:</span>
+              <span class="num-mono" style="font-weight: 800; color: var(--status-danger);">12,300 د.ل</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+             SCREEN 9: التقارير والتحليلات
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openScreenFromBoard('reports');">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">9- التقارير والتحليلات</span>
+            <span class="board-screen-indicator">عرض تفاعلي ↗</span>
+          </div>
+          <div class="board-screen-preview">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; color: var(--text-main);">التحليل المالي الشهري</span>
+              <span style="color: var(--text-muted); font-size: 0.6rem;">سبتمبر 2026</span>
+            </div>
+
+            <!-- Mini Comparative Bar Chart -->
+            <div style="background: #111625; border-radius: 6px; padding: 6px; display: flex; flex-direction: column;">
+              <span style="font-size: 0.6rem; color: var(--text-muted);">المبيعات مقابل المصروفات (آخر 6 أشهر)</span>
+              <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 60px; margin-top: 8px; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; gap: 2px; align-items: flex-end;"><div style="width: 8px; height: 35px; background: #0284c7; border-radius: 2px;"></div><div style="width: 8px; height: 18px; background: #ef4444; border-radius: 2px;"></div></div>
+                <div style="display: flex; gap: 2px; align-items: flex-end;"><div style="width: 8px; height: 42px; background: #0284c7; border-radius: 2px;"></div><div style="width: 8px; height: 20px; background: #ef4444; border-radius: 2px;"></div></div>
+                <div style="display: flex; gap: 2px; align-items: flex-end;"><div style="width: 8px; height: 38px; background: #0284c7; border-radius: 2px;"></div><div style="width: 8px; height: 16px; background: #ef4444; border-radius: 2px;"></div></div>
+                <div style="display: flex; gap: 2px; align-items: flex-end;"><div style="width: 8px; height: 48px; background: #0284c7; border-radius: 2px;"></div><div style="width: 8px; height: 22px; background: #ef4444; border-radius: 2px;"></div></div>
+                <div style="display: flex; gap: 2px; align-items: flex-end;"><div style="width: 8px; height: 55px; background: #0284c7; border-radius: 2px;"></div><div style="width: 8px; height: 24px; background: #ef4444; border-radius: 2px;"></div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.55rem; color: var(--text-muted); margin-top: 2px;">
+                <span>مايو</span><span>يونيو</span><span>يوليو</span><span>أغسطس</span><span>سبتمبر</span>
+              </div>
+            </div>
+
+            <!-- Mini Metric Insights -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+              <div style="background: #111625; padding: 4px; border-radius: 4px;">
+                <div style="font-size: 0.55rem; color: var(--text-muted);">متوسط قيمة الطلب</div>
+                <div class="num-mono" style="font-weight: bold; font-size: 0.75rem;">312.5 د.ل</div>
+              </div>
+              <div style="background: #111625; padding: 4px; border-radius: 4px;">
+                <div style="font-size: 0.55rem; color: var(--text-muted);">هامش الربح الإجمالي</div>
+                <div class="num-mono" style="font-weight: bold; color: var(--status-success); font-size: 0.75rem;">37.8%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+             SCREEN 10: حساب الأرباح وتوزيعها
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openScreenFromBoard('profit');">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">10- حساب الأرباح وتوزيعها</span>
+            <span class="board-screen-indicator">عرض تفاعلي ↗</span>
+          </div>
+          <div class="board-screen-preview">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; color: var(--text-main);">معادلة الأرباح والتوزيع</span>
+              <span class="badge badge-completed">18,420 د.ل صافي</span>
+            </div>
+
+            <!-- Financial formula row -->
+            <div style="background: #111625; padding: 6px; border-radius: 6px; font-size: 0.6rem; display: flex; flex-direction: column; gap: 3px;">
+              <div style="display: flex; justify-content: space-between;">
+                <span>المبيعات:</span>
+                <span class="num-mono font-bold">48,750 د.ل</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; color: var(--status-warning);">
+                <span>- تكلفة البضاعة:</span>
+                <span class="num-mono">18,600 د.ل</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; color: var(--status-danger);">
+                <span>- المصروفات:</span>
+                <span class="num-mono">11,730 د.ل</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-weight: 800; color: var(--status-success); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2px;">
+                <span>= صافي الربح:</span>
+                <span class="num-mono">18,420 د.ل</span>
+              </div>
+            </div>
+
+            <!-- Partner Distribution Split Cards -->
+            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+              <div style="background: #111625; padding: 4px 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem;">
+                <span>طه (33.3%):</span>
+                <span class="num-mono font-bold" style="color: var(--status-success);">6,140 د.ل</span>
+                <span class="btn btn-secondary btn-sm" style="font-size: 0.55rem; padding: 2px 4px;">صرف</span>
+              </div>
+              <div style="background: #111625; padding: 4px 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem;">
+                <span>عبدالمؤمن (33.3%):</span>
+                <span class="num-mono font-bold" style="color: var(--status-success);">6,140 د.ل</span>
+                <span class="btn btn-secondary btn-sm" style="font-size: 0.55rem; padding: 2px 4px;">صرف</span>
+              </div>
+              <div style="background: #111625; padding: 4px 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem;">
+                <span>ساسي (33.3%):</span>
+                <span class="num-mono font-bold" style="color: var(--status-success);">6,140 د.ل</span>
+                <span class="btn btn-secondary btn-sm" style="font-size: 0.55rem; padding: 2px 4px;">صرف</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+             SCREEN 11: بوليصة التوصيل والطباعة
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openDeliverySlipModal('1067');">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">11- بوليصة التوصيل والطباعة</span>
+            <span class="board-screen-indicator">معاينة وطباعة ↗</span>
+          </div>
+          <div class="board-screen-preview">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; color: var(--text-main);">فاتورة وبوليصة شحن A4 / حراري</span>
+              <span class="badge badge-new">#1067</span>
+            </div>
+
+            <!-- Paper Slip Mockup inside Card -->
+            <div style="background: #ffffff; color: #111827; border-radius: 4px; padding: 6px; font-size: 0.55rem; flex: 1; display: flex; flex-direction: column; gap: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px;">
+                <span style="font-weight: 900; color: #0284c7;">ABSOLUTE DENTAL</span>
+                <span style="font-weight: bold; color: #111;">بوليصة تسليم</span>
+              </div>
+              <div style="color: #334155;">العميل: سارة علي (091-2345678)</div>
+              <div style="color: #334155;">الكلية: طب الأسنان - جامعة طرابلس</div>
+              <div style="border-top: 1px dashed #cbd5e1; border-bottom: 1px dashed #cbd5e1; padding: 2px 0;">
+                <div>• مرآة فحص معدنية ×2</div>
+                <div>• بروب سوندا مزدوج ×1</div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-weight: bold; color: #111; margin-top: auto;">
+                <span>المبلغ المطلوب عند الاستلام:</span>
+                <span style="color: #0284c7;">150 د.ل</span>
+              </div>
+              <div style="text-align: center; font-size: 0.5rem; color: #64748b;">||| | ||||| || |||||| | ||| (Barcode)</div>
+            </div>
+
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-primary btn-sm" style="flex: 1; font-size: 0.6rem; padding: 3px;">🖨️ طباعة فورية</button>
+              <button class="btn btn-secondary btn-sm" style="flex: 1; font-size: 0.6rem; padding: 3px;">📄 تحميل PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+             SCREEN 12: تطبيق المندوب (واجهة مبسطة)
+             ---------------------------------------------------- -->
+        <div class="board-screen-card" onclick="openCourierModal();">
+          <div class="board-screen-header">
+            <span class="board-screen-title-badge">12- تطبيق المندوب (واجهة مبسطة)</span>
+            <span class="board-screen-indicator">فتح هاتف المندوب ↗</span>
+          </div>
+          <div class="board-screen-preview" style="align-items: center; justify-content: center;">
+            <!-- Mobile Device Frame Mockup -->
+            <div style="width: 170px; height: 340px; background: #000; border: 3px solid #334155; border-radius: 20px; padding: 6px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.7);">
+              <!-- Notch -->
+              <div style="width: 40px; height: 4px; background: #334155; border-radius: 4px; margin: 0 auto;"></div>
+              
+              <!-- Screen content -->
+              <div style="font-size: 0.55rem; font-weight: bold; color: #fff; text-align: center;">طلبات التوصيل اليوم</div>
+              
+              <div style="background: #1e293b; border-radius: 6px; padding: 4px; font-size: 0.5rem; color: #fff;">
+                <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                  <span>#1066 محمد</span>
+                  <span style="color: var(--accent-cyan);">420 د.ل</span>
+                </div>
+                <div style="color: #94a3b8; font-size: 0.45rem;">الزاوية - كلية الأسنان</div>
+                <div style="display: flex; gap: 2px; margin-top: 3px;">
+                  <span style="background: #0284c7; padding: 1px 4px; border-radius: 2px; color: #fff;">خرائط 🗺️</span>
+                  <span style="background: #10b981; padding: 1px 4px; border-radius: 2px; color: #fff;">اتصال 📞</span>
+                </div>
+              </div>
+
+              <!-- Map snippet -->
+              <div style="flex: 1; background: #0f172a; border-radius: 6px; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; color: var(--accent-cyan); font-size: 0.55rem;">
+                📍 GPS Navigation
+              </div>
+
+              <div style="background: #10b981; color: #fff; text-align: center; border-radius: 6px; padding: 4px; font-weight: bold; font-size: 0.55rem;">
+                ✓ تم تسليم الطلب
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- End board-container -->
+
+    </main>
+
+    <!-- =========================================================
+         4. SECTION B: INTERACTIVE OPERATIONS SCREEN CONTAINER
+         ========================================================= -->
+    <main id="interactiveScreenSection" class="page-content" style="display: none;">
+      <!-- Populated dynamically by app.js when in interactive mode -->
+    </main>
+
+  </div><!-- End main-wrapper -->
+
+</div><!-- End app-container -->
+
+<!-- =========================================================
+     5. PRODUCTION MODALS (Order Detail, Delivery Slip, Courier)
+     ========================================================= -->
+
+<!-- Order Details Modal -->
+<div id="orderDetailsModal" class="modal-overlay">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="modal-title">تفاصيل الطلب <span id="modalOrderNum" class="num-mono" style="color: var(--accent-cyan);">#1067</span></span>
+        <span id="modalOrderStatus" class="badge badge-processing">قيد التجهيز</span>
+      </div>
+      <button class="modal-close" onclick="closeModal('orderDetailsModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Customer Card -->
+      <div class="erp-card" style="padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div id="modalCustomerName" style="font-weight: 800; font-size: 1rem; color: var(--text-main);">سارة علي</div>
+          <div id="modalCustomerPhone" class="num-mono" style="color: var(--accent-cyan); font-size: 0.85rem;">091-2345678</div>
+          <div id="modalCustomerCollege" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">جامعة طرابلس — كلية طب الأسنان</div>
+          <div id="modalCustomerAddress" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">طرابلس، شارع بن عاشور</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <button class="btn btn-success btn-sm" onclick="openWhatsAppMessage('1067', 'ready')">تواصل عبر واتساب</button>
+          <button class="btn btn-secondary btn-sm" onclick="openDeliverySlipModal('1067')">طباعة بوليصة</button>
+        </div>
+      </div>
+
+      <!-- Order Items Table -->
+      <div class="erp-card" style="overflow: hidden;">
+        <div class="card-header">
+          <span class="card-title">محتويات الطلب</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">المسؤول الحالي: <strong id="modalOrderAssignee" style="color: var(--text-main);">طه</strong></span>
+        </div>
+        <table class="erp-table">
+          <thead>
+            <tr>
+              <th>المنتج / الأداة</th>
+              <th style="text-align: center;">الكمية</th>
+              <th>سعر الوحدة</th>
+              <th>الإجمالي</th>
+            </tr>
+          </thead>
+          <tbody id="modalOrderItemsBody">
+            <!-- Injected by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Financial Total -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">ملاحظات: </span>
+          <span id="modalOrderNotes" style="font-size: 0.8rem; color: var(--text-main);">تسليم سريع</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 6px;">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">الإجمالي الكلي:</span>
+          <span id="modalOrderTotal" class="num-mono" style="font-size: 1.25rem; font-weight: 800; color: var(--accent-cyan);">150 د.ل</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div style="display: flex; gap: 6px; margin-inline-end: auto;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); align-self: center;">تغيير الحالة:</span>
+        <button class="btn btn-secondary btn-sm" onclick="updateOrderStatus('1067', 'جاهز للتوصيل')">جاهز للتوصيل</button>
+        <button class="btn btn-secondary btn-sm" onclick="updateOrderStatus('1067', 'قيد التوصيل')">قيد التوصيل</button>
+        <button class="btn btn-success btn-sm" onclick="updateOrderStatus('1067', 'مكتمل')">مكتمل ومستلم</button>
+      </div>
+      <button class="btn btn-secondary" onclick="closeModal('orderDetailsModal')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delivery Slip Modal -->
+<div id="deliverySlipModal" class="modal-overlay">
+  <div class="modal-dialog" style="max-width: 520px;">
+    <div class="modal-header">
+      <span class="modal-title">بوليصة الشحن والتوصيل الرسمية</span>
+      <button class="modal-close" onclick="closeModal('deliverySlipModal')">✕</button>
+    </div>
+    <div class="modal-body" style="background: #1e293b;">
+      <!-- Thermal Paper View -->
+      <div class="receipt-paper" id="printableReceiptArea">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0284c7; padding-bottom: 8px;">
+          <div>
+            <h2 style="font-size: 1.1rem; font-weight: 900; color: #0284c7; margin: 0;">ABSOLUTE DENTAL</h2>
+            <p style="font-size: 0.65rem; color: #64748b; margin: 0;">مستلزمات وأدوات طلبة وأطباء الأسنان — طرابلس</p>
+          </div>
+          <div style="text-align: left;">
+            <div class="num-mono" style="font-weight: 800; font-size: 0.95rem; color: #111;" id="slipOrderNum">#1067</div>
+            <div style="font-size: 0.65rem; color: #64748b;">2026-09-09</div>
+          </div>
+        </div>
+
+        <div style="margin: 10px 0; padding: 8px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
+          <div style="font-weight: 800; font-size: 0.85rem;" id="slipCustomerName">سارة علي</div>
+          <div style="font-size: 0.75rem; color: #334155;" id="slipCustomerPhone">091-2345678</div>
+          <div style="font-size: 0.725rem; color: #64748b;" id="slipCollege">جامعة طرابلس - كلية طب الأسنان</div>
+          <div style="font-size: 0.725rem; color: #64748b;" id="slipAddress">طرابلس، شارع بن عاشور</div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 0.75rem;">
+          <thead>
+            <tr style="background: #f1f5f9; color: #334155;">
+              <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: right;">الأداة</th>
+              <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">الكمية</th>
+              <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: left;">السعر</th>
+            </tr>
+          </thead>
+          <tbody id="slipItemsBody">
+            <!-- Injected by JS -->
+          </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px dashed #94a3b8; padding-top: 8px;">
+          <div>
+            <div style="font-size: 0.7rem; color: #64748b;">طريقة الدفع: كاش عند الاستلام</div>
+            <div style="font-size: 0.65rem; color: #0284c7; font-weight: bold;">شكراً لتعاملكم مع Absolute Dental</div>
+          </div>
+          <div style="text-align: left;">
+            <div style="font-size: 0.7rem; color: #64748b;">المجموع المطلوب:</div>
+            <div class="num-mono" style="font-size: 1.3rem; font-weight: 900; color: #0284c7;" id="slipTotal">150 د.ل</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة الفاتورة</button>
+      <button class="btn btn-primary" onclick="closeModal('deliverySlipModal')">تم</button>
+    </div>
+  </div>
+</div>
+
+<!-- Courier App Simulator Modal -->
+<div id="courierAppModal" class="modal-overlay">
+  <div class="modal-dialog" style="max-width: 380px; padding: 0; background: #000; border: 4px solid #334155; border-radius: 28px; overflow: hidden;">
+    <div style="background: #0f172a; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155;">
+      <span style="font-size: 0.8rem; font-weight: 800; color: #fff;">واجهة المندوب (المبسطة)</span>
+      <button class="modal-close" onclick="closeModal('courierAppModal')">✕</button>
+    </div>
+    <div style="padding: 1rem; display: flex; flex-direction: column; gap: 0.85rem; background: #070a12;">
+      <div style="background: #161e31; border: 1px solid var(--border-subtle); border-radius: 10px; padding: 0.85rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="num-mono" style="font-weight: 800; color: var(--accent-cyan);">الطلب #1066</span>
+          <span class="badge badge-shipping">قيد التوصيل</span>
+        </div>
+        <div style="font-weight: 700; font-size: 0.95rem; margin-top: 4px; color: #fff;">محمد خالد</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">الزاوية، كلية طب وجراحة الفم والأسنان</div>
+        <div class="num-mono" style="font-size: 1.1rem; font-weight: 800; color: var(--status-success); margin-top: 4px;">420 د.ل (كاش)</div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;">
+          <button class="btn btn-secondary btn-sm" onclick="showToast('تم فتح تطبيق خرائط Google')">📍 فتح الموقع</button>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('جاري الاتصال بالطالب: 092-7779888')">📞 اتصال</button>
+        </div>
+      </div>
+
+      <div style="background: #111827; border-radius: 10px; height: 140px; display: flex; align-items: center; justify-content: center; border: 1px dashed #374151; color: var(--accent-cyan); font-size: 0.8rem;">
+        🗺️ خريطة تتبع المسار المباشر (Tripoli/Zawiya)
+      </div>
+
+      <button class="btn btn-success" style="width: 100%; padding: 0.85rem; font-size: 0.95rem;" onclick="showToast('تم تسجيل الطلب كمكتمل وتم إيداع المبلغ في عهدة المندوب'); closeModal('courierAppModal');">
+        ✓ تأكيد التسليم واستلام الكاش
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- Supabase Client SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Core Engine Script -->
+<script src="app.js"></script>
+
+</body>
+</html>
