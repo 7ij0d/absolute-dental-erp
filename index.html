@@ -180,10 +180,16 @@
             <h1 class="page-greeting">صباح الخير، طه 👋</h1>
             <p class="page-subtitle">إليك ملخص أداء Absolute Dental اليوم.</p>
           </div>
-          <button class="btn-primary" onclick="openPosModal()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-            <span>+ طلب سريع (POS)</span>
-          </button>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn-primary" onclick="openStudentOrderModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              <span>+ طلب لطالب (بالنيابة)</span>
+            </button>
+            <button class="btn-secondary" onclick="openPosModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              <span>+ طلب سريع (POS)</span>
+            </button>
+          </div>
         </div>
 
         <!-- 1. FOUR (4) KPI CARDS ONLY -->
@@ -642,7 +648,13 @@
             <h1 class="page-greeting">إدارة الطلبات والمبيعات</h1>
             <p class="page-subtitle">متابعة كافة طلبات كليات طب الأسنان في ليبيا مباشرة.</p>
           </div>
-          <button class="btn-primary" onclick="openPosModal()">+ طلب سريع (POS)</button>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn-primary" onclick="openStudentOrderModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              <span>+ طلب لطالب (بالنيابة)</span>
+            </button>
+            <button class="btn-secondary" onclick="openPosModal()">+ طلب سريع (POS)</button>
+          </div>
         </div>
 
         <div class="erp-table-card">
@@ -1298,6 +1310,249 @@
     </div>
     <div id="commandPaletteResults" style="max-height: 280px; overflow-y: auto; padding: 0.5rem;">
       <!-- Results populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- 5. ASSISTED STUDENT ORDER MODAL (+ طلب لطالب بالنيابة) -->
+<div id="studentOrderModal" class="modal-overlay" onclick="if(event.target === this) closeModal('studentOrderModal')">
+  <div class="modal-dialog modal-dialog-xl">
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="modal-title">🦷 إنشاء طلب لطالب (بالنيابة)</span>
+        <span class="status-pill new">ربط مباشر بالسيرفر والمخزون</span>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal('studentOrderModal')">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="student-order-grid">
+        
+        <!-- RIGHT PANEL: STUDENT DETAILS & DELIVERY -->
+        <div class="student-form-section">
+          <div class="section-badge-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>بيانات الطالب والتسليم</span>
+          </div>
+
+          <div class="form-group-custom">
+            <label class="form-label-custom">اسم الطالب / الطالبة <span style="color:#ef4444;">*</span></label>
+            <input type="text" id="studentOrderName" class="form-input-custom" placeholder="مثال: أحمد عبدالسلام الورفلي" required>
+          </div>
+
+          <div class="form-row-2col">
+            <div class="form-group-custom">
+              <label class="form-label-custom">رقم الهاتف (واتساب) <span style="color:#ef4444;">*</span></label>
+              <input type="tel" id="studentOrderPhone" class="form-input-custom num-mono" placeholder="091xxxxxxx" required>
+            </div>
+            <div class="form-group-custom">
+              <label class="form-label-custom">السنة الدراسية / المرحلة</label>
+              <select id="studentOrderYear" class="form-select-custom">
+                <option value="سنة ثالثة (طب أسنان)" selected>سنة ثالثة (3rd Year)</option>
+                <option value="سنة ثانية (طب أسنان)">سنة ثانية (2nd Year)</option>
+                <option value="سنة رابعة (طب أسنان)">سنة رابعة (4th Year)</option>
+                <option value="سنة أولى (إعدادي/أسنان)">سنة أولى (1st Year)</option>
+                <option value="طبيب امتياز">سنة امتياز (Intern)</option>
+                <option value="طبيب أسنان ممارس">طبيب أسنان ممارس</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group-custom">
+            <label class="form-label-custom">الكلية / الجامعة</label>
+            <select id="studentOrderCollege" class="form-select-custom" onchange="handleCollegePresetChange(this.value)">
+              <option value="جامعة طرابلس — كلية طب الأسنان" selected>جامعة طرابلس — كلية طب الأسنان</option>
+              <option value="جامعة بنغازي — كلية طب الأسنان">جامعة بنغازي — كلية طب الأسنان</option>
+              <option value="جامعة مصراتة — كلية طب الأسنان">جامعة مصراتة — كلية طب الأسنان</option>
+              <option value="جامعة الزاوية — كلية طب الأسنان">جامعة الزاوية — كلية طب الأسنان</option>
+              <option value="الجامعة الدولية للعلوم الطبية (LIMU)">الجامعة الدولية للعلوم الطبية (LIMU)</option>
+              <option value="الجامعة الليبية الأهلية — طب أسنان">الجامعة الليبية الأهلية — طب أسنان</option>
+              <option value="كلية أخرى">كلية أو جهة أخرى...</option>
+            </select>
+          </div>
+
+          <div class="form-group-custom" id="studentCustomCollegeWrap" style="display: none;">
+            <input type="text" id="studentOrderCustomCollege" class="form-input-custom" placeholder="اكتب اسم الجامعة أو الكلية بالتفصيل">
+          </div>
+
+          <div class="form-row-2col">
+            <div class="form-group-custom">
+              <label class="form-label-custom">مكان وطريقة الاستلام</label>
+              <select id="studentOrderDeliveryType" class="form-select-custom" onchange="handleDeliveryFeeChange(this.value)">
+                <option value="faculty" data-fee="0" selected>استلام مباشر بالكلية / المدرج (مجاني)</option>
+                <option value="tripoli_home" data-fee="10">توصيل للمنزل داخل طرابلس (+10 د.ل)</option>
+                <option value="outside_tripoli" data-fee="15">شحن وتوصيل خارج طرابلس (+15 د.ل)</option>
+                <option value="office" data-fee="0">استلام من مقر Absolute Dental (مجاني)</option>
+              </select>
+            </div>
+            <div class="form-group-custom">
+              <label class="form-label-custom">طريقة الدفع</label>
+              <select id="studentOrderPayment" class="form-select-custom">
+                <option value="cash_on_delivery" selected>كاش عند الاستلام</option>
+                <option value="bank_transfer">تحويل مصرفي (سداد / وان كاش / تداول)</option>
+                <option value="prepaid">مدفوع مسبقاً</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group-custom">
+            <label class="form-label-custom">ملاحظات وموعد التسليم</label>
+            <textarea id="studentOrderNotes" class="form-input-custom" rows="2" placeholder="مثال: الاستلام يوم الأحد عند مدرج 2 الساعة 11 ص، أو رقم المجموعة A/B"></textarea>
+          </div>
+
+          <div class="form-group-custom">
+            <label class="form-label-custom">الشريك المسؤول عن الطلب</label>
+            <div style="display: flex; gap: 8px;">
+              <label class="partner-radio-label">
+                <input type="radio" name="studentOrderPartner" value="طه" checked>
+                <span>طه</span>
+              </label>
+              <label class="partner-radio-label">
+                <input type="radio" name="studentOrderPartner" value="عبدالمؤمن">
+                <span>عبدالمؤمن</span>
+              </label>
+              <label class="partner-radio-label">
+                <input type="radio" name="studentOrderPartner" value="ساسي">
+                <span>ساسي</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEFT PANEL: CATALOG SEARCH & CART -->
+        <div class="student-catalog-section">
+          
+          <!-- Catalog Quick Picker -->
+          <div class="catalog-picker-card">
+            <div class="section-badge-title" style="justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
+                <span>اختيار الأدوات من المتجر</span>
+              </div>
+              <span class="num-mono" style="font-size: 0.7rem; color: var(--text-muted);" id="studentCatalogCount">28 منتج</span>
+            </div>
+
+            <!-- Search Bar & Category Filters -->
+            <div style="display: flex; flex-direction: column; gap: 6px; margin: 8px 0;">
+              <input type="text" id="studentCatalogSearch" class="form-input-custom" placeholder="🔍 ابحث بالاسم (بور، كاست، هاندبيس، شمع...)" oninput="filterStudentOrderProducts(this.value)">
+              
+              <div class="student-filter-chips">
+                <button type="button" class="filter-chip active" onclick="setStudentProductCategory('all', this)">الكل</button>
+                <button type="button" class="filter-chip" onclick="setStudentProductCategory('burs', this)">أدوات حفر (Burs)</button>
+                <button type="button" class="filter-chip" onclick="setStudentProductCategory('sets', this)">كاست وهاندبيس</button>
+                <button type="button" class="filter-chip" onclick="setStudentProductCategory('teeth', this)">أسنان وشمع</button>
+                <button type="button" class="filter-chip" onclick="setStudentProductCategory('exam', this)">أدوات فحص</button>
+              </div>
+            </div>
+
+            <!-- Scrollable Products List -->
+            <div class="student-catalog-list" id="studentCatalogList">
+              <!-- Dynamically populated from ERP_STATE.products -->
+            </div>
+          </div>
+
+          <!-- Current Student Order Cart -->
+          <div class="student-cart-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-main);">🛒 محتويات طلب الطالب (<span id="studentCartCount">0</span> صنف)</span>
+              <button type="button" class="text-btn-danger" onclick="clearStudentCart()">تفريغ السلة</button>
+            </div>
+
+            <div class="student-cart-table-wrap">
+              <table class="student-cart-table">
+                <thead>
+                  <tr>
+                    <th>الأداة</th>
+                    <th style="text-align: center; width: 95px;">الكمية</th>
+                    <th style="text-align: left; width: 65px;">السعر</th>
+                    <th style="width: 25px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="studentCartBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Financial Summary Box -->
+            <div class="student-total-box">
+              <div class="summary-line">
+                <span>مجموع الأصناف:</span>
+                <span class="num-mono" id="studentSubtotalDisplay">0 د.ل</span>
+              </div>
+              <div class="summary-line">
+                <span>رسوم التوصيل:</span>
+                <span class="num-mono" id="studentShippingDisplay">مجاني (0 د.ل)</span>
+              </div>
+              <div class="summary-line total">
+                <span>الإجمالي المطلوب من الطالب:</span>
+                <span class="num-mono total-amount" id="studentTotalDisplay">0 د.ل</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" onclick="closeModal('studentOrderModal')">إلغاء</button>
+      <button type="button" class="btn-primary" id="btnSubmitStudentOrder" onclick="submitStudentOrder()">
+        <span>✓ حفظ وتأكيد الطلب في السيرفر</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 6. STUDENT ORDER SUCCESS MODAL -->
+<div id="studentOrderSuccessModal" class="modal-overlay" onclick="if(event.target === this) closeModal('studentOrderSuccessModal')">
+  <div class="modal-dialog" style="max-width: 480px; text-align: center;">
+    <div class="modal-body" style="padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+      <div class="success-icon-badge">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+      </div>
+
+      <div>
+        <h3 style="font-size: 1.25rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px;">تم تسجيل طلب الطالب بنجاح! 🎉</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">تم حفظ الطلب مباشرة في قاعدة البيانات وتحديث المخزون ومؤشرات المبيعات.</p>
+      </div>
+
+      <!-- Quick Receipt Summary Box -->
+      <div style="background: var(--bg-subtle); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 1rem; width: 100%; text-align: right;">
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-card); padding-bottom: 6px; margin-bottom: 6px;">
+          <span style="font-size: 0.775rem; color: var(--text-muted);">رقم الطلب الرسمي:</span>
+          <span class="num-mono" style="font-weight: 800; color: var(--primary);" id="successModalOrderNum">#00000000</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span style="font-size: 0.775rem; color: var(--text-muted);">الطالب:</span>
+          <span style="font-weight: 700; color: var(--text-main);" id="successModalStudentName">-</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span style="font-size: 0.775rem; color: var(--text-muted);">رقم الهاتف:</span>
+          <span class="num-mono" style="color: var(--text-body);" id="successModalStudentPhone">-</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-card); padding-top: 6px; margin-top: 6px;">
+          <span style="font-size: 0.85rem; font-weight: 800;">المبلغ المطلوب كاش:</span>
+          <span class="num-mono" style="font-size: 1.15rem; font-weight: 900; color: var(--primary);" id="successModalOrderTotal">0 د.ل</span>
+        </div>
+      </div>
+
+      <!-- WhatsApp Direct CTA Button -->
+      <button type="button" class="btn-whatsapp-full" id="successModalWhatsAppBtn" onclick="dispatchStudentOrderWhatsApp()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.301-.15-1.78-.879-2.056-.98-.276-.1-.477-.15-.678.15-.2.3-.778.98-.954 1.18-.176.2-.351.226-.653.075-.301-.15-1.272-.469-2.423-1.496-.896-.799-1.5-1.786-1.677-2.087-.176-.3-.019-.462.132-.612.136-.135.301-.351.452-.527.15-.176.2-.3.301-.502.101-.2.05-.376-.025-.527-.075-.15-.678-1.632-.929-2.235-.244-.588-.492-.508-.678-.518-.176-.01-.377-.01-.578-.01-.2 0-.527.075-.803.376-.276.3-1.055 1.03-1.055 2.511 0 1.482 1.08 2.912 1.231 3.113.15.2 2.124 3.245 5.148 4.551.719.311 1.281.497 1.719.636.722.229 1.378.197 1.898.119.579-.088 1.78-.728 2.03-1.431.251-.703.251-1.306.176-1.431-.076-.125-.276-.2-.577-.35z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.174L2 22l4.982-1.408A9.957 9.957 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.61 0-3.11-.47-4.38-1.28l-.31-.2-2.96.84.83-2.88-.2-.33A8.163 8.163 0 0 1 3.8 12c0-4.52 3.68-8.2 8.2-8.2s8.2 3.68 8.2 8.2c0 4.52-3.68 8.2-8.2 8.2z"/></svg>
+        <span>📲 إرسال الفاتورة للطالب عبر الواتساب بنقرة واحدة</span>
+      </button>
+
+      <!-- Thermal Print Slip Button -->
+      <button type="button" class="btn-secondary" style="width: 100%; justify-content: center;" onclick="printSlipFromSuccessModal()">
+        <span>🖨️ طباعة بوليصة التوصيل الرسمية</span>
+      </button>
+    </div>
+
+    <div class="modal-footer" style="justify-content: center;">
+      <button type="button" class="btn-secondary" onclick="closeModal('studentOrderSuccessModal')">إغلاق ومتابعة المنظومة</button>
     </div>
   </div>
 </div>

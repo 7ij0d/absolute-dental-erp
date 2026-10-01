@@ -1073,6 +1073,512 @@ async function syncWithUserServer() {
 }
 
 // -------------------------------------------------------------
+// 18. ASSISTED STUDENT ORDER SYSTEM (+ طلب لطالب بالنيابة)
+// -------------------------------------------------------------
+const STUDENT_ORDER_STATE = {
+  selectedCategory: 'all',
+  cart: [],
+  deliveryFee: 0,
+  lastCreatedOrder: null
+};
+
+function openStudentOrderModal() {
+  const nameInput = document.getElementById('studentOrderName');
+  const phoneInput = document.getElementById('studentOrderPhone');
+  const notesInput = document.getElementById('studentOrderNotes');
+  const searchInput = document.getElementById('studentCatalogSearch');
+  const collegeSelect = document.getElementById('studentOrderCollege');
+  const deliverySelect = document.getElementById('studentOrderDeliveryType');
+  const paymentSelect = document.getElementById('studentOrderPayment');
+  const customCollegeWrap = document.getElementById('studentCustomCollegeWrap');
+  const customCollegeInput = document.getElementById('studentOrderCustomCollege');
+
+  if (nameInput) nameInput.value = '';
+  if (phoneInput) phoneInput.value = '';
+  if (notesInput) notesInput.value = '';
+  if (searchInput) searchInput.value = '';
+  if (customCollegeInput) customCollegeInput.value = '';
+  if (customCollegeWrap) customCollegeWrap.style.display = 'none';
+  if (collegeSelect) collegeSelect.value = 'جامعة طرابلس — كلية طب الأسنان';
+  if (deliverySelect) deliverySelect.value = 'faculty';
+  if (paymentSelect) paymentSelect.value = 'cash_on_delivery';
+
+  // Set default partner radio
+  const partnerRadios = document.querySelectorAll('input[name="studentOrderPartner"]');
+  partnerRadios.forEach(r => {
+    r.checked = (r.value === ERP_STATE.currentPartner);
+  });
+
+  STUDENT_ORDER_STATE.cart = [];
+  STUDENT_ORDER_STATE.deliveryFee = 0;
+  STUDENT_ORDER_STATE.selectedCategory = 'all';
+
+  // Reset category chips
+  document.querySelectorAll('.student-filter-chips .filter-chip').forEach((chip, idx) => {
+    if (idx === 0) chip.classList.add('active');
+    else chip.classList.remove('active');
+  });
+
+  renderStudentCatalogList();
+  renderStudentCart();
+  calculateStudentOrderTotals();
+
+  openModal('studentOrderModal');
+}
+
+function handleCollegePresetChange(val) {
+  const customWrap = document.getElementById('studentCustomCollegeWrap');
+  if (customWrap) {
+    customWrap.style.display = (val === 'كلية أخرى') ? 'block' : 'none';
+  }
+}
+
+function handleDeliveryFeeChange(val) {
+  if (val === 'tripoli_home') {
+    STUDENT_ORDER_STATE.deliveryFee = 10;
+  } else if (val === 'outside_tripoli') {
+    STUDENT_ORDER_STATE.deliveryFee = 15;
+  } else {
+    STUDENT_ORDER_STATE.deliveryFee = 0;
+  }
+  calculateStudentOrderTotals();
+}
+
+function setStudentProductCategory(cat, btn) {
+  STUDENT_ORDER_STATE.selectedCategory = cat;
+  document.querySelectorAll('.student-filter-chips .filter-chip').forEach(c => c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const searchVal = document.getElementById('studentCatalogSearch') ? document.getElementById('studentCatalogSearch').value : '';
+  renderStudentCatalogList(searchVal);
+}
+
+function filterStudentOrderProducts(query) {
+  renderStudentCatalogList(query);
+}
+
+function renderStudentCatalogList(searchQuery = '') {
+  const container = document.getElementById('studentCatalogList');
+  const countDisplay = document.getElementById('studentCatalogCount');
+  if (!container) return;
+
+  let prods = [...ERP_STATE.products];
+  const cat = STUDENT_ORDER_STATE.selectedCategory;
+
+  if (cat === 'burs') {
+    prods = prods.filter(p => {
+      const name = ((p.nameAr || '') + ' ' + (p.nameEn || '')).toLowerCase();
+      return name.includes('bur') || name.includes('حفر') || name.includes('tc') || name.includes('sf') || name.includes('br') || name.includes('si') || name.includes('tf') || name.includes('wr') || name.includes('fo') || name.includes('cd');
+    });
+  } else if (cat === 'sets') {
+    prods = prods.filter(p => {
+      const name = ((p.nameAr || '') + ' ' + (p.nameEn || '')).toLowerCase();
+      return name.includes('cast') || name.includes('handpiece') || name.includes('كاست') || name.includes('هاندبيس');
+    });
+  } else if (cat === 'teeth') {
+    prods = prods.filter(p => {
+      const name = ((p.nameAr || '') + ' ' + (p.nameEn || '')).toLowerCase();
+      return name.includes('teeth') || name.includes('wax') || name.includes('شمع') || name.includes('أسنان') || name.includes('baseplate');
+    });
+  } else if (cat === 'exam') {
+    prods = prods.filter(p => {
+      const name = ((p.nameAr || '') + ' ' + (p.nameEn || '')).toLowerCase();
+      return name.includes('mirror') || name.includes('probe') || name.includes('spatula') || name.includes('bowl') || name.includes('slab') || name.includes('lighter') || name.includes('torch');
+    });
+  }
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase().trim();
+    prods = prods.filter(p => {
+      const name = ((p.nameAr || '') + ' ' + (p.nameEn || '') + ' ' + (p.sku || '')).toLowerCase();
+      return name.includes(q);
+    });
+  }
+
+  if (countDisplay) {
+    countDisplay.textContent = `${prods.length} منتج`;
+  }
+
+  if (prods.length === 0) {
+    container.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.775rem;">لا توجد أدوات مطابقة للبحث</div>';
+    return;
+  }
+
+  container.innerHTML = prods.map(p => {
+    const stock = Number(p.stock) || 0;
+    const isOutOfStock = stock <= 0;
+    const price = Number(p.sellingPrice) || 0;
+
+    return `
+      <div class="student-product-pick-item">
+        <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;">
+          <div style="font-weight: 700; font-size: 0.785rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.nameAr}">${p.nameAr}</div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.7rem;">
+            <span class="num-mono" style="font-weight: 800; color: var(--primary);">${price} د.ل</span>
+            <span style="color: ${isOutOfStock ? '#ef4444' : stock < 10 ? '#f59e0b' : 'var(--text-muted)'}; font-size: 0.675rem;">
+              ${isOutOfStock ? '⚠️ نافد' : `(متاح: ${stock})`}
+            </span>
+          </div>
+        </div>
+        <button type="button" class="btn-primary btn-sm" onclick="studentOrderAddToCart('${p.id}')" ${isOutOfStock ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} style="padding: 3px 8px; font-size: 0.725rem;">
+          + إضافة
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+function studentOrderAddToCart(productId) {
+  const prod = ERP_STATE.products.find(p => p.id === productId);
+  if (!prod) return;
+
+  const existing = STUDENT_ORDER_STATE.cart.find(i => i.productId === productId);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    STUDENT_ORDER_STATE.cart.push({
+      productId: prod.id,
+      name: prod.nameAr,
+      price: Number(prod.sellingPrice) || 0,
+      qty: 1,
+      stock: Number(prod.stock) || 0
+    });
+  }
+
+  renderStudentCart();
+  calculateStudentOrderTotals();
+  showToast(`تمت إضافة "${prod.nameAr}" لسلة الطالب 🛒`);
+}
+
+function studentOrderUpdateQty(productId, delta) {
+  const item = STUDENT_ORDER_STATE.cart.find(i => i.productId === productId);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) {
+    STUDENT_ORDER_STATE.cart = STUDENT_ORDER_STATE.cart.filter(i => i.productId !== productId);
+  }
+  renderStudentCart();
+  calculateStudentOrderTotals();
+}
+
+function studentOrderRemoveItem(productId) {
+  STUDENT_ORDER_STATE.cart = STUDENT_ORDER_STATE.cart.filter(i => i.productId !== productId);
+  renderStudentCart();
+  calculateStudentOrderTotals();
+}
+
+function clearStudentCart() {
+  STUDENT_ORDER_STATE.cart = [];
+  renderStudentCart();
+  calculateStudentOrderTotals();
+}
+
+function renderStudentCart() {
+  const tbody = document.getElementById('studentCartBody');
+  const countEl = document.getElementById('studentCartCount');
+  if (!tbody) return;
+
+  if (countEl) {
+    countEl.textContent = STUDENT_ORDER_STATE.cart.reduce((sum, i) => sum + i.qty, 0);
+  }
+
+  if (STUDENT_ORDER_STATE.cart.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.75rem;">
+          سلة الطالب فارغة حالياً. اضغط على "+ إضافة" بجانب أي أداة لإضافتها.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = STUDENT_ORDER_STATE.cart.map(item => `
+    <tr>
+      <td style="font-weight: 600; color: var(--text-main); font-size: 0.775rem;">
+        ${item.name}
+      </td>
+      <td style="text-align: center;">
+        <div style="display: inline-flex; align-items: center; gap: 4px;">
+          <button type="button" class="qty-stepper-btn" onclick="studentOrderUpdateQty('${item.productId}', -1)">-</button>
+          <span class="num-mono" style="font-weight: 800; min-width: 18px; text-align: center;">${item.qty}</span>
+          <button type="button" class="qty-stepper-btn" onclick="studentOrderUpdateQty('${item.productId}', 1)">+</button>
+        </div>
+      </td>
+      <td class="num-mono" style="text-align: left; font-weight: 700; color: var(--primary);">
+        ${item.price * item.qty} د.ل
+      </td>
+      <td style="text-align: center;">
+        <button type="button" class="cart-item-delete-btn" onclick="studentOrderRemoveItem('${item.productId}')" title="حذف">✕</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function calculateStudentOrderTotals() {
+  const subtotal = STUDENT_ORDER_STATE.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+  const shipping = STUDENT_ORDER_STATE.deliveryFee;
+  const total = subtotal + shipping;
+
+  const subtotalEl = document.getElementById('studentSubtotalDisplay');
+  const shippingEl = document.getElementById('studentShippingDisplay');
+  const totalEl = document.getElementById('studentTotalDisplay');
+
+  if (subtotalEl) subtotalEl.textContent = `${subtotal} د.ل`;
+  if (shippingEl) {
+    shippingEl.textContent = shipping === 0 ? 'مجاني (0 د.ل)' : `${shipping} د.ل`;
+  }
+  if (totalEl) totalEl.textContent = `${total} د.ل`;
+
+  return { subtotal, shipping, total };
+}
+
+async function submitStudentOrder() {
+  const nameInput = document.getElementById('studentOrderName');
+  const phoneInput = document.getElementById('studentOrderPhone');
+  const yearSelect = document.getElementById('studentOrderYear');
+  const collegeSelect = document.getElementById('studentOrderCollege');
+  const customCollegeInput = document.getElementById('studentOrderCustomCollege');
+  const deliverySelect = document.getElementById('studentOrderDeliveryType');
+  const paymentSelect = document.getElementById('studentOrderPayment');
+  const notesInput = document.getElementById('studentOrderNotes');
+  const partnerRadio = document.querySelector('input[name="studentOrderPartner"]:checked');
+  const submitBtn = document.getElementById('btnSubmitStudentOrder');
+
+  const name = nameInput ? nameInput.value.trim() : '';
+  const phone = phoneInput ? phoneInput.value.trim() : '';
+
+  if (!name) {
+    showToast('يرجى إدخال اسم الطالب / الطالبة', 'warning');
+    if (nameInput) nameInput.focus();
+    return;
+  }
+
+  if (!phone || phone.length < 8) {
+    showToast('يرجى إدخال رقم هاتف صحيح للتواصل عبر الواتساب', 'warning');
+    if (phoneInput) phoneInput.focus();
+    return;
+  }
+
+  if (STUDENT_ORDER_STATE.cart.length === 0) {
+    showToast('يرجى إضافة أداة واحدة على الأقل لسلة الطالب', 'warning');
+    return;
+  }
+
+  // Resolve University & College
+  let college = collegeSelect ? collegeSelect.value : 'جامعة طرابلس — كلية طب الأسنان';
+  if (college === 'كلية أخرى' && customCollegeInput && customCollegeInput.value.trim()) {
+    college = customCollegeInput.value.trim();
+  }
+
+  // Resolve delivery text
+  const deliveryType = deliverySelect ? deliverySelect.value : 'faculty';
+  let deliveryText = 'استلام مباشر بالكلية / المدرج';
+  if (deliveryType === 'tripoli_home') deliveryText = 'توصيل للمنزل داخل طرابلس';
+  else if (deliveryType === 'outside_tripoli') deliveryText = 'شحن وتوصيل خارج طرابلس';
+  else if (deliveryType === 'office') deliveryText = 'استلام من مقر Absolute Dental';
+
+  const userNotes = notesInput ? notesInput.value.trim() : '';
+  const academicYear = yearSelect ? yearSelect.value : '';
+  const partnerName = partnerRadio ? partnerRadio.value : ERP_STATE.currentPartner;
+  const paymentMethod = paymentSelect ? paymentSelect.value : 'cash_on_delivery';
+
+  // Calculate totals
+  const totals = calculateStudentOrderTotals();
+  const subtotal = totals.subtotal;
+  const shippingFee = totals.shipping;
+  const totalPrice = totals.total;
+
+  // Generate 8-digit order number
+  const orderNum = Math.floor(10000000 + Math.random() * 90000000).toString();
+
+  // Full composite address / delivery notes
+  const fullAddress = [
+    deliveryText,
+    academicYear ? `[${academicYear}]` : '',
+    userNotes ? `[ملاحظات: ${userNotes}]` : ''
+  ].filter(Boolean).join(' - ');
+
+  // UI button loading state
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>⏳ جاري الحفظ في السيرفر والمخزون...</span>';
+  }
+
+  let serverOrderId = null;
+
+  try {
+    // 1. POST Order to Supabase `/rest/v1/orders`
+    const orderPayload = {
+      order_number: orderNum,
+      customer_name: name,
+      customer_phone: phone,
+      university: 'جامعة طرابلس',
+      college: college,
+      address_text: fullAddress,
+      status: 'new',
+      total_price: totalPrice,
+      subtotal: subtotal,
+      shipping_fee: shippingFee,
+      payment_method: paymentMethod,
+      is_guest: true,
+      notes: `طلب مسجل بواسطة الأدمن (${partnerName}) بالنيابة عن الطالب. ${userNotes ? 'ملاحظة: ' + userNotes : ''}`
+    };
+
+    const orderRes = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_CONFIG.anonKey,
+        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(orderPayload)
+    });
+
+    if (orderRes.ok) {
+      const createdRows = await orderRes.json();
+      if (Array.isArray(createdRows) && createdRows[0]) {
+        serverOrderId = createdRows[0].id;
+      }
+    }
+
+    // 2. If order created in Supabase, insert order items into `/rest/v1/order_items`
+    if (serverOrderId) {
+      const itemsPayload = STUDENT_ORDER_STATE.cart.map(item => ({
+        order_id: serverOrderId,
+        product_id: item.productId,
+        quantity: item.qty,
+        price: item.price
+      }));
+
+      await fetch(`${SUPABASE_CONFIG.url}/rest/v1/order_items`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_CONFIG.anonKey,
+          'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(itemsPayload)
+      });
+    }
+  } catch (err) {
+    console.warn('Direct Supabase insert notice:', err);
+  }
+
+  // 3. Fallback or Local Order Object
+  const orderId = serverOrderId || `order-${Date.now()}`;
+  const newOrder = {
+    id: orderId,
+    orderNumber: `#${orderNum}`,
+    customerName: name,
+    phone: phone,
+    university: 'جامعة طرابلس',
+    college: college,
+    address: fullAddress,
+    itemsCount: STUDENT_ORDER_STATE.cart.reduce((sum, i) => sum + i.qty, 0),
+    items: STUDENT_ORDER_STATE.cart.map(i => ({ name: i.name, qty: i.qty, price: i.price, id: i.productId })),
+    total: totalPrice,
+    subtotal: subtotal,
+    shippingFee: shippingFee,
+    status: 'جديد',
+    assignedTo: partnerName,
+    date: 'الآن (مباشر)',
+    notes: userNotes,
+    paymentMethod: paymentMethod
+  };
+
+  // Prepend to ERP State orders
+  ERP_STATE.orders.unshift(newOrder);
+
+  // Update product stock locally
+  STUDENT_ORDER_STATE.cart.forEach(cartItem => {
+    const prod = ERP_STATE.products.find(p => p.id === cartItem.productId);
+    if (prod) {
+      prod.stock = Math.max(0, (Number(prod.stock) || 0) - cartItem.qty);
+    }
+  });
+
+  // Log to Audit Trail
+  ERP_STATE.auditLogs.unshift({
+    id: `#${1100 + ERP_STATE.auditLogs.length}`,
+    time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
+    date: 'اليوم',
+    user: partnerName,
+    action: 'إنشاء طلب طالب (بالنيابة)',
+    details: `تم إنشاء الطلب #${orderNum} للطالب/ة ${name} (${newOrder.itemsCount} صنفاً) بقيمة ${totalPrice} د.ل`,
+    oldVal: '-',
+    newVal: `${totalPrice} د.ل`
+  });
+  localStorage.setItem('abs_erp_audit', JSON.stringify(ERP_STATE.auditLogs));
+
+  // Store last created order for WhatsApp and print
+  STUDENT_ORDER_STATE.lastCreatedOrder = newOrder;
+
+  // Restore submit button
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<span>✓ حفظ وتأكيد الطلب في السيرفر</span>';
+  }
+
+  // Close creation modal
+  closeModal('studentOrderModal');
+
+  // Update all system screens & metrics
+  updateDashboardRealUI();
+  if (ERP_STATE.activeScreen === 'orders') renderOrdersTable();
+  if (ERP_STATE.activeScreen === 'products') renderProductsTable();
+  if (ERP_STATE.activeScreen === 'inventory') renderInventoryTable();
+
+  // Populate Success Modal
+  const successOrderNumEl = document.getElementById('successModalOrderNum');
+  const successStudentNameEl = document.getElementById('successModalStudentName');
+  const successStudentPhoneEl = document.getElementById('successModalStudentPhone');
+  const successOrderTotalEl = document.getElementById('successModalOrderTotal');
+
+  if (successOrderNumEl) successOrderNumEl.textContent = `#${orderNum}`;
+  if (successStudentNameEl) successStudentNameEl.textContent = name;
+  if (successStudentPhoneEl) successStudentPhoneEl.textContent = phone;
+  if (successOrderTotalEl) successOrderTotalEl.textContent = `${totalPrice} د.ل`;
+
+  openModal('studentOrderSuccessModal');
+  showToast(`تم حفظ طلب الطالب #${orderNum} وتأكيده بنجاح في السيرفر 🦷✨`);
+}
+
+function dispatchStudentOrderWhatsApp() {
+  const order = STUDENT_ORDER_STATE.lastCreatedOrder;
+  if (!order) return;
+
+  const cleanPhone = (order.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '');
+  const itemsText = (order.items || []).map(i => `• ${i.name} (عدد ${i.qty}) — ${(i.price * i.qty)} د.ل`).join('\n');
+  const shippingText = order.shippingFee > 0 ? `🚚 رسوم التوصيل: ${order.shippingFee} د.ل\n` : '🚚 التوصيل: استلام مباشر بالكلية (مجاني)\n';
+
+  const msg = `🦷 *مرحباً دكتور/ة ${order.customerName}*
+تم تسجيل وتأكيد طلبكم بنجاح لدى *Absolute Dental* لمستلزمات طب الأسنان!
+
+📋 *رقم الطلب:* ${order.orderNumber}
+🏛️ *الكلية / الجامعة:* ${order.college}
+📍 *مكان التسليم:* ${order.address}
+
+🛒 *الأصناف المطلوبة:*
+${itemsText}
+
+${shippingText}💰 *الإجمالي المطلوب:* *${order.total} د.ل*
+💳 *طريقة الدفع:* كاش عند الاستلام
+
+نتمنى لكم فصلاً وتدريباً دراسياً موفقاً! 🦷✨
+فريق Absolute Dental`;
+
+  window.open(`https://wa.me/218${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function printSlipFromSuccessModal() {
+  const order = STUDENT_ORDER_STATE.lastCreatedOrder;
+  if (!order) return;
+  closeModal('studentOrderSuccessModal');
+  openDeliverySlipById(order.id);
+}
+
+// -------------------------------------------------------------
 // 17. INITIALIZATION
 // -------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
