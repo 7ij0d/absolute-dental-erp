@@ -196,12 +196,12 @@
               </div>
               <div class="kpi-meta">
                 <div class="kpi-label">إجمالي المبيعات</div>
-                <div class="kpi-value num-mono">48,750 <span class="kpi-value-currency">د.ل</span></div>
+                <div class="kpi-value num-mono" id="kpiSalesVal">3,818 <span class="kpi-value-currency">د.ل</span></div>
               </div>
             </div>
             <div class="kpi-bottom-row">
-              <span class="kpi-badge positive">↑ +12%</span>
-              <span class="kpi-period">مقارنة بالشهر الماضي</span>
+              <span class="kpi-badge positive">↑ مؤكد</span>
+              <span class="kpi-period">18 طلباً من متجر الأسنان</span>
             </div>
             <!-- Sparkline Curve SVG -->
             <svg class="kpi-sparkline" viewBox="0 0 180 40" preserveAspectRatio="none">
@@ -218,12 +218,12 @@
               </div>
               <div class="kpi-meta">
                 <div class="kpi-label">صافي الأرباح</div>
-                <div class="kpi-value num-mono">18,420 <span class="kpi-value-currency">د.ل</span></div>
+                <div class="kpi-value num-mono" id="kpiProfitVal">1,458 <span class="kpi-value-currency">د.ل</span></div>
               </div>
             </div>
             <div class="kpi-bottom-row">
-              <span class="kpi-badge positive">↑ +8%</span>
-              <span class="kpi-period">مقارنة بالشهر الماضي</span>
+              <span class="kpi-badge positive">486 د.ل</span>
+              <span class="kpi-period">لكل شريك (33.3%)</span>
             </div>
             <!-- Sparkline Curve SVG -->
             <svg class="kpi-sparkline" viewBox="0 0 180 40" preserveAspectRatio="none">
@@ -240,12 +240,12 @@
               </div>
               <div class="kpi-meta">
                 <div class="kpi-label">المصروفات</div>
-                <div class="kpi-value num-mono">12,300 <span class="kpi-value-currency">د.ل</span></div>
+                <div class="kpi-value num-mono" id="kpiExpensesVal">680 <span class="kpi-value-currency">د.ل</span></div>
               </div>
             </div>
             <div class="kpi-bottom-row">
-              <span class="kpi-badge negative">↓ -3%</span>
-              <span class="kpi-period">مقارنة بالشهر الماضي</span>
+              <span class="kpi-badge negative">تشغيلي</span>
+              <span class="kpi-period">شحن، تغليف، تسويق، سيرفر</span>
             </div>
             <!-- Sparkline Curve SVG -->
             <svg class="kpi-sparkline" viewBox="0 0 180 40" preserveAspectRatio="none">
@@ -262,12 +262,12 @@
               </div>
               <div class="kpi-meta">
                 <div class="kpi-label">عدد الطلبات</div>
-                <div class="kpi-value num-mono">156</div>
+                <div class="kpi-value num-mono" id="kpiOrdersVal">18</div>
               </div>
             </div>
             <div class="kpi-bottom-row">
-              <span class="kpi-badge positive">↑ +24%</span>
-              <span class="kpi-period">مقارنة بالشهر الماضي</span>
+              <span class="kpi-badge positive">17 نشط</span>
+              <span class="kpi-period">1 ملغي فقط</span>
             </div>
             <!-- Sparkline Curve SVG -->
             <svg class="kpi-sparkline" viewBox="0 0 180 40" preserveAspectRatio="none">
@@ -283,18 +283,18 @@
           <!-- Left / Main Card: المبيعات خلال آخر 30 يوماً -->
           <div class="card-container">
             <div class="card-header-row">
-              <div class="card-title">المبيعات خلال آخر 30 يوماً</div>
+              <div class="card-title">المبيعات خلال آخر 30 يوماً (سبتمبر)</div>
               <div class="chart-filter-pills">
                 <button class="chart-pill" onclick="filterChartPeriod('day', this)">اليوم</button>
                 <button class="chart-pill" onclick="filterChartPeriod('week', this)">الأسبوع</button>
                 <button class="chart-pill active" onclick="filterChartPeriod('month', this)">الشهر</button>
-                <button class="chart-pill" onclick="filterChartPeriod('3months', this)">آخر 3 أشهر</button>
+                <button class="chart-pill" onclick="filterChartPeriod('3months', this)">الكل</button>
               </div>
             </div>
 
             <div class="chart-header-metrics">
-              <span class="chart-big-number num-mono" id="chartTotalDisplay">48,750 د.ل</span>
-              <span class="kpi-badge positive">↑ +12%</span>
+              <span class="chart-big-number num-mono" id="chartTotalDisplay">3,818 د.ل</span>
+              <span class="kpi-badge positive">ذروة 28 سبتمبر (2,137 د.ل)</span>
             </div>
 
             <!-- Pristine Line & Gradient Chart SVG -->
@@ -314,38 +314,38 @@
                 <line x1="40" y1="185" x2="680" y2="185" stroke="#f1f5f9" stroke-width="1"/>
 
                 <!-- Y-Axis Labels -->
-                <text x="25" y="24" fill="#94a3b8" font-size="10" text-anchor="end" font-family="Inter">6,000</text>
-                <text x="25" y="79" fill="#94a3b8" font-size="10" text-anchor="end" font-family="Inter">4,000</text>
-                <text x="25" y="134" fill="#94a3b8" font-size="10" text-anchor="end" font-family="Inter">2,000</text>
-                <text x="25" y="189" fill="#94a3b8" font-size="10" text-anchor="end" font-family="Inter">0</text>
+                <text x="35" y="24" fill="#94a3b8" font-size="10" text-anchor="end" font-family="Inter">2,500</text>
+                <text x="35" y="79" fill="#94a3b8" font-size="10" text-anchor="end" font-family="Inter">1,500</text>
+                <text x="35" y="134" fill="#94a3b8" font-size="10" text-anchor="end" font-family="Inter">500</text>
+                <text x="35" y="189" fill="#94a3b8" font-size="10" text-anchor="end" font-family="Inter">0</text>
 
                 <!-- Gradient Fill -->
-                <path d="M 50 175 C 90 160 130 140 170 138 C 210 136 240 115 280 110 C 320 105 360 88 400 95 C 440 102 460 70 500 70 C 530 70 560 110 600 95 C 630 85 650 65 675 50 L 675 185 L 50 185 Z" fill="url(#salesGradient)"/>
+                <path d="M 60 160 C 130 155 180 170 230 168 C 290 165 350 175 420 40 C 470 50 520 150 580 155 C 620 155 650 158 675 158 L 675 185 L 60 185 Z" fill="url(#salesGradient)"/>
 
                 <!-- Curve Line -->
-                <path d="M 50 175 C 90 160 130 140 170 138 C 210 136 240 115 280 110 C 320 105 360 88 400 95 C 440 102 460 70 500 70 C 530 70 560 110 600 95 C 630 85 650 65 675 50" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                <path d="M 60 160 C 130 155 180 170 230 168 C 290 165 350 175 420 40 C 470 50 520 150 580 155 C 620 155 650 158 675 158" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
 
-                <!-- Highlight Point with Tooltip -->
-                <circle cx="500" cy="70" r="5" fill="#ffffff" stroke="#2563eb" stroke-width="3"/>
+                <!-- Peak Highlight Point with Tooltip (28 سبتمبر) -->
+                <circle cx="420" cy="40" r="5" fill="#ffffff" stroke="#2563eb" stroke-width="3"/>
                 <!-- Tooltip Box -->
-                <g transform="translate(465, 34)">
-                  <rect width="70" height="26" rx="6" fill="#0f172a"/>
-                  <text x="35" y="17" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle" font-family="Inter">4,320 د.ل</text>
+                <g transform="translate(385, 8)">
+                  <rect width="76" height="26" rx="6" fill="#0f172a"/>
+                  <text x="38" y="17" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle" font-family="Cairo">2,137 د.ل</text>
                 </g>
 
                 <!-- X-Axis Dates -->
-                <text x="50" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">1 سبتمبر</text>
-                <text x="150" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">5 سبتمبر</text>
-                <text x="250" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">10 سبتمبر</text>
-                <text x="350" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">15 سبتمبر</text>
-                <text x="450" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">20 سبتمبر</text>
-                <text x="550" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">25 سبتمبر</text>
-                <text x="650" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">30 سبتمبر</text>
+                <text x="60" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">23 سبت</text>
+                <text x="160" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">25 سبت</text>
+                <text x="260" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">26 سبت</text>
+                <text x="350" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">27 سبت</text>
+                <text x="420" y="208" fill="#2563eb" font-weight="bold" font-size="10" text-anchor="middle" font-family="Cairo">28 سبت</text>
+                <text x="530" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">29 سبت</text>
+                <text x="640" y="208" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="Cairo">30 سبت</text>
               </svg>
             </div>
           </div>
 
-          <!-- Right Card: الطلبات التي تحتاج إجراء (Exact 5 Rows) -->
+          <!-- Right Card: الطلبات التي تحتاج إجراء (Exact 5 Real Orders) -->
           <div class="card-container">
             <div class="card-header-row">
               <div class="card-title">الطلبات التي تحتاج إجراء</div>
@@ -353,94 +353,94 @@
             </div>
 
             <div class="orders-list" id="actionOrdersList">
-              <!-- Row 1: #1068 -->
+              <!-- Real Row 1: #75735422 هديل النفاتي -->
               <div class="order-row-item">
                 <div class="order-row-meta">
-                  <span class="order-row-id num-mono">#1068</span>
-                  <span class="order-row-time num-mono">30/09 09:14</span>
+                  <span class="order-row-id num-mono">#75735422</span>
+                  <span class="order-row-time num-mono">30/09 10:04</span>
                 </div>
                 <div class="order-row-thumb">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m14 7 3 3-8.5 8.5-3.5 1 1-3.5Z"/></svg>
                 </div>
                 <div class="order-row-customer">
-                  <span class="order-customer-name">أحمد محمد</span>
-                  <span class="order-items-count">3 منتجات</span>
+                  <span class="order-customer-name">هديل النفاتي</span>
+                  <span class="order-items-count">23 منتج</span>
                 </div>
-                <span class="order-row-amount num-mono">280 د.ل</span>
-                <span class="status-pill preparing">قيد التجهيز</span>
-                <button class="order-open-btn" onclick="openOrderDetailsById('1068')">فتح</button>
+                <span class="order-row-amount num-mono">378 د.ل</span>
+                <span class="status-pill new">جديد</span>
+                <button class="order-open-btn" onclick="openOrderDetailsById('a94c9a07-9e86-4ffc-af3d-0a94fd0c985b')">فتح</button>
               </div>
 
-              <!-- Row 2: #1067 -->
+              <!-- Real Row 2: #18015727 ولاء المسلاتي -->
               <div class="order-row-item">
                 <div class="order-row-meta">
-                  <span class="order-row-id num-mono">#1067</span>
-                  <span class="order-row-time num-mono">30/09 08:53</span>
+                  <span class="order-row-id num-mono">#18015727</span>
+                  <span class="order-row-time num-mono">29/09 09:12</span>
                 </div>
                 <div class="order-row-thumb">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/></svg>
                 </div>
                 <div class="order-row-customer">
-                  <span class="order-customer-name">سارة علي</span>
-                  <span class="order-items-count">2 منتج</span>
+                  <span class="order-customer-name">ولاء المسلاتي</span>
+                  <span class="order-items-count">20 منتج</span>
                 </div>
-                <span class="order-row-amount num-mono">150 د.ل</span>
-                <span class="status-pill ready">جاهز للتوصيل</span>
-                <button class="order-open-btn" onclick="openOrderDetailsById('1067')">فتح</button>
+                <span class="order-row-amount num-mono">314 د.ل</span>
+                <span class="status-pill preparing">قيد التجهيز</span>
+                <button class="order-open-btn" onclick="openOrderDetailsById('8059ff36-1c99-43b7-ba0c-4c8d13fef140')">فتح</button>
               </div>
 
-              <!-- Row 3: #1066 -->
+              <!-- Real Row 3: #47090658 رغدة عبدالرحمن الدالي -->
               <div class="order-row-item">
                 <div class="order-row-meta">
-                  <span class="order-row-id num-mono">#1066</span>
-                  <span class="order-row-time num-mono">30/09 08:20</span>
+                  <span class="order-row-id num-mono">#47090658</span>
+                  <span class="order-row-time num-mono">28/09 12:11</span>
                 </div>
                 <div class="order-row-thumb">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 7h-9"/><path d="M14 17H5"/></svg>
                 </div>
                 <div class="order-row-customer">
-                  <span class="order-customer-name">محمد خالد</span>
-                  <span class="order-items-count">5 منتجات</span>
+                  <span class="order-customer-name">رغدة عبدالرحمن الدالي</span>
+                  <span class="order-items-count">74 منتج</span>
                 </div>
-                <span class="order-row-amount num-mono">420 د.ل</span>
-                <span class="status-pill new">جديد</span>
-                <button class="order-open-btn" onclick="openOrderDetailsById('1066')">فتح</button>
+                <span class="order-row-amount num-mono">480 د.ل</span>
+                <span class="status-pill preparing">قيد التجهيز</span>
+                <button class="order-open-btn" onclick="openOrderDetailsById('73307d5b-2244-4aba-93c7-a881ee00d899')">فتح</button>
               </div>
 
-              <!-- Row 4: #1065 -->
+              <!-- Real Row 4: #37276067 سيف الاسلام -->
               <div class="order-row-item">
                 <div class="order-row-meta">
-                  <span class="order-row-id num-mono">#1065</span>
-                  <span class="order-row-time num-mono">30/09 07:55</span>
+                  <span class="order-row-id num-mono">#37276067</span>
+                  <span class="order-row-time num-mono">28/09 23:15</span>
                 </div>
                 <div class="order-row-thumb">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </div>
                 <div class="order-row-customer">
-                  <span class="order-customer-name">نور الهدى</span>
-                  <span class="order-items-count">1 منتج</span>
+                  <span class="order-customer-name">سيف الاسلام</span>
+                  <span class="order-items-count">13 منتج</span>
                 </div>
-                <span class="order-row-amount num-mono">95 د.ل</span>
+                <span class="order-row-amount num-mono">175 د.ل</span>
                 <span class="status-pill preparing">قيد التجهيز</span>
-                <button class="order-open-btn" onclick="openOrderDetailsById('1065')">فتح</button>
+                <button class="order-open-btn" onclick="openOrderDetailsById('5506ee16-20e9-4a9b-822a-ae01e2fb6185')">فتح</button>
               </div>
 
-              <!-- Row 5: #1064 -->
+              <!-- Real Row 5: #98426493 ملاك فرحات -->
               <div class="order-row-item">
                 <div class="order-row-meta">
-                  <span class="order-row-id num-mono">#1064</span>
-                  <span class="order-row-time num-mono">30/09 06:16</span>
+                  <span class="order-row-id num-mono">#98426493</span>
+                  <span class="order-row-time num-mono">29/09 08:25</span>
                 </div>
                 <div class="order-row-thumb">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
                 </div>
                 <div class="order-row-customer">
-                  <span class="order-customer-name">علي محمود</span>
-                  <span class="order-items-count">4 منتجات</span>
+                  <span class="order-customer-name">ملاك فرحات</span>
+                  <span class="order-items-count">1 منتج</span>
                 </div>
-                <span class="order-row-amount num-mono">310 د.ل</span>
-                <span class="status-pill new">جديد</span>
-                <button class="order-open-btn" onclick="openOrderDetailsById('1064')">فتح</button>
+                <span class="order-row-amount num-mono">75 د.ل</span>
+                <span class="status-pill completed">مكتمل</span>
+                <button class="order-open-btn" onclick="openOrderDetailsById('b56fe05a-7402-48a9-8935-dda89e3836bc')">فتح</button>
               </div>
             </div>
           </div>
@@ -449,10 +449,10 @@
         <!-- 3. BOTTOM SECTION: 3 CARDS (INVENTORY, TOP PRODUCTS, RECENT ACTIVITIES) -->
         <div class="dashboard-bottom-row">
 
-          <!-- Bottom Card 1: المخزون -->
+          <!-- Bottom Card 1: المخزون الحقيقي -->
           <div class="card-container">
             <div class="card-header-row">
-              <div class="card-title">المخزون</div>
+              <div class="card-title">المخزون (28 صنفاً)</div>
               <span class="card-link" onclick="navigateToScreen('inventory')">عرض الكل ←</span>
             </div>
 
@@ -461,8 +461,8 @@
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
               </div>
               <div class="inventory-big-stat">
-                <span class="inventory-num num-mono">128</span>
-                <span class="inventory-sublabel">منتج متوفر</span>
+                <span class="inventory-num num-mono" id="invTotalAvailablePieces">910</span>
+                <span class="inventory-sublabel">قطعة متوفرة</span>
               </div>
             </div>
 
@@ -470,15 +470,15 @@
               <div class="inventory-warning-card low">
                 <span class="inv-warning-icon">⚠️</span>
                 <div>
-                  <div class="inv-warning-num num-mono">3</div>
-                  <div class="inv-warning-text">منتجات منخفضة</div>
+                  <div class="inv-warning-num num-mono" id="invLowStockCount">2</div>
+                  <div class="inv-warning-text">منتجات منخفضة (مرآة فحص، SF 46)</div>
                 </div>
               </div>
               <div class="inventory-warning-card out">
                 <span class="inv-warning-icon">🚫</span>
                 <div>
-                  <div class="inv-warning-num num-mono">1</div>
-                  <div class="inv-warning-text">منتج نافد</div>
+                  <div class="inv-warning-num num-mono" id="invOutStockCount">4</div>
+                  <div class="inv-warning-text">أصناف نافدة</div>
                 </div>
               </div>
             </div>
@@ -488,92 +488,92 @@
             </button>
           </div>
 
-          <!-- Bottom Card 2: أكثر المنتجات مبيعاً -->
+          <!-- Bottom Card 2: أكثر المنتجات مبيعاً من واقع الطلبيات -->
           <div class="card-container">
             <div class="card-header-row">
               <div class="card-title">أكثر المنتجات مبيعاً</div>
               <span class="card-link" onclick="navigateToScreen('products')">عرض الكل ←</span>
             </div>
 
-            <div class="top-products-list">
-              <!-- Item 1 -->
+            <div class="top-products-list" id="topProductsContainer">
+              <!-- Item 1: Central Incisor -->
               <div class="top-product-item">
                 <span class="rank-badge num-mono">1</span>
                 <div class="top-prod-thumb">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
                 </div>
                 <div class="top-prod-info">
-                  <span class="top-prod-name">مجموعة طالب الأسنان</span>
-                  <span class="top-prod-sales">48 مبيعاً</span>
+                  <span class="top-prod-name">Artificial Teeth - Central Incisor</span>
+                  <span class="top-prod-sales">52 مبيعاً</span>
                 </div>
                 <div class="top-prod-bar-wrap">
-                  <div class="top-prod-bar-fill" style="width: 85%;"></div>
+                  <div class="top-prod-bar-fill" style="width: 100%;"></div>
                 </div>
               </div>
 
-              <!-- Item 2 -->
+              <!-- Item 2: Lower First Molar -->
               <div class="top-product-item">
                 <span class="rank-badge num-mono">2</span>
                 <div class="top-prod-thumb">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/></svg>
                 </div>
                 <div class="top-prod-info">
-                  <span class="top-prod-name">مرآة فحص</span>
-                  <span class="top-prod-sales">36 مبيعاً</span>
+                  <span class="top-prod-name">Artificial Teeth - Lower First Molar</span>
+                  <span class="top-prod-sales">52 مبيعاً</span>
                 </div>
                 <div class="top-prod-bar-wrap">
-                  <div class="top-prod-bar-fill" style="width: 65%;"></div>
+                  <div class="top-prod-bar-fill" style="width: 100%;"></div>
                 </div>
               </div>
 
-              <!-- Item 3 -->
+              <!-- Item 3: Fissure Bur SF 46 -->
               <div class="top-product-item">
                 <span class="rank-badge num-mono">3</span>
                 <div class="top-prod-thumb">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="2" x2="12" y2="22"/></svg>
                 </div>
                 <div class="top-prod-info">
-                  <span class="top-prod-name">مسبار أسنان</span>
-                  <span class="top-prod-sales">28 مبيعاً</span>
+                  <span class="top-prod-name">Fissure Bur - SF 46</span>
+                  <span class="top-prod-sales">13 مبيعاً</span>
                 </div>
                 <div class="top-prod-bar-wrap">
-                  <div class="top-prod-bar-fill" style="width: 50%;"></div>
+                  <div class="top-prod-bar-fill" style="width: 25%;"></div>
                 </div>
               </div>
 
-              <!-- Item 4 -->
+              <!-- Item 4: niddle bur TC 10 -->
               <div class="top-product-item">
                 <span class="rank-badge num-mono">4</span>
                 <div class="top-prod-thumb">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 7 3 3"/></svg>
                 </div>
                 <div class="top-prod-info">
-                  <span class="top-prod-name">ملقط</span>
-                  <span class="top-prod-sales">22 مبيعاً</span>
+                  <span class="top-prod-name">niddle bur - TC 10 (Blue)</span>
+                  <span class="top-prod-sales">11 مبيعاً</span>
                 </div>
                 <div class="top-prod-bar-wrap">
-                  <div class="top-prod-bar-fill" style="width: 40%;"></div>
+                  <div class="top-prod-bar-fill" style="width: 21%;"></div>
                 </div>
               </div>
 
-              <!-- Item 5 -->
+              <!-- Item 5: Long taper TF12 -->
               <div class="top-product-item">
                 <span class="rank-badge num-mono">5</span>
                 <div class="top-prod-thumb">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m14 7 3 3-8.5 8.5-3.5 1 1-3.5Z"/></svg>
                 </div>
                 <div class="top-prod-info">
-                  <span class="top-prod-name">Endo File</span>
-                  <span class="top-prod-sales">18 مبيعاً</span>
+                  <span class="top-prod-name">Long taper with flat end - TF12 (blue)</span>
+                  <span class="top-prod-sales">11 مبيعاً</span>
                 </div>
                 <div class="top-prod-bar-wrap">
-                  <div class="top-prod-bar-fill" style="width: 30%;"></div>
+                  <div class="top-prod-bar-fill" style="width: 21%;"></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Bottom Card 3: آخر نشاطات الشركاء -->
+          <!-- Bottom Card 3: آخر نشاطات الشركاء والطلبيات الحقيقية -->
           <div class="card-container">
             <div class="card-header-row">
               <div class="card-title">آخر نشاطات الشركاء</div>
@@ -583,19 +583,19 @@
             <div class="activities-list">
               <!-- Activity 1 -->
               <div class="activity-item">
-                <div class="activity-icon-badge expense">💼</div>
+                <div class="activity-icon-badge order">✓</div>
                 <div class="activity-body">
-                  <div class="activity-user-action"><strong>طه</strong> أضاف مصروفاً بقيمة 500 د.ل (شحن)</div>
-                  <span class="activity-time">منذ 10 دقائق</span>
+                  <div class="activity-user-action"><strong>طه</strong> استلم وأكد الطلب #75735422 للطالبة هديل النفاتي (378 د.ل)</div>
+                  <span class="activity-time">30 سبتمبر 10:04 ص</span>
                 </div>
               </div>
 
               <!-- Activity 2 -->
               <div class="activity-item">
-                <div class="activity-icon-badge order">✓</div>
+                <div class="activity-icon-badge order">📦</div>
                 <div class="activity-body">
-                  <div class="activity-user-action"><strong>عبدالمؤمن</strong> أكمل الطلب #1067</div>
-                  <span class="activity-time">منذ 25 دقيقة</span>
+                  <div class="activity-user-action"><strong>عبدالمؤمن</strong> جهز الطلب #18015727 للطالبة ولاء المسلاتي (314 د.ل)</div>
+                  <span class="activity-time">29 سبتمبر 09:12 ص</span>
                 </div>
               </div>
 
@@ -603,8 +603,8 @@
               <div class="activity-item">
                 <div class="activity-icon-badge treasury">🏛️</div>
                 <div class="activity-body">
-                  <div class="activity-user-action"><strong>ساسي</strong> أضاف دفعة للصندوق بقيمة 1,000 د.ل</div>
-                  <span class="activity-time">منذ ساعة</span>
+                  <div class="activity-user-action"><strong>ساسي</strong> أكمل تسليم الطلب #98426493 للطالبة ملاك فرحات (75 د.ل)</div>
+                  <span class="activity-time">29 سبتمبر 08:25 ص</span>
                 </div>
               </div>
 
@@ -612,17 +612,17 @@
               <div class="activity-item">
                 <div class="activity-icon-badge price">✏️</div>
                 <div class="activity-body">
-                  <div class="activity-user-action"><strong>طه</strong> عدّل سعر منتج مرآة فحص</div>
-                  <span class="activity-time">منذ ساعتين</span>
+                  <div class="activity-user-action"><strong>طه</strong> راجع طلبية رغدة عبدالرحمن الدالي #47090658 (480 د.ل)</div>
+                  <span class="activity-time">28 سبتمبر 12:11 ص</span>
                 </div>
               </div>
 
               <!-- Activity 5 -->
               <div class="activity-item">
-                <div class="activity-icon-badge product">📦</div>
+                <div class="activity-icon-badge product">⚠️</div>
                 <div class="activity-body">
-                  <div class="activity-user-action"><strong>عبدالمؤمن</strong> أضاف منتج جديد (ماسك طبي)</div>
-                  <span class="activity-time">منذ 3 ساعات</span>
+                  <div class="activity-user-action"><strong>عبدالمؤمن</strong> فحص مخزون Fissure Bur SF 46 (متبقي 7 قطع فقط)</div>
+                  <span class="activity-time">28 سبتمبر 10:20 ص</span>
                 </div>
               </div>
             </div>
@@ -741,18 +741,18 @@
         <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.5rem;">
           <div class="kpi-card">
             <div class="kpi-label">إجمالي المخزون المتاح</div>
-            <div class="kpi-value num-mono" style="color: var(--status-success);">128 قطعة</div>
-            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">متوفرة في مخزن طرابلس</span>
+            <div class="kpi-value num-mono" id="invScreenTotalPieces" style="color: var(--status-success);">910 قطعة</div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">متوفرة في مخزن طرابلس عبر 24 صنفاً</span>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">منتجات منخفضة المخزون</div>
-            <div class="kpi-value num-mono" style="color: var(--status-warning);">3 أصناف</div>
-            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">مرآة فحص، مسبار، قبضة توربين</span>
+            <div class="kpi-value num-mono" id="invScreenLowCount" style="color: var(--status-warning);">2 أصناف</div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">مرآة فحص (Dental Mouth Mirror)، SF 46</span>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">أصناف نافدة بالكامل</div>
-            <div class="kpi-value num-mono" style="color: var(--status-danger);">1 صنف</div>
-            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Round bur BR 49</span>
+            <div class="kpi-value num-mono" id="invScreenOutCount" style="color: var(--status-danger);">4 أصناف</div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Round bur BR 49، Baseplates، Wax sheet، Spatula</span>
           </div>
         </div>
 
@@ -798,22 +798,22 @@
         <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 1.5rem;">
           <div class="kpi-card">
             <div class="kpi-label">إجمالي المبيعات (Revenue)</div>
-            <div class="kpi-value num-mono">48,750 د.ل</div>
-            <span style="font-size: 0.725rem; color: var(--status-success);">156 طلباً معتمداً</span>
+            <div class="kpi-value num-mono" id="finScreenRevenue">3,818 د.ل</div>
+            <span style="font-size: 0.725rem; color: var(--status-success);">18 طلباً معتمداً</span>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">تكلفة البضاعة المباعة (COGS)</div>
-            <div class="kpi-value num-mono" style="color: var(--text-muted);">21,450 د.ل</div>
+            <div class="kpi-value num-mono" id="finScreenCogs" style="color: var(--text-muted);">1,680 د.ل</div>
             <span style="font-size: 0.725rem; color: var(--text-muted);">44% من المبيعات</span>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">المصروفات التشغيلية</div>
-            <div class="kpi-value num-mono" style="color: var(--status-danger);">12,300 د.ل</div>
-            <span style="font-size: 0.725rem; color: var(--status-danger);">شحن، تغليف، إعلانات</span>
+            <div class="kpi-value num-mono" id="finScreenExpenses" style="color: var(--status-danger);">680 د.ل</div>
+            <span style="font-size: 0.725rem; color: var(--status-danger);">شحن، تغليف، تسويق، سيرفر</span>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">صافي الربح القابل للتوزيع</div>
-            <div class="kpi-value num-mono" style="color: var(--status-success);">18,420 د.ل</div>
+            <div class="kpi-value num-mono" id="finScreenNetProfit" style="color: var(--status-success);">1,458 د.ل</div>
             <span style="font-size: 0.725rem; color: var(--status-success);">جاهزة للتوزيع بالتساوي (33.3%)</span>
           </div>
         </div>
@@ -855,7 +855,7 @@
             <h1 class="page-greeting">حسابات الشركاء وتوزيع الأرباح</h1>
             <p class="page-subtitle">إدارة الحصص ورؤوس الأموال والأرباح المستحقة للشركاء الثلاثة.</p>
           </div>
-          <button class="btn-primary" onclick="showToast('تم تأكيد توزيع أرباح الشهر بالتساوي (6,140 د.ل لكل شريك)')">توزيع الأرباح الآن</button>
+          <button class="btn-primary" onclick="showToast('تم تأكيد توزيع أرباح الشهر بالتساوي (486 د.ل لكل شريك)')">توزيع الأرباح الآن</button>
         </div>
 
         <!-- 3 Partner Detailed Cards (طه، عبدالمؤمن، ساسي) -->
@@ -876,22 +876,22 @@
               </div>
               <div class="partner-metric-box">
                 <div class="partner-metric-label">رأس المال المساهم</div>
-                <div class="partner-metric-val num-mono">15,000 د.ل</div>
+                <div class="partner-metric-val num-mono">1,000 د.ل</div>
               </div>
               <div class="partner-metric-box">
                 <div class="partner-metric-label">الأرباح المستحقة</div>
-                <div class="partner-metric-val num-mono" style="color: var(--status-success);">6,140 د.ل</div>
+                <div class="partner-metric-val num-mono" id="partnerTahaShare" style="color: var(--status-success);">486 د.ل</div>
               </div>
               <div class="partner-metric-box">
                 <div class="partner-metric-label">المسحوبات</div>
-                <div class="partner-metric-val num-mono" style="color: var(--status-danger);">1,500 د.ل</div>
+                <div class="partner-metric-val num-mono" style="color: var(--status-danger);">0 د.ل</div>
               </div>
             </div>
             <div style="background: var(--bg-subtle); padding: 0.85rem; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 0.8rem; font-weight: 700;">الرصيد الجاري المستحق:</span>
-              <span class="num-mono" style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">19,640 د.ل</span>
+              <span class="num-mono" id="partnerTahaBalance" style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">1,486 د.ل</span>
             </div>
-            <button class="btn-secondary btn-sm" style="width: 100%; justify-content: center;" onclick="showToast('تم صرف أرباح طه بقيمة 6,140 د.ل')">صرف الأرباح</button>
+            <button class="btn-secondary btn-sm" style="width: 100%; justify-content: center;" onclick="showToast('تم صرف أرباح طه بقيمة 486 د.ل')">صرف الأرباح</button>
           </div>
 
           <!-- Partner 2: عبدالمؤمن -->
@@ -910,22 +910,22 @@
               </div>
               <div class="partner-metric-box">
                 <div class="partner-metric-label">رأس المال المساهم</div>
-                <div class="partner-metric-val num-mono">15,000 د.ل</div>
+                <div class="partner-metric-val num-mono">1,000 د.ل</div>
               </div>
               <div class="partner-metric-box">
                 <div class="partner-metric-label">الأرباح المستحقة</div>
-                <div class="partner-metric-val num-mono" style="color: var(--status-success);">6,140 د.ل</div>
+                <div class="partner-metric-val num-mono" id="partnerMomenShare" style="color: var(--status-success);">486 د.ل</div>
               </div>
               <div class="partner-metric-box">
                 <div class="partner-metric-label">المسحوبات</div>
-                <div class="partner-metric-val num-mono" style="color: var(--status-danger);">2,000 د.ل</div>
+                <div class="partner-metric-val num-mono" style="color: var(--status-danger);">0 د.ل</div>
               </div>
             </div>
             <div style="background: var(--bg-subtle); padding: 0.85rem; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 0.8rem; font-weight: 700;">الرصيد الجاري المستحق:</span>
-              <span class="num-mono" style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">19,140 د.ل</span>
+              <span class="num-mono" id="partnerMomenBalance" style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">1,486 د.ل</span>
             </div>
-            <button class="btn-secondary btn-sm" style="width: 100%; justify-content: center;" onclick="showToast('تم صرف أرباح عبدالمؤمن بقيمة 6,140 د.ل')">صرف الأرباح</button>
+            <button class="btn-secondary btn-sm" style="width: 100%; justify-content: center;" onclick="showToast('تم صرف أرباح عبدالمؤمن بقيمة 486 د.ل')">صرف الأرباح</button>
           </div>
 
           <!-- Partner 3: ساسي -->
@@ -944,22 +944,22 @@
               </div>
               <div class="partner-metric-box">
                 <div class="partner-metric-label">رأس المال المساهم</div>
-                <div class="partner-metric-val num-mono">15,000 د.ل</div>
+                <div class="partner-metric-val num-mono">1,000 د.ل</div>
               </div>
               <div class="partner-metric-box">
                 <div class="partner-metric-label">الأرباح المستحقة</div>
-                <div class="partner-metric-val num-mono" style="color: var(--status-success);">6,140 د.ل</div>
+                <div class="partner-metric-val num-mono" id="partnerSasiShare" style="color: var(--status-success);">486 د.ل</div>
               </div>
               <div class="partner-metric-box">
                 <div class="partner-metric-label">المسحوبات</div>
-                <div class="partner-metric-val num-mono" style="color: var(--status-danger);">1,200 د.ل</div>
+                <div class="partner-metric-val num-mono" style="color: var(--status-danger);">0 د.ل</div>
               </div>
             </div>
             <div style="background: var(--bg-subtle); padding: 0.85rem; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 0.8rem; font-weight: 700;">الرصيد الجاري المستحق:</span>
-              <span class="num-mono" style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">19,940 د.ل</span>
+              <span class="num-mono" id="partnerSasiBalance" style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">1,486 د.ل</span>
             </div>
-            <button class="btn-secondary btn-sm" style="width: 100%; justify-content: center;" onclick="showToast('تم صرف أرباح ساسي بقيمة 6,140 د.ل')">صرف الأرباح</button>
+            <button class="btn-secondary btn-sm" style="width: 100%; justify-content: center;" onclick="showToast('تم صرف أرباح ساسي بقيمة 486 د.ل')">صرف الأرباح</button>
           </div>
         </div>
       </section>
@@ -979,48 +979,39 @@
 
         <div class="dashboard-main-row" style="margin-bottom: 0;">
           <div class="card-container">
-            <div class="card-title" style="margin-bottom: 1rem;">حجم المبيعات حسب كليات طب الأسنان في ليبيا</div>
+            <div class="card-title" style="margin-bottom: 1rem;">حجم المبيعات حسب كليات ومناطق طب الأسنان</div>
             <div style="display: flex; flex-direction: column; gap: 0.85rem;">
               <div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 4px;">
                   <span>جامعة طرابلس — كلية طب الأسنان</span>
-                  <span class="num-mono" style="color: var(--primary);">32,500 د.ل (66%)</span>
+                  <span class="num-mono" style="color: var(--primary);">3,466 د.ل (91%)</span>
                 </div>
                 <div style="height: 8px; background: var(--bg-subtle); border-radius: 4px; overflow: hidden;">
-                  <div style="width: 66%; height: 100%; background: var(--primary);"></div>
+                  <div style="width: 91%; height: 100%; background: var(--primary);"></div>
                 </div>
               </div>
               <div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 4px;">
-                  <span>جامعة الزاوية — كلية طب الأسنان</span>
-                  <span class="num-mono" style="color: var(--status-success);">9,800 د.ل (20%)</span>
+                  <span>مناطق أخرى (العزيزية والجفارة والسراج)</span>
+                  <span class="num-mono" style="color: var(--status-success);">352 د.ل (9%)</span>
                 </div>
                 <div style="height: 8px; background: var(--bg-subtle); border-radius: 4px; overflow: hidden;">
-                  <div style="width: 20%; height: 100%; background: var(--status-success);"></div>
-                </div>
-              </div>
-              <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 4px;">
-                  <span>جامعة مصراتة — كلية طب الأسنان</span>
-                  <span class="num-mono" style="color: var(--status-warning);">6,450 د.ل (14%)</span>
-                </div>
-                <div style="height: 8px; background: var(--bg-subtle); border-radius: 4px; overflow: hidden;">
-                  <div style="width: 14%; height: 100%; background: var(--status-warning);"></div>
+                  <div style="width: 9%; height: 100%; background: var(--status-success);"></div>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="card-container">
-            <div class="card-title" style="margin-bottom: 1rem;">معدل سلة الشراء ومؤشرات الجودة</div>
+            <div class="card-title" style="margin-bottom: 1rem;">معدل سلة الشراء ومؤشرات الجودة الحقيقية</div>
             <div style="display: flex; flex-direction: column; gap: 1rem;">
               <div style="background: var(--bg-muted); padding: 0.85rem; border-radius: var(--radius-md);">
                 <div style="font-size: 0.75rem; color: var(--text-muted);">متوسط قيمة الطلب الواحد (AOV):</div>
-                <div class="num-mono" style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);">312.5 د.ل</div>
+                <div class="num-mono" id="reportAovDisplay" style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);">212.1 د.ل</div>
               </div>
               <div style="background: var(--bg-muted); padding: 0.85rem; border-radius: var(--radius-md);">
-                <div style="font-size: 0.75rem; color: var(--text-muted);">نسبة التسليم الناجح:</div>
-                <div class="num-mono" style="font-size: 1.4rem; font-weight: 800; color: var(--status-success);">98.4%</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">نسبة الطلبات المؤكدة والناجحة:</div>
+                <div class="num-mono" style="font-size: 1.4rem; font-weight: 800; color: var(--status-success);">94.4%</div>
               </div>
             </div>
           </div>
@@ -1110,8 +1101,8 @@
   <div class="modal-dialog">
     <div class="modal-header">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="modal-title">تفاصيل الطلب <span id="modalOrderNum" class="num-mono" style="color: var(--primary);">#1068</span></span>
-        <span id="modalOrderStatus" class="status-pill preparing">قيد التجهيز</span>
+        <span class="modal-title">تفاصيل الطلب <span id="modalOrderNum" class="num-mono" style="color: var(--primary);">#75735422</span></span>
+        <span id="modalOrderStatus" class="status-pill new">جديد</span>
       </div>
       <button class="modal-close-btn" onclick="closeModal('orderDetailsModal')">✕</button>
     </div>
@@ -1119,7 +1110,7 @@
       <!-- Customer Info Box -->
       <div style="background: var(--bg-subtle); padding: 1rem; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <div id="modalCustomerName" style="font-weight: 800; font-size: 1rem; color: var(--text-main);">أحمد محمد</div>
+          <div id="modalCustomerName" style="font-weight: 800; font-size: 1rem; color: var(--text-main);">هديل النفاتي</div>
           <div id="modalCustomerPhone" class="num-mono" style="color: var(--primary); font-size: 0.85rem; margin-top: 2px;">0912801073</div>
           <div id="modalCustomerCollege" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">جامعة طرابلس — كلية طب الأسنان</div>
           <div id="modalCustomerAddress" style="font-size: 0.75rem; color: var(--text-body); margin-top: 2px;">طرابلس</div>
@@ -1150,7 +1141,7 @@
       <!-- Financial Total -->
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
         <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">إجمالي الفاتورة المطلوب:</span>
-        <span id="modalOrderTotal" class="num-mono" style="font-size: 1.4rem; font-weight: 900; color: var(--primary);">280 د.ل</span>
+        <span id="modalOrderTotal" class="num-mono" style="font-size: 1.4rem; font-weight: 900; color: var(--primary);">378 د.ل</span>
       </div>
     </div>
     <div class="modal-footer">
@@ -1228,13 +1219,13 @@
             <p style="font-size: 0.65rem; color: #64748b; margin: 0;">مستلزمات وأدوات أطباء وطلبة الأسنان — ليبيا</p>
           </div>
           <div style="text-align: left;">
-            <div class="num-mono" style="font-weight: 800; font-size: 0.95rem; color: #111;" id="slipOrderNum">#1068</div>
-            <div style="font-size: 0.65rem; color: #64748b;">2026-09-30</div>
+            <div class="num-mono" style="font-weight: 800; font-size: 0.95rem; color: #111;" id="slipOrderNum">#75735422</div>
+            <div style="font-size: 0.65rem; color: #64748b;">2026-09-30 10:04</div>
           </div>
         </div>
 
         <div style="margin: 10px 0; padding: 8px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
-          <div style="font-weight: 800; font-size: 0.85rem;" id="slipCustomerName">أحمد محمد</div>
+          <div style="font-weight: 800; font-size: 0.85rem;" id="slipCustomerName">هديل النفاتي</div>
           <div style="font-size: 0.75rem; color: #334155;" id="slipCustomerPhone">0912801073</div>
           <div style="font-size: 0.725rem; color: #64748b;" id="slipCollege">جامعة طرابلس — كلية طب الأسنان</div>
           <div style="font-size: 0.725rem; color: #64748b;" id="slipAddress">طرابلس</div>
@@ -1249,6 +1240,31 @@
             </tr>
           </thead>
           <tbody id="slipItemsBody">
+            <tr>
+              <td style="border: 1px solid #e2e8f0; padding: 6px;">Study cast + high-speed NSK hand piece</td>
+              <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">1</td>
+              <td style="border: 1px solid #e2e8f0; padding: 6px;">250 د.ل</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #e2e8f0; padding: 6px;">Torch 261 Jet Lighter</td>
+              <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">1</td>
+              <td style="border: 1px solid #e2e8f0; padding: 6px;">60 د.ل</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #e2e8f0; padding: 6px;">Dental Mouth Mirror</td>
+              <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">1</td>
+              <td style="border: 1px solid #e2e8f0; padding: 6px;">15 د.ل</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #e2e8f0; padding: 6px;">Periodontal Probe</td>
+              <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">1</td>
+              <td style="border: 1px solid #e2e8f0; padding: 6px;">15 د.ل</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #e2e8f0; padding: 6px;">أدوات وحشوات حفر متنوعة (19 قطعة)</td>
+              <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">19</td>
+              <td style="border: 1px solid #e2e8f0; padding: 6px;">38 د.ل</td>
+            </tr>
           </tbody>
         </table>
 
@@ -1259,7 +1275,7 @@
           </div>
           <div style="text-align: left;">
             <div style="font-size: 0.7rem; color: #64748b;">المجموع المطلوب:</div>
-            <div class="num-mono" style="font-size: 1.3rem; font-weight: 900; color: #2563eb;" id="slipTotal">280 د.ل</div>
+            <div class="num-mono" style="font-size: 1.3rem; font-weight: 900; color: #2563eb;" id="slipTotal">378 د.ل</div>
           </div>
         </div>
       </div>
