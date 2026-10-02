@@ -119,6 +119,7 @@
           <a class="submenu-item" onclick="navigateToScreen('finance', 'treasury')">الخزينة والسيولة</a>
           <a class="submenu-item" onclick="navigateToScreen('finance', 'expenses')">دفتر المصروفات</a>
           <a class="submenu-item" onclick="navigateToScreen('finance', 'profit')">حساب الأرباح</a>
+          <a class="submenu-item" onclick="navigateToScreen('finance', 'purchases')">فواتير المشتريات والتوريد (16)</a>
         </div>
       </div>
 
@@ -1050,7 +1051,7 @@
             <div style="display: flex; gap: 8px;">
               <input type="text" class="search-input" id="productsTableSearchInput" placeholder="بحث باسم الأداة..." oninput="handleProductsSearch(this.value)" style="background: var(--bg-subtle); padding: 0.4rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-card); width: 240px;">
             </div>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">إجمالي الأصناف: <strong id="productsTotalCount" style="color: var(--text-main);">28</strong> صنف</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">إجمالي الأصناف: <strong id="productsTotalCount" style="color: var(--text-main);">39</strong> صنف</span>
           </div>
 
           <div style="overflow-x: auto;">
@@ -1166,6 +1167,60 @@
             <div class="kpi-label">صافي الربح القابل للتوزيع</div>
             <div class="kpi-value num-mono" id="finScreenNetProfit" style="color: var(--status-success);">1,458 د.ل</div>
             <span style="font-size: 0.725rem; color: var(--status-success);">جاهزة للتوزيع بالتساوي (33.3%)</span>
+          </div>
+        </div>
+
+        
+        <!-- Procurement Capital & Inventory Value Cards -->
+        <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.5rem;">
+          <div class="kpi-card">
+            <div class="kpi-label">إجمالي رأس مال المشتريات (16 فاتورة)</div>
+            <div class="kpi-value num-mono" id="finPurchasesCapital" style="color: var(--primary);">9,826.50 د.ل</div>
+            <span style="font-size: 0.725rem; color: var(--text-muted);">16 فاتورة توريد معتمدة من شارع بن عاشور والموردين</span>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">القيمة البيعية المتوقعة للبضاعة</div>
+            <div class="kpi-value num-mono" id="finPurchasesExpectedRev" style="color: var(--status-success);">11,860.00 د.ل</div>
+            <span style="font-size: 0.725rem; color: var(--status-success);">بناءً على أسعار البيع القطاعي المعتمدة</span>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">الأرباح المتوقعة من البضائع</div>
+            <div class="kpi-value num-mono" id="finPurchasesExpectedProfit" style="color: var(--status-success);">+2,033.50 د.ل</div>
+            <span style="font-size: 0.725rem; color: var(--text-muted);">صافي هامش الربح الإجمالي (+20.7%)</span>
+          </div>
+        </div>
+
+        <!-- Procurement Invoices Ledger Table -->
+        <div class="erp-table-card" style="margin-bottom: 1.5rem;" id="purchasesLedgerCard">
+          <div class="table-controls-bar">
+            <div>
+              <div class="card-title">فواتير المشتريات والتوريدات المعتمدة (16 فاتورة)</div>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">توثيق رسمي لكافة فواتير التوريد والأصناف المعتمدة</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" class="search-input" id="purchasesSearchInput" placeholder="بحث باسم المورد أو رقم الفاتورة..." oninput="handlePurchasesSearch(this.value)" style="background: var(--bg-subtle); padding: 0.4rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-card); width: 240px;">
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th># الفاتورة</th>
+                  <th>المورّد / الشركة</th>
+                  <th>التاريخ</th>
+                  <th>المستلم</th>
+                  <th style="text-align: center;">الأصناف</th>
+                  <th>التكلفة (جملة)</th>
+                  <th>البيع المتوقع</th>
+                  <th>صافي الربح</th>
+                  <th>حالة الدفع</th>
+                  <th style="text-align: center;">التفاصيل</th>
+                </tr>
+              </thead>
+              <tbody id="purchasesTableBody">
+                <!-- Dynamically populated from ERP_STATE.purchases -->
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -2270,6 +2325,71 @@
     <div class="modal-footer">
       <button type="button" class="btn-secondary" onclick="closeModal('addProductModal')">إلغاء</button>
       <button type="button" class="btn-primary" onclick="saveNewProduct()">✓ إضافة الصنف وتوثيقه</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- 9. PROCUREMENT INVOICE DETAILS MODAL -->
+<div id="purchaseInvoiceModal" class="modal-overlay" onclick="if(event.target === this) closeModal('purchaseInvoiceModal')">
+  <div class="modal-dialog" style="max-width: 780px;">
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="modal-title">تفاصيل فاتورة التوريد: <span id="purModalInvNumber" class="num-mono" style="color: var(--primary);"></span></span>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal('purchaseInvoiceModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: var(--bg-subtle); padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-card); margin-bottom: 1rem;">
+        <div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">المورّد / الشركة</span>
+          <strong id="purModalSupplier" style="font-size: 0.9rem;">-</strong>
+        </div>
+        <div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">التاريخ والوقت</span>
+          <span id="purModalDate" class="num-mono" style="font-size: 0.85rem; font-weight: 600;">-</span>
+        </div>
+        <div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">المستلم / الحساب</span>
+          <span id="purModalRecipient" style="font-size: 0.85rem; font-weight: 600;">-</span>
+        </div>
+        <div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">حالة الدفع</span>
+          <span id="purModalStatus" style="font-size: 0.85rem; font-weight: 700;">-</span>
+        </div>
+        <div style="grid-column: span 2;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">ملاحظات الفاتورة</span>
+          <span id="purModalNotes" style="font-size: 0.85rem; color: var(--text-muted);">-</span>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto; margin-bottom: 1rem;">
+        <table class="erp-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>بيان الصنف</th>
+              <th style="text-align: center;">الكمية</th>
+              <th>سعر الجملة</th>
+              <th>سعر البيع</th>
+              <th>إجمالي التكلفة</th>
+              <th>صافي الربح</th>
+            </tr>
+          </thead>
+          <tbody id="purModalItemsBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; background: var(--bg-card); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-card); font-size: 0.9rem;">
+        <div>إجمالي التكلفة: <strong id="purModalTotalCost" class="num-mono" style="color: var(--primary);">0 د.ل</strong></div>
+        <div>المبيعات المتوقعة: <strong id="purModalExpectedRev" class="num-mono" style="color: var(--text-main);">0 د.ل</strong></div>
+        <div>صافي الربح المتوقع: <strong id="purModalProfit" class="num-mono" style="color: var(--status-success);">0 د.ل</strong></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" onclick="closeModal('purchaseInvoiceModal')">إغلاق</button>
     </div>
   </div>
 </div>

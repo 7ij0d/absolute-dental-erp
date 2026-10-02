@@ -139,9 +139,23 @@ const ERP_STATE = {
   currentPartner: 'مؤمن',
   currentOrderInModal: null,
 
-  // Products from Seed (28 Real Items)
-  products: (typeof INITIAL_PRODUCTS !== 'undefined' && Array.isArray(INITIAL_PRODUCTS))
-    ? [...INITIAL_PRODUCTS]
+  // Products from Seed (39 Real Items - Fully Synced)
+  products: (() => {
+    const cached = localStorage.getItem('abs_erp_products');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length >= (typeof INITIAL_PRODUCTS !== 'undefined' ? INITIAL_PRODUCTS.length : 0)) {
+          return parsed;
+        }
+      } catch (_) {}
+    }
+    return (typeof INITIAL_PRODUCTS !== 'undefined' && Array.isArray(INITIAL_PRODUCTS)) ? [...INITIAL_PRODUCTS] : [];
+  })(),
+
+  // Procurement Invoices (16 Invoices)
+  purchases: (typeof INITIAL_PURCHASES !== 'undefined' && Array.isArray(INITIAL_PURCHASES))
+    ? [...INITIAL_PURCHASES]
     : [],
 
   // Orders from Seed (18 Real Orders)
@@ -157,7 +171,8 @@ const ERP_STATE = {
     { id: 'EXP-101', date: '2026-09-30', desc: 'توصيل وشحن طلبيات كلية الأسنان طرابلس', category: 'شحن وتوصيل', user: 'ساسي', method: 'كاش', amount: 250 },
     { id: 'EXP-102', date: '2026-09-28', desc: 'أكياس وتغليف وعلب Absolute Dental الواقية', category: 'تغليف', user: 'عبدالمؤمن', method: 'كاش', amount: 180 },
     { id: 'EXP-103', date: '2026-09-25', desc: 'تمويل منشورات وحملات كليات طب الأسنان', category: 'تسويق', user: 'طه', method: 'كاش', amount: 150 },
-    { id: 'EXP-104', date: '2026-09-20', desc: 'استضافة وسيرفر المنظومة السحابي والدومين', category: 'سيرفر وتقنية', user: 'طه', method: 'بطاقة مصرفية', amount: 100 }
+    { id: 'EXP-104', date: '2026-09-20', desc: 'استضافة وسيرفر المنظومة السحابي والدومين', category: 'سيرفر وتقنية', user: 'طه', method: 'بطاقة مصرفية', amount: 100 },
+    { id: 'EXP-105', date: '2026-09-28', desc: 'أكياس شحن وتغليف للطلبيات + بطاقات هوية Absolute Dental', category: 'تغليف ودعاية', user: 'طه', method: 'كاش', amount: 80 }
   ],
 
   // Audit Logs (Operations Ledger with 100% Real Customer & Product References)
@@ -199,7 +214,15 @@ function calculateRealMetrics() {
   const lowStockCount = ERP_STATE.products.filter(p => p.stock > 0 && p.stock <= 10).length;
   const outStockCount = ERP_STATE.products.filter(p => p.stock === 0).length;
 
+  const purchasesList = Array.isArray(ERP_STATE.purchases) ? ERP_STATE.purchases : [];
+  const totalProcurementCost = purchasesList.reduce((sum, p) => sum + (Number(p.totalCost) || 0), 0);
+  const totalProcurementRevenue = purchasesList.reduce((sum, p) => sum + (Number(p.expectedRevenue) || 0), 0);
+  const totalProcurementProfit = purchasesList.reduce((sum, p) => sum + (Number(p.expectedProfit) || 0), 0);
+
   return {
+    totalProcurementCost,
+    totalProcurementRevenue,
+    totalProcurementProfit,
     grossSales,
     totalDiscounts,
     netSales,
@@ -361,7 +384,14 @@ function navigateToScreen(screenId, subSection = null) {
     renderInventoryTable();
   } else if (screenId === 'finance') {
     renderExpensesTable();
+    renderPurchasesTable();
     updateFinanceScreenMetrics();
+    if (subSection === 'purchases') {
+      setTimeout(() => {
+        const card = document.getElementById('purchasesLedgerCard');
+        if (card) card.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
   } else if (screenId === 'partners') {
     updatePartnersScreenMetrics();
   } else if (screenId === 'reports') {
@@ -1115,6 +1145,15 @@ function updateFinanceScreenMetrics() {
 
   const finNetEl = document.getElementById('finScreenNetProfit');
   if (finNetEl) finNetEl.textContent = `${m.netProfit.toLocaleString()} د.ل`;
+
+  const finPurchCapEl = document.getElementById('finPurchasesCapital');
+  if (finPurchCapEl) finPurchCapEl.textContent = `${m.totalProcurementCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} د.ل`;
+
+  const finPurchRevEl = document.getElementById('finPurchasesExpectedRev');
+  if (finPurchRevEl) finPurchRevEl.textContent = `${m.totalProcurementRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} د.ل`;
+
+  const finPurchProfEl = document.getElementById('finPurchasesExpectedProfit');
+  if (finPurchProfEl) finPurchProfEl.textContent = `+${m.totalProcurementProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} د.ل`;
 }
 
 function openExpenseModal() {
@@ -2819,3 +2858,104 @@ window.addEventListener('DOMContentLoaded', () => {
   syncWithUserServer();
 });
 
+
+
+// -------------------------------------------------------------
+// 10.B. PROCUREMENT INVOICES LEDGER & MODAL
+// -------------------------------------------------------------
+function renderPurchasesTable(searchTerm = '') {
+  const tbody = document.getElementById('purchasesTableBody');
+  if (!tbody) return;
+
+  const purchases = ERP_STATE.purchases || [];
+  const term = searchTerm.toLowerCase().trim();
+  const filtered = purchases.filter(p => {
+    if (!term) return true;
+    return (p.invoiceNumber && p.invoiceNumber.toLowerCase().includes(term)) ||
+           (p.supplier && p.supplier.toLowerCase().includes(term)) ||
+           (p.recipient && p.recipient.toLowerCase().includes(term)) ||
+           (p.items && p.items.some(it => it.name.toLowerCase().includes(term)));
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">لا توجد فواتير مطابقة للبحث</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(p => {
+    let statusBadge = '';
+    if (p.paymentStatus.includes('كاش') || p.paymentStatus.includes('مدفوع نقداً') || p.paymentStatus.includes('خالص')) {
+      statusBadge = '<span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3);">✓ ' + p.paymentStatus + '</span>';
+    } else if (p.paymentStatus.includes('دين') || p.paymentStatus.includes('آجل')) {
+      statusBadge = '<span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3);">⏳ ' + p.paymentStatus + '</span>';
+    } else {
+      statusBadge = '<span class="badge" style="background: rgba(99, 102, 241, 0.12); color: #4f46e5; border: 1px solid rgba(99, 102, 241, 0.3);">' + p.paymentStatus + '</span>';
+    }
+
+    const profitColor = p.expectedProfit > 0 ? 'var(--status-success)' : (p.expectedProfit === 0 ? 'var(--text-muted)' : 'var(--status-danger)');
+    const profitSign = p.expectedProfit > 0 ? '+' : '';
+
+    return `
+      <tr>
+        <td class="num-mono" style="font-weight: 700; color: var(--primary);">${p.invoiceNumber}</td>
+        <td style="font-weight: 600;">${p.supplier}</td>
+        <td class="num-mono" style="font-size: 0.8rem; color: var(--text-muted);">${p.date}</td>
+        <td style="font-size: 0.85rem;">${p.recipient || 'مؤسسو المنظومة'}</td>
+        <td class="num-mono" style="text-align: center; font-weight: 700;">${p.itemsCount}</td>
+        <td class="num-mono" style="font-weight: 700;">${Number(p.totalCost).toLocaleString(undefined, {minimumFractionDigits: 2})} د.ل</td>
+        <td class="num-mono" style="color: var(--text-muted);">${Number(p.expectedRevenue).toLocaleString(undefined, {minimumFractionDigits: 2})} د.ل</td>
+        <td class="num-mono" style="font-weight: 700; color: ${profitColor};">${profitSign}${Number(p.expectedProfit).toLocaleString(undefined, {minimumFractionDigits: 2})} د.ل</td>
+        <td>${statusBadge}</td>
+        <td style="text-align: center;">
+          <button class="btn-secondary btn-sm" onclick="openPurchaseInvoiceModal('${p.id}')" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">
+            عرض البنود 📄
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function handlePurchasesSearch(val) {
+  renderPurchasesTable(val);
+}
+
+function openPurchaseInvoiceModal(purId) {
+  const p = (ERP_STATE.purchases || []).find(item => item.id === purId);
+  if (!p) return;
+
+  const modal = document.getElementById('purchaseInvoiceModal');
+  if (!modal) return;
+
+  document.getElementById('purModalInvNumber').textContent = p.invoiceNumber;
+  document.getElementById('purModalSupplier').textContent = p.supplier;
+  document.getElementById('purModalDate').textContent = `${p.date} (${p.time || ''})`;
+  document.getElementById('purModalRecipient').textContent = p.recipient || '-';
+  document.getElementById('purModalStatus').textContent = p.paymentStatus;
+  document.getElementById('purModalNotes').textContent = p.notes || '-';
+  document.getElementById('purModalTotalCost').textContent = `${Number(p.totalCost).toLocaleString(undefined, {minimumFractionDigits: 2})} د.ل`;
+  document.getElementById('purModalExpectedRev').textContent = `${Number(p.expectedRevenue).toLocaleString(undefined, {minimumFractionDigits: 2})} د.ل`;
+  
+  const profEl = document.getElementById('purModalProfit');
+  profEl.textContent = `${p.expectedProfit > 0 ? '+' : ''}${Number(p.expectedProfit).toLocaleString(undefined, {minimumFractionDigits: 2})} د.ل`;
+  profEl.style.color = p.expectedProfit >= 0 ? 'var(--status-success)' : 'var(--status-danger)';
+
+  const tbody = document.getElementById('purModalItemsBody');
+  tbody.innerHTML = (p.items || []).map((it, idx) => {
+    const itProfit = (it.profit !== undefined) ? it.profit : ((Number(it.sellPrice) - Number(it.costPrice)) * Number(it.qty));
+    const profitColor = itProfit > 0 ? 'var(--status-success)' : (itProfit === 0 ? 'var(--text-muted)' : 'var(--status-danger)');
+    return `
+      <tr>
+        <td style="color: var(--text-muted); font-size: 0.8rem;">${idx + 1}</td>
+        <td style="font-weight: 600;">${it.name}</td>
+        <td class="num-mono" style="text-align: center; font-weight: 700;">${it.qty}</td>
+        <td class="num-mono">${Number(it.costPrice).toFixed(2)} د.ل</td>
+        <td class="num-mono" style="color: var(--primary); font-weight: 700;">${Number(it.sellPrice).toFixed(2)} د.ل</td>
+        <td class="num-mono" style="font-weight: 700;">${(Number(it.costPrice) * Number(it.qty)).toFixed(2)} د.ل</td>
+        <td class="num-mono" style="font-weight: 700; color: ${profitColor};">${itProfit > 0 ? '+' : ''}${Number(itProfit).toFixed(2)} د.ل</td>
+      </tr>
+    `;
+  }).join('');
+
+  modal.classList.add('active');
+}
