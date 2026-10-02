@@ -71,6 +71,12 @@
           <span class="brand-sub">Operations ERP</span>
         </div>
       </a>
+      <button type="button" class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="إغلاق القائمة">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Navigation List (Intentionally Short & Clean) -->
@@ -174,6 +180,7 @@
       </div>
     </div>
   </aside>
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
   <!-- =========================================================
        2. MAIN CONTENT WRAPPER
@@ -184,17 +191,27 @@
     <header class="top-header">
       <div class="header-right">
         <!-- Mobile Sidebar Hamburger Toggle -->
-        <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="فتح القائمة">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <button type="button" class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="فتح القائمة">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
 
-        <!-- Global Search Field -->
+        <!-- Global Search Field (Desktop) -->
         <div class="search-container" onclick="openCommandPalette()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           <input type="text" class="search-input" placeholder="ابحث عن طلب، منتج، عميل..." readonly>
           <span class="search-kbd">Ctrl K</span>
         </div>
       </div>
+
+      <!-- Mobile Brand Link (Compact: Absolute Dental logo & name) -->
+      <a href="#" class="mobile-brand-link" onclick="navigateToScreen('dashboard'); return false;">
+        <div class="brand-logo-icon mobile-brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C8.69 2 6 4.69 6 8c0 2.21.89 4.21 2.34 5.66.66.66 1.07 1.55 1.16 2.48l.5 5.86c.07.82.76 1.45 1.58 1.45.69 0 1.28-.44 1.48-1.09l1.19-3.96c.15-.49.6-.84 1.12-.84.51 0 .97.35 1.12.84l1.19 3.96c.2.65.79 1.09 1.48 1.09.82 0 1.51-.63 1.58-1.45l.5-5.86c.09-.93.5-1.82 1.16-2.48C21.11 12.21 22 10.21 22 8c0-3.31-2.69-6-6-6h-4z"/>
+          </svg>
+        </div>
+        <span class="mobile-brand-text">ABSOLUTE DENTAL</span>
+      </a>
 
       <div class="header-left">
         <!-- Date Badge -->
@@ -786,7 +803,7 @@
           <div class="pos-checkout-column">
 
             <!-- 1. CUSTOMER INFORMATION CARD -->
-            <div class="erp-card-container">
+            <div class="erp-card-container pos-step-customer">
               <div class="card-section-header">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <div class="card-icon-pill">
@@ -853,7 +870,7 @@
             </div>
 
             <!-- 2. SMART DISCOUNT ENGINE (محرك الخصومات الذكي) -->
-            <div class="erp-card-container discount-engine-box">
+            <div class="erp-card-container discount-engine-box pos-step-discount">
               <div class="card-section-header">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <div class="card-icon-pill discount">
@@ -906,7 +923,7 @@
             </div>
 
             <!-- 3. FINANCIAL TOTALS & INVOICE GENERATION -->
-            <div class="erp-card-container pos-totals-card">
+            <div class="erp-card-container pos-totals-card pos-step-totals">
               <div class="card-section-header">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <div class="card-icon-pill">
@@ -967,7 +984,7 @@
           <div class="pos-catalog-column">
 
             <!-- 1. LIVE CART LINE ITEMS TABLE -->
-            <div class="erp-card-container">
+            <div class="erp-card-container pos-step-cart">
               <div class="card-section-header">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <div class="card-icon-pill">
@@ -990,7 +1007,7 @@
             </div>
 
             <!-- 2. DENTAL PRODUCTS CATALOG WITH REAL IMAGES -->
-            <div class="erp-card-container" style="flex: 1;">
+            <div class="erp-card-container pos-step-catalog" style="flex: 1;">
               <div class="card-section-header">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <div class="card-icon-pill">
@@ -1092,7 +1109,7 @@
           <button class="btn-primary" onclick="showToast('تم إرسال طلب إعادة تزويد النواقص للمورد أوراكير')">طلب تزويد النواقص</button>
         </div>
 
-        <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.5rem;">
+        <div class="kpi-grid kpi-grid-3">
           <div class="kpi-card">
             <div class="kpi-label">إجمالي المخزون المتاح</div>
             <div class="kpi-value num-mono" id="invScreenTotalPieces" style="color: var(--status-success);">910 قطعة</div>
@@ -1149,7 +1166,7 @@
         </div>
 
         <!-- Financial Hierarchy Cards -->
-        <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 1.5rem;">
+        <div class="kpi-grid kpi-grid-4">
           <div class="kpi-card">
             <div class="kpi-label">إجمالي المبيعات (Revenue)</div>
             <div class="kpi-value num-mono" id="finScreenRevenue">3,818 د.ل</div>
@@ -1174,7 +1191,7 @@
 
         
         <!-- Procurement Capital & Inventory Value Cards -->
-        <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.5rem;">
+        <div class="kpi-grid kpi-grid-3">
           <div class="kpi-card">
             <div class="kpi-label">إجمالي رأس مال المشتريات (16 فاتورة)</div>
             <div class="kpi-value num-mono" id="finPurchasesCapital" style="color: var(--primary);">9,826.50 د.ل</div>
@@ -1469,7 +1486,7 @@
             <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.6rem;">
               توزيع الخصومات التجارية الممنوحة حسب الشريك المعتمد:
             </div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;" id="reportPartnerDiscountsGrid">
+            <div class="responsive-3-grid" id="reportPartnerDiscountsGrid">
               <!-- Rendered via JS -->
             </div>
           </div>
@@ -1810,7 +1827,7 @@
     </div>
     <div class="modal-body">
       <!-- Quick Student Info -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+      <div class="modal-grid-2">
         <div>
           <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">اسم الطالب / العميل</label>
           <input type="text" id="posInputName" class="search-input" value="طالب كلية الأسنان" style="background: var(--bg-subtle); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-card); width: 100%;">
@@ -1824,7 +1841,7 @@
       <!-- Quick Item Selector -->
       <div>
         <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px;">اختر الأداة للإضافة السريعة:</label>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; max-height: 180px; overflow-y: auto; padding: 4px;" id="posProductsButtonsGrid">
+        <div class="quick-items-grid" id="posProductsButtonsGrid">
           <!-- Populated from products -->
         </div>
       </div>
@@ -2342,7 +2359,7 @@
       <button class="modal-close-btn" onclick="closeModal('purchaseInvoiceModal')">✕</button>
     </div>
     <div class="modal-body">
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: var(--bg-subtle); padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-card); margin-bottom: 1rem;">
+      <div class="modal-detail-grid">
         <div>
           <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">المورّد / الشركة</span>
           <strong id="purModalSupplier" style="font-size: 0.9rem;">-</strong>

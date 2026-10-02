@@ -75,6 +75,7 @@ function logoutCurrentUser() {
   }
 
   sessionStorage.removeItem('abs_erp_active_user');
+  closeMobileSidebar();
 
   const overlay = document.getElementById('userSelectOverlay');
   if (overlay) {
@@ -402,11 +403,8 @@ function navigateToScreen(screenId, subSection = null) {
     initNewOrderScreen();
   }
 
-  // Auto-close mobile sidebar if open
-  const sidebar = document.querySelector('.sidebar');
-  if (sidebar && sidebar.classList.contains('mobile-open')) {
-    sidebar.classList.remove('mobile-open');
-  }
+  // Auto-close mobile sidebar drawer if open
+  closeMobileSidebar();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1402,21 +1400,47 @@ window.addEventListener('keydown', (e) => {
 });
 
 // -------------------------------------------------------------
-// 14. MOBILE SIDEBAR RESPONSIVE TOGGLE
+// 14. MOBILE SIDEBAR RESPONSIVE DRAWER & OVERLAY ENGINE
 // -------------------------------------------------------------
+function openMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (sidebar) sidebar.classList.add('mobile-open');
+  if (overlay) overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (sidebar) sidebar.classList.remove('mobile-open');
+  if (overlay) overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
 function toggleMobileSidebar() {
   const sidebar = document.querySelector('.sidebar');
-  if (sidebar) {
-    sidebar.classList.toggle('mobile-open');
+  if (sidebar && sidebar.classList.contains('mobile-open')) {
+    closeMobileSidebar();
+  } else {
+    openMobileSidebar();
   }
 }
+
+// Global dismiss triggers (Escape key + backdrop click)
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeMobileSidebar();
+  }
+});
 
 document.addEventListener('click', (e) => {
   const sidebar = document.querySelector('.sidebar');
   const toggleBtn = document.querySelector('.mobile-menu-btn');
+  const overlay = document.getElementById('sidebarOverlay');
   if (sidebar && sidebar.classList.contains('mobile-open')) {
-    if (!sidebar.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
-      sidebar.classList.remove('mobile-open');
+    if ((overlay && e.target === overlay) || (!sidebar.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target)))) {
+      closeMobileSidebar();
     }
   }
 });
