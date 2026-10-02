@@ -1684,7 +1684,17 @@ function renderStudentCatalogList(searchQuery = '') {
   let prods = [...ERP_STATE.products];
   const cat = STUDENT_ORDER_STATE.selectedCategory;
 
-  if (cat === 'burs') {
+  if (cat === 'cons') {
+    prods = prods.filter(p => {
+      const str = ((p.nameAr || '') + ' ' + (p.nameEn || '') + ' ' + (p.category || '')).toLowerCase();
+      return str.includes('coxo') || str.includes('handpiece') || str.includes('قبضة') || str.includes('كونس') || str.includes('bur') || str.includes('بور') || str.includes('wax') || str.includes('شمع');
+    });
+  } else if (cat === 'crown') {
+    prods = prods.filter(p => {
+      const str = ((p.nameAr || '') + ' ' + (p.nameEn || '') + ' ' + (p.category || '')).toLowerCase();
+      return str.includes('coxo') || str.includes('handpiece') || str.includes('قبضة') || str.includes('كراون') || str.includes('cast') || str.includes('كاست') || str.includes('tf') || str.includes('bur');
+    });
+  } else if (cat === 'burs') {
     prods = prods.filter(p => {
       const name = ((p.nameAr || '') + ' ' + (p.nameEn || '')).toLowerCase();
       return name.includes('bur') || name.includes('حفر') || name.includes('tc') || name.includes('sf') || name.includes('br') || name.includes('si') || name.includes('tf') || name.includes('wr') || name.includes('fo') || name.includes('cd');
@@ -2240,6 +2250,8 @@ function renderPosProductsCatalog(query = posCatalogSearchFilter, category = pos
     filtered = filtered.filter(p => {
       const cat = (p.category || '').toLowerCase();
       const name = (p.nameAr || '').toLowerCase();
+      if (category === 'cons') return cat.includes('كونس') || cat.includes('cons') || name.includes('coxo') || name.includes('handpiece') || name.includes('قبضة') || name.includes('bur') || name.includes('بور');
+      if (category === 'crown') return cat.includes('كراون') || cat.includes('crown') || name.includes('coxo') || name.includes('handpiece') || name.includes('قبضة') || name.includes('cast') || name.includes('كاست');
       if (category === 'burs') return cat.includes('بور') || name.includes('bur') || name.includes('بور');
       if (category === 'sets') return cat.includes('كاست') || name.includes('cast') || name.includes('handpiece') || name.includes('هاندبيس');
       if (category === 'teeth') return cat.includes('شمع') || cat.includes('أسنان') || name.includes('wax') || name.includes('teeth') || name.includes('شمع');
