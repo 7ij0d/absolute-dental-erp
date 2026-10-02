@@ -352,10 +352,14 @@ function updateDashboardRealUI() {
   const chartTotalEl = document.getElementById('chartTotalDisplay');
   if (chartTotalEl) chartTotalEl.textContent = `${m.totalSales.toLocaleString()} د.ل`;
 
-  // 3. Render Top 5 Orders Needing Attention
+  // 3. Render Top Orders Needing Action (Screen 1 Blueprint)
+  renderDashboardActionOrdersTable();
   renderActionOrdersList();
 
-  // 4. Update Inventory Card
+  // 4. Render Low Stock Items (Screen 1 Blueprint)
+  renderDashboardLowStockList();
+
+  // 5. Update Inventory Card
   const invTotalEl = document.getElementById('invTotalAvailablePieces');
   if (invTotalEl) invTotalEl.textContent = m.totalStock;
 
@@ -365,15 +369,75 @@ function updateDashboardRealUI() {
   const invOutEl = document.getElementById('invOutStockCount');
   if (invOutEl) invOutEl.textContent = m.outStockCount;
 
-  // 5. Render Top Products from Real Orders
+  // 6. Render Top Products from Real Orders
   renderTopProductsReal();
+}
+
+function renderDashboardActionOrdersTable() {
+  const tbody = document.getElementById('dashboardActionOrdersTableBody');
+  if (!tbody) return;
+
+  // Prioritize pending/new orders first
+  let actionOrders = ERP_STATE.orders.filter(o => o.status === 'جديد' || o.status === 'قيد التجهيز');
+  if (actionOrders.length === 0) {
+    actionOrders = ERP_STATE.orders.slice(0, 5);
+  } else {
+    actionOrders = actionOrders.slice(0, 6);
+  }
+
+  tbody.innerHTML = actionOrders.map(order => `
+    <tr onclick="openOrderDetailsById('${order.id}')" title="انقر لعرض تفاصيل الطلب">
+      <td class="num-mono" style="font-weight: 800; color: var(--primary);">${order.orderNumber}</td>
+      <td style="font-weight: 700; color: var(--text-main);">${order.customerName}</td>
+      <td class="num-mono" style="font-weight: 800; color: var(--text-main);">${order.total} د.ل</td>
+      <td>
+        <span class="status-pill ${getOrderStatusClass(order.status)}">${order.status}</span>
+      </td>
+      <td class="num-mono" style="font-size: 0.775rem; color: var(--text-muted);">${order.date ? order.date.replace(' ص', '').replace(' م', '') : '-'}</td>
+      <td style="text-align: center;">
+        <button class="dash-arrow-btn" onclick="event.stopPropagation(); openOrderDetailsById('${order.id}')" title="عرض تفاصيل الطلب">›</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderDashboardLowStockList() {
+  const container = document.getElementById('dashboardLowStockList');
+  if (!container) return;
+
+  // Products with lowest stock
+  const lowItems = [...ERP_STATE.products]
+    .sort((a, b) => Number(a.stock) - Number(b.stock))
+    .slice(0, 6);
+
+  container.innerHTML = lowItems.map(p => {
+    const stock = Number(p.stock) || 0;
+    const isOut = stock === 0;
+    const badgeClass = isOut ? 'low-stock-qty-pill out' : 'low-stock-qty-pill';
+    const badgeText = isOut ? 'نافد (0)' : `${stock} قطع`;
+    const imgSrc = p.image || resolveProductImage(p);
+
+    return `
+      <div class="low-stock-row" onclick="navigateToScreen('inventory')">
+        <div class="low-stock-info">
+          <img class="low-stock-thumb" src="${imgSrc}" alt="${p.nameAr}" onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=80&q=80'">
+          <div class="low-stock-titles">
+            <span class="low-stock-name">${p.nameAr}</span>
+            <span class="low-stock-sku">${p.sku || '-'}</span>
+          </div>
+        </div>
+        <div class="low-stock-badge-col">
+          <span class="${badgeClass}">${badgeText}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 function renderActionOrdersList() {
   const container = document.getElementById('actionOrdersList');
   if (!container) return;
 
-  // Prioritize pending/new orders first
   const displayOrders = [...ERP_STATE.orders].slice(0, 5);
 
   container.innerHTML = displayOrders.map(order => `
@@ -400,7 +464,6 @@ function renderTopProductsReal() {
   const container = document.getElementById('topProductsContainer');
   if (!container) return;
 
-  // Aggregate product counts across all real order items
   const counts = {};
   ERP_STATE.orders.forEach(o => {
     (o.items || []).forEach(item => {
@@ -545,7 +608,9 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
       'new': 'جديد',
       'preparing': 'قيد التجهيز',
       'shipping': 'جاهز للتوصيل',
-      'completed': 'مكتمل'
+      'ready': 'جاهز للتوصيل',
+      'completed': 'مكتمل',
+      'cancelled': 'ملغي'
     };
     const targetStatus = statusMap[filterStatus] || filterStatus;
     filtered = filtered.filter(o => o.status === targetStatus);
@@ -561,37 +626,71 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
     );
   }
 
-  tbody.innerHTML = filtered.map(order => `
-    <tr>
-      <td class="num-mono" style="font-weight: 800; color: var(--primary);">${order.orderNumber}</td>
-      <td style="font-weight: 700; color: var(--text-main);">${order.customerName}</td>
-      <td class="num-mono" style="color: var(--text-muted); font-size: 0.775rem;">${order.phone}</td>
-      <td style="color: var(--text-muted); font-size: 0.75rem;">${order.college || 'كلية طب الأسنان طرابلس'}</td>
-      <td class="num-mono" style="font-weight: 800; color: var(--text-main);">${order.total} د.ل</td>
-      <td>
-        <span class="status-pill ${getOrderStatusClass(order.status)}">${order.status}</span>
-        <div style="margin-top: 3px;">
-          ${typeof getOrderDeductionBadge === 'function' ? getOrderDeductionBadge(order) : ''}
-        </div>
-      </td>
-      <td style="color: var(--text-body); font-weight: 600;">${order.assignedTo || 'طه'}</td>
-      <td>
-        <div style="display: flex; gap: 4px;">
-          <button class="order-open-btn" onclick="openOrderDetailsById('${order.id}')">فتح</button>
-          <button class="btn-secondary btn-sm" onclick="openInvoiceModal('${order.id}')" title="فاتورة مبيعات معتمدة">🧾</button>
-          <button class="btn-secondary btn-sm" onclick="openWhatsAppForOrder('${order.id}')" title="واتساب">💬</button>
-          <button class="btn-secondary btn-sm" onclick="openDeliverySlipById('${order.id}')" title="بوليصة شحن">🖨️</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
+  // Update tab counts
+  const totalCount = ERP_STATE.orders.length;
+  const newCount = ERP_STATE.orders.filter(o => o.status === 'جديد').length;
+  const prepCount = ERP_STATE.orders.filter(o => o.status === 'قيد التجهيز').length;
+  const compCount = ERP_STATE.orders.filter(o => o.status === 'مكتمل').length;
+  const cancCount = ERP_STATE.orders.filter(o => o.status === 'ملغي').length;
 
-  const countBadge = document.getElementById('ordersTotalTabCount');
-  if (countBadge) countBadge.textContent = ERP_STATE.orders.length;
+  const totalTabEl = document.getElementById('ordersTotalTabCount');
+  const newTabEl = document.getElementById('ordersNewTabCount');
+  const prepTabEl = document.getElementById('ordersPrepTabCount');
+  const compTabEl = document.getElementById('ordersCompTabCount');
+  const cancTabEl = document.getElementById('ordersCancTabCount');
+
+  if (totalTabEl) totalTabEl.textContent = totalCount;
+  if (newTabEl) newTabEl.textContent = newCount;
+  if (prepTabEl) prepTabEl.textContent = prepCount;
+  if (compTabEl) compTabEl.textContent = compCount;
+  if (cancTabEl) cancTabEl.textContent = cancCount;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+          لا توجد طلبات تطابق هذا التصنيف
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(order => {
+    const itemsSummary = order.itemsCount 
+      ? `${order.itemsCount} قطعة`
+      : (order.items ? `${order.items.length} صنف` : '1 صنف');
+
+    return `
+      <tr>
+        <td class="num-mono" style="font-weight: 800; color: var(--primary);">${order.orderNumber}</td>
+        <td>
+          <div style="font-weight: 700; color: var(--text-main); line-height: 1.3;">${order.customerName}</div>
+          <div class="num-mono" style="font-size: 0.75rem; color: var(--text-muted);">${order.phone || ''}</div>
+        </td>
+        <td style="font-size: 0.825rem; color: var(--text-body);">${itemsSummary}</td>
+        <td class="num-mono" style="font-weight: 800; color: var(--text-main);">${order.total} د.ل</td>
+        <td>
+          <span class="status-pill ${getOrderStatusClass(order.status)}">${order.status}</span>
+          <div style="margin-top: 3px;">
+            ${typeof getOrderDeductionBadge === 'function' ? getOrderDeductionBadge(order) : ''}
+          </div>
+        </td>
+        <td class="num-mono" style="color: var(--text-muted); font-size: 0.775rem;">${order.date ? order.date.replace(' ص', '').replace(' م', '') : '-'}</td>
+        <td style="text-align: center;">
+          <div style="display: flex; gap: 4px; justify-content: center; align-items: center;">
+            <button class="dash-arrow-btn" onclick="openOrderDetailsById('${order.id}')" title="عرض تفاصيل الطلب">›</button>
+            <button class="btn-secondary btn-sm" onclick="openInvoiceModal('${order.id}')" title="فاتورة مبيعات معتمدة">🧾</button>
+            <button class="btn-secondary btn-sm" onclick="openWhatsAppForOrder('${order.id}')" title="واتساب">💬</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 
 function filterOrdersTable(status, btn) {
-  document.querySelectorAll('.table-filter-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.order-filter-btn, .table-filter-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   const searchInput = document.getElementById('ordersTableSearchInput');
   const query = searchInput ? searchInput.value : '';
@@ -599,8 +698,12 @@ function filterOrdersTable(status, btn) {
 }
 
 function handleOrdersSearch(val) {
-  const activeTab = document.querySelector('.table-filter-tab.active');
-  const status = activeTab ? activeTab.getAttribute('onclick').match(/'([^']+)'/)[1] : 'all';
+  const activeTab = document.querySelector('.order-filter-btn.active, .table-filter-tab.active');
+  let status = 'all';
+  if (activeTab) {
+    const m = activeTab.getAttribute('onclick')?.match(/'([^']+)'/);
+    if (m) status = m[1];
+  }
   renderOrdersTable(status, val);
 }
 
@@ -610,6 +713,7 @@ function getOrderStatusClass(status) {
     case 'قيد التجهيز': return 'preparing';
     case 'جاهز للتوصيل': return 'ready';
     case 'مكتمل': return 'completed';
+    case 'ملغي': return 'cancelled';
     default: return 'new';
   }
 }
@@ -1260,22 +1364,57 @@ function renderInventoryTable() {
   const tbody = document.getElementById('inventoryTableBody');
   if (!tbody) return;
 
-  tbody.innerHTML = ERP_STATE.products.map(p => `
-    <tr>
-      <td style="font-weight: 700; color: var(--text-main);">${p.nameAr}</td>
-      <td class="num-mono" style="font-weight: 800; font-size: 0.95rem;">${p.stock} قطعة</td>
-      <td class="num-mono" style="color: var(--text-muted);">${p.minStock}</td>
-      <td style="color: var(--text-muted); font-size: 0.75rem;">${p.supplier}</td>
-      <td>
-        <span class="status-pill ${p.stock > 10 ? 'completed' : (p.stock > 0 ? 'preparing' : 'new')}">
-          ${p.stock > 10 ? 'مخزون آمن' : (p.stock > 0 ? 'منخفض (إعادة طلب)' : 'نافد بالكامل')}
-        </span>
-      </td>
-      <td>
-        <button class="btn-secondary btn-sm" onclick="showToast('تم إرسال أمر شراء للصنف: ${p.nameAr}')">+ طلب توريد</button>
-      </td>
-    </tr>
-  `).join('');
+  const completedOrders = ERP_STATE.orders.filter(o => o.status === 'مكتمل');
+
+  tbody.innerHTML = ERP_STATE.products.map(p => {
+    // Calculate pieces sold across all completed orders
+    let soldCount = 0;
+    completedOrders.forEach(ord => {
+      (ord.items || []).forEach(item => {
+        if (item.id === p.id || (item.name && (item.name === p.nameAr || item.name === p.nameEn))) {
+          soldCount += (Number(item.qty) || 1);
+        } else if (item.id) {
+          const itemProd = ERP_STATE.products.find(x => x.id === item.id);
+          if (itemProd && itemProd.shared_inventory_product_id === p.id) {
+            soldCount += (Number(item.qty) || 1) * (Number(itemProd.unit_multiplier) || 1);
+          }
+        }
+      });
+    });
+
+    const currentStock = Number(p.stock) || 0;
+    const baseStock = currentStock + soldCount;
+    const imgSrc = p.image || resolveProductImage(p);
+
+    let statusPill = '<span class="status-pill completed">متوفر</span>';
+    if (currentStock === 0) {
+      statusPill = '<span class="status-pill new">نافد</span>';
+    } else if (currentStock <= 10) {
+      statusPill = '<span class="status-pill preparing">منخفض</span>';
+    }
+
+    return `
+      <tr>
+        <td>
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <img src="${imgSrc}" alt="${p.nameAr}" style="width: 36px; height: 36px; border-radius: var(--radius-sm); object-fit: contain; background: #f8fafc; border: 1px solid rgba(0,0,0,0.06); flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=80&q=80'">
+            <div>
+              <div style="font-weight: 700; color: var(--text-main); line-height: 1.3;">${p.nameAr}</div>
+              <div style="font-size: 0.725rem; color: var(--text-muted);">${p.nameEn !== p.nameAr ? p.nameEn : (p.category || '')}</div>
+            </div>
+          </div>
+        </td>
+        <td class="num-mono" style="font-size: 0.775rem; color: var(--text-muted);">${p.sku || '-'}</td>
+        <td class="num-mono" style="text-align: center; font-weight: 600; color: var(--text-body);">${baseStock}</td>
+        <td class="num-mono" style="text-align: center; font-weight: 700; color: ${soldCount > 0 ? '#16a34a' : 'var(--text-muted)'};">${soldCount}</td>
+        <td class="num-mono" style="text-align: center; font-weight: 800; font-size: 0.95rem; color: ${currentStock <= 5 ? '#dc2626' : 'var(--text-main)'};">${currentStock} قطعة</td>
+        <td style="text-align: center;">${statusPill}</td>
+        <td style="text-align: center;">
+          <button class="btn-secondary btn-sm" onclick="openEditProductModal('${p.id}')">تعديل المخزون</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
 
   const m = calculateRealMetrics();
   const invScrTotal = document.getElementById('invScreenTotalPieces');
@@ -1342,17 +1481,28 @@ function applyOrderInventoryDeduction(order, user) {
     }
     
     if (prod) {
-      const oldStock = Number(prod.stock) || 0;
-      const qtyToDeduct = Number(item.qty) || 1;
+      // Check if product maps to a shared inventory parent product (e.g. Carving wax 3-pack -> Carving wax single piece)
+      let targetProd = prod;
+      let multiplier = 1;
+      if (prod.shared_inventory_product_id) {
+        const parent = ERP_STATE.products.find(p => p.id === prod.shared_inventory_product_id);
+        if (parent) {
+          targetProd = parent;
+          multiplier = Number(prod.unit_multiplier) || 1;
+        }
+      }
+
+      const oldStock = Number(targetProd.stock) || 0;
+      const qtyToDeduct = (Number(item.qty) || 1) * multiplier;
       const newStock = Math.max(0, oldStock - qtyToDeduct);
-      prod.stock = newStock;
+      targetProd.stock = newStock;
       
-      if (prod.stock === 0) prod.status = 'نافد';
-      else if (prod.stock <= 10) prod.status = 'منخفض';
-      else prod.status = 'متوفر';
+      if (targetProd.stock === 0) targetProd.status = 'نافد';
+      else if (targetProd.stock <= 10) targetProd.status = 'منخفض';
+      else targetProd.status = 'متوفر';
 
       deductedItems.push({
-        name: prod.nameAr || item.name,
+        name: targetProd.nameAr || item.name,
         qty: qtyToDeduct,
         oldStock: oldStock,
         newStock: newStock,
@@ -1363,10 +1513,10 @@ function applyOrderInventoryDeduction(order, user) {
       logOperation({
         user: author,
         action: 'خصم مخزون لإكمال الطلب',
-        target: `${prod.nameAr} (${order.orderNumber})`,
+        target: `${targetProd.nameAr} (${order.orderNumber})`,
         oldVal: `${oldStock} قطعة`,
         newVal: `${newStock} قطعة (-${qtyToDeduct})`,
-        details: `«خصم كمية (-${qtyToDeduct}) من المنتج ${prod.nameAr} لإكمال الطلب ${order.orderNumber} للطالب ${order.customerName} (المخزون: ${oldStock} ➔ ${newStock})»`
+        details: `«خصم كمية (-${qtyToDeduct}) من المنتج ${targetProd.nameAr} لإكمال الطلب ${order.orderNumber} للطالب ${order.customerName} (المخزون: ${oldStock} ➔ ${newStock})»`
       });
     } else {
       deductedItems.push({
@@ -1446,22 +1596,32 @@ function reverseOrderInventoryDeduction(order, user) {
       );
     }
     if (prod) {
-      const oldStock = Number(prod.stock) || 0;
-      const qtyToRestore = Number(item.qty) || 1;
+      let targetProd = prod;
+      let multiplier = 1;
+      if (prod.shared_inventory_product_id) {
+        const parent = ERP_STATE.products.find(p => p.id === prod.shared_inventory_product_id);
+        if (parent) {
+          targetProd = parent;
+          multiplier = Number(prod.unit_multiplier) || 1;
+        }
+      }
+
+      const oldStock = Number(targetProd.stock) || 0;
+      const qtyToRestore = (Number(item.qty) || 1) * multiplier;
       const newStock = oldStock + qtyToRestore;
-      prod.stock = newStock;
+      targetProd.stock = newStock;
       
-      if (prod.stock === 0) prod.status = 'نافد';
-      else if (prod.stock <= 10) prod.status = 'منخفض';
-      else prod.status = 'متوفر';
+      if (targetProd.stock === 0) targetProd.status = 'نافد';
+      else if (targetProd.stock <= 10) targetProd.status = 'منخفض';
+      else targetProd.status = 'متوفر';
 
       logOperation({
         user: author,
         action: 'إلغاء خصم واستعادة مخزون',
-        target: `${prod.nameAr} (${order.orderNumber})`,
+        target: `${targetProd.nameAr} (${order.orderNumber})`,
         oldVal: `${oldStock} قطعة`,
         newVal: `${newStock} قطعة (+${qtyToRestore})`,
-        details: `«استرجاع كمية (+${qtyToRestore}) إلى مخزون ${prod.nameAr} بسبب إلغاء/تعديل الطلب ${order.orderNumber}»`
+        details: `«استرجاع كمية (+${qtyToRestore}) إلى مخزون ${targetProd.nameAr} بسبب إلغاء/تعديل الطلب ${order.orderNumber}»`
       });
     }
   });

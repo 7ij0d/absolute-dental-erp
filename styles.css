@@ -7,28 +7,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Surface & Background Tokens (Clean Light Aesthetic) */
-  --bg-page: #f8fafc;
+  /* Surface & Background Tokens (Warm Clean Minimalist Aesthetic) */
+  --bg-page: #faf9f6;
   --bg-surface: #ffffff;
-  --bg-subtle: #f1f5f9;
-  --bg-muted: #f8fafc;
-  --bg-hover: #f1f5f9;
+  --bg-subtle: #f5f3ef;
+  --bg-muted: #f8f7f4;
+  --bg-hover: #f3f1ec;
 
-  /* Sidebar Tokens (Deep Midnight Navy) */
-  --sidebar-bg: #0b1329;
-  --sidebar-surface: #111c38;
+  /* Sidebar Tokens (Absolute Dental Deep Espresso) */
+  --sidebar-bg: #231d19;
+  --sidebar-surface: #2b231e;
   --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-text: #94a3b8;
+  --sidebar-text: #c0b7b1;
   --sidebar-text-hover: #ffffff;
-  --sidebar-active-bg: #2563eb;
+  --sidebar-active-bg: rgba(255, 255, 255, 0.12);
   --sidebar-active-text: #ffffff;
   --sidebar-width: 250px;
 
-  /* Primary Brand Action Color */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-subtle: #eff6ff;
-  --primary-border: #bfdbfe;
+  /* Primary Brand Action Color (Absolute Dental Solid Espresso) */
+  --primary: #2e2520;
+  --primary-hover: #1f1814;
+  --primary-subtle: #f7f4f0;
+  --primary-border: #dcd4cc;
 
   /* Financial & Functional Status Colors (Subtle & Restrained) */
   --status-success: #16a34a;
@@ -3995,5 +3995,379 @@ a {
   color: #1d4ed8;
   border: 1px solid #bfdbfe;
 }
+
+/* ==========================================================================
+   STREAMLINED ERP WORKSPACE — BLUEPRINT DESIGN STYLES (SCREENS 1-5)
+   ========================================================================== */
+
+/* 1. Dashboard 2-Column Section */
+.dashboard-simple-grid {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-simple-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dashboard Action Orders Table */
+.simple-dash-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.simple-dash-table th {
+  padding: 0.65rem 0.85rem;
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: right;
+  border-bottom: 1px solid var(--border-card);
+  background: var(--bg-surface);
+}
+
+.simple-dash-table td {
+  padding: 0.85rem 0.85rem;
+  font-size: 0.85rem;
+  color: var(--text-body);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  vertical-align: middle;
+}
+
+.simple-dash-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.simple-dash-table tbody tr:hover {
+  background-color: var(--bg-subtle);
+}
+
+.dash-arrow-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-card);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.dash-arrow-btn:hover {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+/* Dashboard Low Stock List */
+.low-stock-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.low-stock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-card);
+  background: var(--bg-surface);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.low-stock-row:hover {
+  border-color: #cbd5e1;
+  background-color: var(--bg-subtle);
+}
+
+.low-stock-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.low-stock-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  background: #f8fafc;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.low-stock-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.low-stock-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.low-stock-sku {
+  font-size: 0.725rem;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+}
+
+.low-stock-badge-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.low-stock-qty-pill {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.low-stock-qty-pill.out {
+  color: #991b1b;
+  background: #fee2e2;
+  border-color: #f87171;
+}
+
+/* 2. Orders Page Filters Bar */
+.orders-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.orders-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.order-filter-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: var(--text-body);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.order-filter-btn:hover {
+  background: var(--bg-subtle);
+  border-color: #cbd5e1;
+}
+
+.order-filter-btn.active {
+  background: var(--sidebar-bg);
+  color: #ffffff;
+  border-color: var(--sidebar-bg);
+}
+
+.order-filter-count {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+/* 3. Streamlined Clean Inventory Table */
+.clean-inventory-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.clean-inventory-table th {
+  padding: 0.85rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: right;
+  border-bottom: 1px solid var(--border-card);
+  background: var(--bg-surface);
+}
+
+.clean-inventory-table td {
+  padding: 0.9rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-body);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  vertical-align: middle;
+}
+
+.clean-inventory-table tbody tr:hover {
+  background-color: var(--bg-subtle);
+}
+
+/* Product Card Minimal Design in POS */
+.pos-prod-card {
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: var(--transition);
+}
+
+.pos-prod-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
+}
+
+.pos-prod-card-fav {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-pill);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  z-index: 2;
+  transition: var(--transition);
+}
+
+.pos-prod-card-fav:hover {
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+.pos-prod-thumb-wrap {
+  width: 100%;
+  height: 120px;
+  border-radius: var(--radius-md);
+  background: #f8fafc;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.65rem;
+}
+
+.pos-prod-thumb-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pos-prod-name {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.3;
+  margin-bottom: 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 2.3em;
+}
+
+.pos-prod-sku {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 0.4rem;
+}
+
+.pos-prod-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.pos-prod-price {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.pos-prod-stock-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-pill);
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.pos-prod-stock-pill.low {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #fde68a;
+}
+
+.pos-prod-stock-pill.out {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.pos-prod-add-btn {
+  width: 100%;
+  background-color: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.55rem;
+  font-size: 0.825rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.pos-prod-add-btn:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.pos-prod-add-btn:disabled {
+  background-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+}
+
 
 
