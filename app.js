@@ -2480,15 +2480,19 @@ async function syncWithUserServer() {
           const existingOrder = (ERP_STATE.orders || []).find(eo => eo.id === o.id || eo.orderNumber === `#${o.order_number}`);
           const fallbackOrder = existingOrder || initialOrdersMap[o.id] || initialOrdersMap[o.order_number] || null;
 
-          // Items mapping
+          // Items mapping (Prioritize live relational order_items table, then snapshot JSON, then fallback)
           let rawItems = [];
-          if (Array.isArray(o.items) && o.items.length > 0) {
+          if (itemsByOrderId[o.id] && itemsByOrderId[o.id].length > 0) {
+            rawItems = itemsByOrderId[o.id];
+          } else if (Array.isArray(o.items) && o.items.length > 0) {
             rawItems = o.items;
           } else if (typeof o.items === 'string') {
-            try { rawItems = JSON.parse(o.items); } catch (_) { rawItems = []; }
-          } else if (itemsByOrderId[o.id] && itemsByOrderId[o.id].length > 0) {
-            rawItems = itemsByOrderId[o.id];
-          } else if (fallbackOrder && fallbackOrder.items && fallbackOrder.items.length > 0) {
+            try {
+              const parsed = JSON.parse(o.items);
+              if (Array.isArray(parsed) && parsed.length > 0) rawItems = parsed;
+            } catch (_) {}
+          }
+          if (rawItems.length === 0 && fallbackOrder && fallbackOrder.items && fallbackOrder.items.length > 0) {
             rawItems = fallbackOrder.items;
           }
 
