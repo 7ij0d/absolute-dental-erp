@@ -566,15 +566,17 @@
                 <input type="text" id="posCatalogSearchInput" class="form-input-custom pos-storefront-search" placeholder="ابحث عن منتج بالاسم أو الرمز SKU..." oninput="handlePosCatalogSearch(this.value)">
               </div>
 
-              <!-- Category Filter Chips (Matching Storefront & Clinical Specialties) -->
+              <!-- Category Filter Chips (Matching Storefront Academic Subjects & Specialties) -->
               <div class="student-filter-chips pos-category-chips">
                 <button type="button" class="filter-chip active" onclick="filterPosCatalogCategory('all', this)">الكل</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('tools', this)">أدوات</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('consumables', this)">استهلاكية</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('materials', this)">مواد طب الأسنان</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('devices', this)">أجهزة</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('cons', this)">الكونس</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('crown', this)">الكراون</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('dental-anatomy', this)">تشريح الأسنان (سنة 1)</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('dental-materials', this)">مواد طب الأسنان (سنة 1)</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('restorative-dentistry', this)">علاج تحفظي / كونس (سنة 2)</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('fixed-prosthodontics', this)">كراون وتعويضات ثابتة (سنة 2)</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('removable-prosthodontics', this)">أطقم متحركة (سنة 2)</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('boxes-bags', this)">شنط وبوكسات</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('diagnostic', this)">أدوات فحص وكشافات</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('scrubs', this)">ملابس طبية</button>
               </div>
 
               <!-- Product Cards Grid (Storefront Cards 1:1 Aspect Ratio) -->
@@ -1409,45 +1411,49 @@
         </div>
 
         <!-- Subheader Row (Company details & Invoice meta) -->
-        <div class="invoice-header-row">
+        <div class="invoice-header-row" style="border-bottom: 2px solid #00a896; padding-bottom: 1.25rem; margin-bottom: 1.25rem;">
           <!-- Company Info (Right in RTL) -->
           <div class="inv-company-details">
-            <div class="inv-comp-name">Absolute Dental</div>
-            <div class="inv-comp-line">طرابلس، ليبيا 🇱🇾</div>
-            <div class="inv-comp-line num-mono" style="direction: ltr; display: inline-block;">091 234 5678</div>
-            <div class="inv-comp-line email">absolute.dental.ly@gmail.com</div>
+            <div class="inv-comp-name" style="font-size: 1.35rem; font-weight: 900; color: #0a335c;">Absolute Dental</div>
+            <div class="inv-comp-line" style="font-size: 0.8rem; color: #64748b;">معدات ومستلزمات طب الأسنان</div>
+            <div class="inv-comp-line" style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #475569; margin-top: 4px;">
+              <span>📍 طرابلس، ليبيا / Tripoli, Libya</span>
+            </div>
+            <div class="inv-comp-line num-mono" style="display: flex; align-items: center; gap: 4px; font-weight: 700; color: #0a335c; font-size: 0.85rem; margin-top: 2px;">
+              <span>📞 0946859163</span>
+            </div>
           </div>
 
           <!-- Invoice Meta (Left in RTL) -->
-          <div class="inv-meta-details">
-            <div class="inv-type-title">فاتورة مبيعات</div>
-            <div class="inv-number num-mono" id="invDocNumber">#INV-1068</div>
-            <div class="inv-datetime" id="invDocDate">09:26 02-10-2026</div>
-            <div class="inv-status-pill-wrap">
-              <span class="inv-status-pill" id="invDocStatusPill">مكتمل</span>
+          <div class="inv-meta-details" style="text-align: left;">
+            <div class="inv-status-pill-wrap" style="margin-bottom: 0.4rem;">
+              <span class="inv-status-pill" id="invDocStatusPill" style="background: #e6f6f4; color: #00a896; padding: 0.35rem 0.8rem; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">مكتمل</span>
             </div>
+            <div class="inv-number num-mono" id="invDocNumber" style="font-size: 1rem; font-weight: 800; color: #0a335c;">#INV-1068</div>
+            <div class="inv-datetime" id="invDocDate" style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">02 أكتوبر 2026</div>
           </div>
         </div>
 
-        <!-- Customer Information Grid -->
-        <div class="invoice-customer-box">
-          <h4 class="inv-cust-box-title">معلومات العميل</h4>
-          <div class="inv-cust-grid">
-            <div class="inv-cust-cell">
-              <span class="inv-cust-label">الاسم:</span>
-              <strong class="inv-cust-value" id="invDocCustomerName">أحمد محمد</strong>
+        <!-- Customer & Company Info Grid (Matching Storefront 2-col) -->
+        <div class="invoice-customer-box" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
+          <!-- Customer info -->
+          <div>
+            <h4 style="color: #0a335c; font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem;">معلومات الطالب / العميل</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.82rem; color: #334155;">
+              <div><strong>الاسم:</strong> <span id="invDocCustomerName">طالب كلية الأسنان</span></div>
+              <div><strong>الهاتف:</strong> <span class="num-mono" id="invDocCustomerPhone" style="font-weight: 600; color: #00a896;">0912345678</span></div>
+              <div><strong>الكلية:</strong> <span id="invDocCollege">كلية طب الأسنان - جامعة طرابلس</span></div>
+              <div id="invDocAddressWrap"><strong>العنوان:</strong> <span id="invDocAddress">طرابلس</span></div>
             </div>
-            <div class="inv-cust-cell">
-              <span class="inv-cust-label">رقم الهاتف:</span>
-              <strong class="inv-cust-value num-mono" id="invDocCustomerPhone">0912345678</strong>
-            </div>
-            <div class="inv-cust-cell full-width">
-              <span class="inv-cust-label">الجامعة / الكلية:</span>
-              <span class="inv-cust-value" id="invDocCollege">كلية طب الأسنان - جامعة طرابلس</span>
-            </div>
-            <div class="inv-cust-cell full-width" id="invDocAddressWrap">
-              <span class="inv-cust-label">العنوان:</span>
-              <span class="inv-cust-value" id="invDocAddress">طرابلس</span>
+          </div>
+
+          <!-- Store Info -->
+          <div>
+            <h4 style="color: #0a335c; font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem;">Absolute Dental</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.82rem; color: #475569;">
+              <div>📍 المقر: طرابلس، ليبيا (جامعة طرابلس)</div>
+              <div>📞 خدمة العملاء: <span class="num-mono" style="font-weight: 700; color: #0a335c;">0946859163</span></div>
+              <div>🌐 المنصة: المتجر الرسمي لطلبة طب الأسنان</div>
             </div>
           </div>
         </div>
@@ -2123,6 +2129,9 @@
 
 <!-- Toast Container -->
 <div id="toastContainer" class="toast-container"></div>
+
+<!-- Supabase Client for Realtime Storefront Sync -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!-- Data & Engine Scripts -->
 <script src="seed.js"></script>
