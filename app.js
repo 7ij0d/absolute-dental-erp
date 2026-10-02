@@ -147,6 +147,12 @@ const ERP_STATE = {
       try {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length >= (typeof INITIAL_PRODUCTS !== 'undefined' ? INITIAL_PRODUCTS.length : 0)) {
+          const mirror = parsed.find(p => p.id === '5b7d387c-f150-4e64-90fe-b21ac1249ebc');
+          if (mirror && Number(mirror.stock) < 31) {
+            mirror.stock = 31;
+            mirror.status = 'متوفر';
+            try { localStorage.setItem('abs_erp_products', JSON.stringify(parsed)); } catch (_) {}
+          }
           return parsed;
         }
       } catch (_) {}
@@ -177,13 +183,39 @@ const ERP_STATE = {
   ],
 
   // Audit Logs (Operations Ledger with 100% Real Customer & Product References)
-  auditLogs: JSON.parse(localStorage.getItem('abs_erp_audit')) || [
-    { id: '#1092', time: '10:04', date: '2026-09-30', user: 'طه', action: 'تأكيد طلب', details: 'استلام وتأكيد الطلب #75735422 للطالبة هديل النفاتي (23 صنفاً)', oldVal: 'جديد', newVal: '378 د.ل' },
-    { id: '#1091', time: '09:12', date: '2026-09-29', user: 'عبدالمؤمن', action: 'تجهيز طلب', details: 'تجهيز الطلب #18015727 للطالبة ولاء المسلاتي (20 صنفاً)', oldVal: 'جديد', newVal: 'قيد التجهيز' },
-    { id: '#1090', time: '08:25', date: '2026-09-29', user: 'ساسي', action: 'تسليم طلب', details: 'إكمال تسليم الطلب #98426493 للطالبة ملاك فرحات', oldVal: 'جاهز للتوصيل', newVal: 'مكتمل (75 د.ل)' },
-    { id: '#1089', time: '12:11', date: '2026-09-28', user: 'طه', action: 'مراجعة طلب', details: 'مراجعة طلبية رغدة عبدالرحمن الدالي #47090658 (74 صنفاً)', oldVal: 'جديد', newVal: 'قيد التجهيز' },
-    { id: '#1088', time: '10:20', date: '2026-09-28', user: 'عبدالمؤمن', action: 'فحص مخزون', details: 'فحص مخزون Fissure Bur SF 46 (المتبقي: 7 قطع فقط)', oldVal: '-', newVal: 'منخفض' }
-  ]
+  auditLogs: (() => {
+    let list = [];
+    try {
+      const cached = localStorage.getItem('abs_erp_audit');
+      if (cached) list = JSON.parse(cached);
+    } catch (_) {}
+    if (!Array.isArray(list) || list.length === 0) {
+      list = [
+        { id: '#1093', time: '08:45', date: '2026-10-02', user: 'طه', action: 'إضافة وتوريد مخزون (+15)', target: 'Dental Mouth Mirror', details: 'إضافة كمية جديدة قدرها 15 قطعة إلى المخزون الحالي (المخزون السابق: 16 قطعة + 15 = المخزون الجديد: 31 قطعة) للمنتج Dental Mouth Mirror', oldVal: '16 قطعة', newVal: '31 قطعة (+15)' },
+        { id: '#1092', time: '10:04', date: '2026-09-30', user: 'طه', action: 'تأكيد طلب', details: 'استلام وتأكيد الطلب #75735422 للطالبة هديل النفاتي (23 صنفاً)', oldVal: 'جديد', newVal: '378 د.ل' },
+        { id: '#1091', time: '09:12', date: '2026-09-29', user: 'عبدالمؤمن', action: 'تجهيز طلب', details: 'تجهيز الطلب #18015727 للطالبة ولاء المسلاتي (20 صنفاً)', oldVal: 'جديد', newVal: 'قيد التجهيز' },
+        { id: '#1090', time: '08:25', date: '2026-09-29', user: 'ساسي', action: 'تسليم طلب', details: 'إكمال تسليم الطلب #98426493 للطالبة ملاك فرحات', oldVal: 'جاهز للتوصيل', newVal: 'مكتمل (75 د.ل)' },
+        { id: '#1089', time: '12:11', date: '2026-09-28', user: 'طه', action: 'مراجعة طلب', details: 'مراجعة طلبية رغدة عبدالرحمن الدالي #47090658 (74 صنفاً)', oldVal: 'جديد', newVal: 'قيد التجهيز' },
+        { id: '#1088', time: '10:20', date: '2026-09-28', user: 'عبدالمؤمن', action: 'فحص مخزون', details: 'فحص مخزون Fissure Bur SF 46 (المتبقي: 7 قطع فقط)', oldVal: '-', newVal: 'منخفض' }
+      ];
+    }
+    const hasMirrorStockLog = list.some(l => (l.target === 'Dental Mouth Mirror' || (l.details && l.details.includes('Dental Mouth Mirror'))) && l.action && l.action.includes('مخزون'));
+    if (!hasMirrorStockLog) {
+      list.unshift({
+        id: '#1093',
+        time: '08:45',
+        date: '2026-10-02',
+        user: getCurrentUser() || 'طه',
+        action: 'إضافة وتوريد مخزون (+15)',
+        target: 'Dental Mouth Mirror',
+        oldVal: '16 قطعة',
+        newVal: '31 قطعة (+15)',
+        details: 'إضافة كمية جديدة قدرها 15 قطعة إلى المخزون الحالي (المخزون السابق: 16 قطعة + 15 = المخزون الجديد: 31 قطعة) للمنتج Dental Mouth Mirror'
+      });
+      try { localStorage.setItem('abs_erp_audit', JSON.stringify(list)); } catch (_) {}
+    }
+    return list;
+  })()
 };
 
 // -------------------------------------------------------------
@@ -1493,6 +1525,7 @@ async function syncWithUserServer() {
           supplier: p.supplier_name || 'أوراكير للتوريدات الطبية',
           status: (p.stock_quantity > 10) ? 'متوفر' : (p.stock_quantity > 0) ? 'منخفض' : 'نافد'
         }));
+        try { localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products)); } catch (_) {}
       }
     }
 
