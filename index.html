@@ -1103,17 +1103,23 @@
       <section id="inventoryScreen" class="secondary-screen-view">
         <div class="page-header">
           <div class="page-header-titles">
-            <h1 class="page-greeting">إدارة المخزون والتوريدات</h1>
-            <p class="page-subtitle">مراقبة مستويات النواقص وتنبيهات إعادة الطلب من الموردين.</p>
+            <h1 class="page-greeting">إدارة المخزون والتسوية والطلبات</h1>
+            <p class="page-subtitle">ربط حركات المخزون بالطلبات المكتملة فعلياً والفواتير مع منع الخصم المكرر.</p>
           </div>
-          <button class="btn-primary" onclick="showToast('تم إرسال طلب إعادة تزويد النواقص للمورد أوراكير')">طلب تزويد النواقص</button>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn-secondary" onclick="showToast('تم إرسال طلب تزويد النواقص للموردين المعتمدين')">طلب تزويد النواقص</button>
+            <button class="btn-primary" onclick="runAutomaticInventoryReconciliation()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>تسوية المخزون والطلبات ⚡</span>
+            </button>
+          </div>
         </div>
 
         <div class="kpi-grid kpi-grid-3">
           <div class="kpi-card">
             <div class="kpi-label">إجمالي المخزون المتاح</div>
             <div class="kpi-value num-mono" id="invScreenTotalPieces" style="color: var(--status-success);">910 قطعة</div>
-            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">متوفرة في مخزن طرابلس عبر 24 صنفاً</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">متوفرة في مخزن طرابلس عبر 39 صنفاً</span>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">منتجات منخفضة المخزون</div>
@@ -1127,7 +1133,19 @@
           </div>
         </div>
 
-        <div class="erp-table-card">
+        <!-- Inventory Sub-Navigation View Switcher Tabs -->
+        <div class="table-filter-tabs" style="margin-bottom: 1rem;">
+          <button class="table-filter-tab active" id="invSubTabStock" onclick="switchInventorySubView('stock', this)">
+            <span>مستويات المخزون (39 صنفاً)</span>
+          </button>
+          <button class="table-filter-tab" id="invSubTabRecon" onclick="switchInventorySubView('recon', this)">
+            <span>تسوية ومزامنة الطلبات والمخزون (Order ➔ Invoice ➔ Ledger)</span>
+            <span class="filter-count-badge" id="invReconPendingBadge" style="background: #eab308; color: #000; display: none;">0</span>
+          </button>
+        </div>
+
+        <!-- VIEW 1: DEDICATED STOCK LEVELS TABLE -->
+        <div id="inventoryStockCard" class="erp-table-card">
           <div class="table-controls-bar">
             <div class="card-title">قائمة متابعة مستويات المخزون</div>
             <span style="font-size: 0.75rem; color: var(--text-muted);">تحديث فوري من قاعدة البيانات</span>
@@ -1146,6 +1164,77 @@
               </thead>
               <tbody id="inventoryTableBody">
                 <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- VIEW 2: 3-WAY INVENTORY & ORDERS RECONCILIATION LEDGER -->
+        <div id="inventoryReconCard" class="erp-table-card" style="display: none;">
+          <div class="table-controls-bar">
+            <div>
+              <div class="card-title">سجل تسوية حركات المخزون والطلبات المكتملة</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                الربط الإلزامي: يُخصم المخزون فقط عند حالة (مكتمل) — منع الخصم المكرر وحماية الطلبات المعلقة
+              </div>
+            </div>
+            <button class="btn-secondary btn-sm" onclick="runAutomaticInventoryReconciliation()">مقارنة وتحديث فوري 🔄</button>
+          </div>
+
+          <!-- 5-Metric Reconciliation Summary -->
+          <div class="recon-kpi-grid">
+            <div class="recon-kpi-card completed">
+              <span class="recon-kpi-title">مكتمل وتم الخصم</span>
+              <span class="recon-kpi-num num-mono" id="reconKpiCompletedCount" style="color: var(--status-success);">13</span>
+              <span class="recon-kpi-desc">حركات مخزون منفذة مسبقاً</span>
+            </div>
+            <div class="recon-kpi-card pending">
+              <span class="recon-kpi-title">مكتمل بانتظار الخصم</span>
+              <span class="recon-kpi-num num-mono" id="reconKpiPendingCount" style="color: #ca8a04;">0</span>
+              <span class="recon-kpi-desc">تتطلب تنفيذ الخصم فوراً</span>
+            </div>
+            <div class="recon-kpi-card protected">
+              <span class="recon-kpi-title">غير مكتمل (محمي)</span>
+              <span class="recon-kpi-num num-mono" id="reconKpiProtectedCount" style="color: #2563eb;">4</span>
+              <span class="recon-kpi-desc">جديد / قيد التجهيز (لا خصم)</span>
+            </div>
+            <div class="recon-kpi-card cancelled">
+              <span class="recon-kpi-title">طلبات ملغاة</span>
+              <span class="recon-kpi-num num-mono" id="reconKpiCancelledCount" style="color: #dc2626;">1</span>
+              <span class="recon-kpi-desc">مستبعدة كلياً من الخصم</span>
+            </div>
+            <div class="recon-kpi-card review">
+              <span class="recon-kpi-title">مكرر / للمراجعة</span>
+              <span class="recon-kpi-num num-mono" id="reconKpiReviewCount" style="color: #9333ea;">0</span>
+              <span class="recon-kpi-desc">مطابقة أرقام المعاملات</span>
+            </div>
+          </div>
+
+          <!-- Recon Tabs Filter -->
+          <div class="table-filter-tabs" style="margin-bottom: 0.75rem;">
+            <button class="table-filter-tab active" onclick="filterReconTable('all', this)">الكل (<span id="reconTabAllCount">18</span>)</button>
+            <button class="table-filter-tab" onclick="filterReconTable('completed_deducted', this)">مكتمل ومخصوم (<span id="reconTabDeductedCount">13</span>)</button>
+            <button class="table-filter-tab" onclick="filterReconTable('completed_pending', this)">مكتمل بانتظار الخصم (<span id="reconTabPendingCount">0</span>)</button>
+            <button class="table-filter-tab" onclick="filterReconTable('pending_protected', this)">غير مكتمل (محمي) (<span id="reconTabProtectedCount">4</span>)</button>
+            <button class="table-filter-tab" onclick="filterReconTable('cancelled', this)">ملغي (<span id="reconTabCancelledCount">1</span>)</button>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>الطلب (Order)</th>
+                  <th>الفاتورة (Invoice)</th>
+                  <th>العميل</th>
+                  <th>حالة الطلب</th>
+                  <th>الأصناف والكميات</th>
+                  <th>حركة المخزون</th>
+                  <th>حالة الخصم</th>
+                  <th>الإجراء</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryReconTableBody">
+                <!-- Dynamically populated by JS -->
               </tbody>
             </table>
           </div>
@@ -1641,6 +1730,27 @@
         </div>
       </div>
 
+      <!-- 3-Way Order ➔ Invoice ➔ Inventory Transaction Pipeline -->
+      <div class="recon-pipeline-card">
+        <div class="recon-pipeline-node done" id="pipelineNodeOrder">
+          <span class="recon-pipeline-node-title">1. الطلب</span>
+          <span class="recon-pipeline-node-val num-mono" id="pipelineOrderNum">#75735422</span>
+          <span class="recon-pipeline-node-sub" id="pipelineOrderStatus">جديد</span>
+        </div>
+        <div class="recon-pipeline-arrow">➔</div>
+        <div class="recon-pipeline-node" id="pipelineNodeInvoice">
+          <span class="recon-pipeline-node-title">2. الفاتورة الرسمية</span>
+          <span class="recon-pipeline-node-val num-mono" id="pipelineInvoiceNum">#INV-2026-0001</span>
+          <span class="recon-pipeline-node-sub">فاتورة بيع</span>
+        </div>
+        <div class="recon-pipeline-arrow">➔</div>
+        <div class="recon-pipeline-node" id="pipelineNodeTx">
+          <span class="recon-pipeline-node-title">3. حركة المخزون</span>
+          <span class="recon-pipeline-node-val num-mono" id="pipelineTxVal">غير مخصوم</span>
+          <span class="recon-pipeline-node-sub" id="pipelineTxSub">محمي حتى الاكتمال</span>
+        </div>
+      </div>
+
       <!-- Financial Total -->
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
         <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">إجمالي الفاتورة المطلوب:</span>
@@ -1648,10 +1758,11 @@
       </div>
     </div>
     <div class="modal-footer">
-      <div style="display: flex; gap: 6px; margin-inline-end: auto;">
+      <div style="display: flex; gap: 6px; margin-inline-end: auto; flex-wrap: wrap;">
         <button class="btn-secondary btn-sm" onclick="updateOrderStatusFromModal('قيد التجهيز')">قيد التجهيز</button>
         <button class="btn-secondary btn-sm" onclick="updateOrderStatusFromModal('جاهز للتوصيل')">جاهز للتوصيل</button>
-        <button class="btn-primary btn-sm" onclick="updateOrderStatusFromModal('مكتمل')">مكتمل ومستلم</button>
+        <button class="btn-primary btn-sm" onclick="updateOrderStatusFromModal('مكتمل')">مكتمل ومستلم (خصم المخزون) ✅</button>
+        <button class="btn-secondary btn-sm" style="color: var(--status-danger); border-color: rgba(220,38,38,0.25);" onclick="updateOrderStatusFromModal('ملغي')">إلغاء الطلب 🚫</button>
       </div>
       <button class="btn-secondary" onclick="closeModal('orderDetailsModal')">إغلاق</button>
     </div>

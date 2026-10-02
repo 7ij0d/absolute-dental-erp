@@ -165,10 +165,64 @@ const ERP_STATE = {
     ? [...INITIAL_PURCHASES]
     : [],
 
-  // Orders from Seed (18 Real Orders)
-  orders: (typeof INITIAL_ORDERS !== 'undefined' && Array.isArray(INITIAL_ORDERS))
-    ? [...INITIAL_ORDERS]
-    : [],
+  // Orders from Seed (18 Real Orders) with LocalStorage fallback & safe property harmonization
+  orders: (() => {
+    let list = [];
+    const cached = localStorage.getItem('abs_erp_orders');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) list = parsed;
+      } catch (_) {}
+    }
+    if (list.length === 0 && typeof INITIAL_ORDERS !== 'undefined' && Array.isArray(INITIAL_ORDERS)) {
+      list = JSON.parse(JSON.stringify(INITIAL_ORDERS));
+    }
+
+    const seedMap = {};
+    if (typeof INITIAL_ORDERS !== 'undefined' && Array.isArray(INITIAL_ORDERS)) {
+      INITIAL_ORDERS.forEach(so => {
+        if (so.id) seedMap[so.id] = so;
+        if (so.orderNumber) seedMap[so.orderNumber] = so;
+      });
+    }
+
+    list.forEach(o => {
+      const match = seedMap[o.id] || seedMap[o.orderNumber];
+      if (!o.invoiceNumber) {
+        o.invoiceNumber = match ? match.invoiceNumber : `#INV-2026-${(o.orderNumber || o.id || '').replace('#', '')}`;
+      }
+      if (!o.inventoryDeduction) {
+        if (match && match.inventoryDeduction) {
+          o.inventoryDeduction = match.inventoryDeduction;
+        } else if (o.status === 'مكتمل') {
+          o.inventoryDeduction = 'applied'; // Baseline protection for historical completed orders
+        } else if (o.status === 'ملغي') {
+          o.inventoryDeduction = 'cancelled';
+        } else {
+          o.inventoryDeduction = 'not_applied';
+        }
+      }
+    });
+
+    return list;
+  })(),
+
+  // Integrated Inventory Deduction Ledger (3-Way Reconciliation Store)
+  inventoryTransactions: (() => {
+    let list = [];
+    const cached = localStorage.getItem('abs_erp_inventory_transactions');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) list = parsed;
+      } catch (_) {}
+    }
+    if (list.length === 0 && typeof INITIAL_INVENTORY_TRANSACTIONS !== 'undefined' && Array.isArray(INITIAL_INVENTORY_TRANSACTIONS)) {
+      list = JSON.parse(JSON.stringify(INITIAL_INVENTORY_TRANSACTIONS));
+    }
+    return list;
+  })(),
 
   // POS State
   posCart: [],
@@ -415,6 +469,7 @@ function navigateToScreen(screenId, subSection = null) {
     renderProductsTable();
   } else if (screenId === 'inventory') {
     renderInventoryTable();
+    renderInventoryReconciliationUI();
   } else if (screenId === 'finance') {
     renderExpensesTable();
     renderPurchasesTable();
@@ -515,6 +570,9 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
       <td class="num-mono" style="font-weight: 800; color: var(--text-main);">${order.total} د.ل</td>
       <td>
         <span class="status-pill ${getOrderStatusClass(order.status)}">${order.status}</span>
+        <div style="margin-top: 3px;">
+          ${typeof getOrderDeductionBadge === 'function' ? getOrderDeductionBadge(order) : ''}
+        </div>
       </td>
       <td style="color: var(--text-body); font-weight: 600;">${order.assignedTo || 'طه'}</td>
       <td>
@@ -622,6 +680,54 @@ function openOrderDetailsById(orderId) {
     `).join('');
   }
 
+  // 3-Way Order ➔ Invoice ➔ Inventory Transaction Pipeline
+  const pNodeOrder = document.getElementById('pipelineNodeOrder');
+  const pOrderNum = document.getElementById('pipelineOrderNum');
+  const pOrderStatus = document.getElementById('pipelineOrderStatus');
+  const pNodeInvoice = document.getElementById('pipelineNodeInvoice');
+  const pInvoiceNum = document.getElementById('pipelineInvoiceNum');
+  const pNodeTx = document.getElementById('pipelineNodeTx');
+  const pTxVal = document.getElementById('pipelineTxVal');
+  const pTxSub = document.getElementById('pipelineTxSub');
+
+  if (pOrderNum) pOrderNum.textContent = order.orderNumber;
+  if (pOrderStatus) pOrderStatus.textContent = order.status;
+  if (pInvoiceNum) pInvoiceNum.textContent = order.invoiceNumber || `#INV-2026-${(order.orderNumber || '').replace('#', '')}`;
+
+  if (pNodeOrder) pNodeOrder.className = 'recon-pipeline-node done';
+  if (pNodeInvoice) pNodeInvoice.className = 'recon-pipeline-node done';
+
+  const tx = (ERP_STATE.inventoryTransactions || []).find(t => 
+    t.status === 'applied' && (t.orderId === order.id || t.orderNumber === order.orderNumber)
+  );
+
+  if (pNodeTx && pTxVal && pTxSub) {
+    pNodeTx.className = 'recon-pipeline-node';
+    if (order.status === 'مكتمل') {
+      if (order.inventoryDeduction === 'applied' || tx) {
+        pNodeTx.classList.add('done');
+        pTxVal.textContent = tx ? tx.id : 'تم الخصم';
+        pTxVal.style.color = 'var(--status-success)';
+        pTxSub.textContent = 'مخصوم من المخزون 🟢';
+      } else {
+        pNodeTx.classList.add('waiting');
+        pTxVal.textContent = 'بانتظار الخصم';
+        pTxVal.style.color = '#ca8a04';
+        pTxSub.textContent = 'يتطلب خصم المخزون ⚠️';
+      }
+    } else if (order.status === 'ملغي') {
+      pNodeTx.classList.add('idle');
+      pTxVal.textContent = 'ملغي';
+      pTxVal.style.color = 'var(--status-danger)';
+      pTxSub.textContent = 'مستبعد من الخصم 🚫';
+    } else {
+      pNodeTx.classList.add('idle');
+      pTxVal.textContent = 'غير مخصوم';
+      pTxVal.style.color = 'var(--text-muted)';
+      pTxSub.textContent = 'محمي حتى الاكتمال 🛡️';
+    }
+  }
+
   openModal('orderDetailsModal');
 }
 
@@ -629,20 +735,53 @@ function updateOrderStatusFromModal(newStatus) {
   if (!ERP_STATE.currentOrderInModal) return;
   const order = ERP_STATE.currentOrderInModal;
   const oldStatus = order.status;
+  if (oldStatus === newStatus) return;
+
   order.status = newStatus;
+  const author = getCurrentUser() || ERP_STATE.currentPartner || 'طه';
+
+  // Apply or reverse inventory deduction based on strict logic
+  let deductionNotice = '';
+  if (newStatus === 'مكتمل') {
+    if (order.inventoryDeduction !== 'applied') {
+      const deductRes = applyOrderInventoryDeduction(order, author);
+      if (deductRes && deductRes.success) {
+        deductionNotice = ' وتم خصم أصناف الطلب من المخزون بنجاح 📦';
+      }
+    }
+  } else if (newStatus === 'ملغي') {
+    if (order.inventoryDeduction === 'applied') {
+      reverseOrderInventoryDeduction(order, author);
+      deductionNotice = ' وتمت استعادة الكميات المخصومة إلى المخزون 🔄';
+    } else {
+      order.inventoryDeduction = 'cancelled';
+    }
+  } else {
+    // If transitioning back from completed to preparing/ready/new, reverse deduction if it was applied
+    if (oldStatus === 'مكتمل' && order.inventoryDeduction === 'applied') {
+      reverseOrderInventoryDeduction(order, author);
+      deductionNotice = ' وتم إلغاء الخصم وحماية المخزون 🛡️';
+    } else if (newStatus !== 'ملغي') {
+      order.inventoryDeduction = 'not_applied';
+    }
+  }
 
   // Update audit log
   ERP_STATE.auditLogs.unshift({
     id: `#${1095 + ERP_STATE.auditLogs.length}`,
     time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
-    date: 'اليوم',
-    user: ERP_STATE.currentPartner,
+    date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }),
+    user: author,
     action: 'تحديث حالة الطلب',
-    details: `تحديث الطلب ${order.orderNumber} لـ ${order.customerName} إلى (${newStatus})`,
+    details: `تحديث الطلب ${order.orderNumber} لـ ${order.customerName} من (${oldStatus}) إلى (${newStatus})${deductionNotice}`,
     oldVal: oldStatus,
     newVal: newStatus
   });
-  localStorage.setItem('abs_erp_audit', JSON.stringify(ERP_STATE.auditLogs));
+
+  try {
+    localStorage.setItem('abs_erp_audit', JSON.stringify(ERP_STATE.auditLogs));
+    localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+  } catch (_) {}
 
   // Update UI in modal
   const statusBadge = document.getElementById('modalOrderStatus');
@@ -651,8 +790,15 @@ function updateOrderStatusFromModal(newStatus) {
     statusBadge.className = `status-pill ${getOrderStatusClass(newStatus)}`;
   }
 
-  showToast(`تم تحديث حالة الطلب ${order.orderNumber} إلى: ${newStatus}`);
+  // Refresh pipeline in modal
+  openOrderDetailsById(order.id);
+
+  showToast(`تم تحديث حالة الطلب ${order.orderNumber} إلى (${newStatus})${deductionNotice}`);
   if (ERP_STATE.activeScreen === 'orders') renderOrdersTable();
+  if (ERP_STATE.activeScreen === 'inventory') {
+    renderInventoryTable();
+    renderInventoryReconciliationUI();
+  }
   updateDashboardRealUI();
 }
 
@@ -1142,6 +1288,502 @@ function renderInventoryTable() {
 }
 
 // -------------------------------------------------------------
+// 9.B. INVENTORY, ORDERS & INVOICES 3-WAY RECONCILIATION ENGINE
+// -------------------------------------------------------------
+let CURRENT_INVENTORY_SUBVIEW = 'stock';
+let CURRENT_RECON_FILTER = 'all';
+
+function getOrderDeductionBadge(order) {
+  if (order.status === 'مكتمل') {
+    if (order.inventoryDeduction === 'applied') {
+      return '<span class="inv-deduct-pill deducted" title="تم خصم الأصناف من المخزون">📦 تم الخصم</span>';
+    } else {
+      return '<span class="inv-deduct-pill pending" title="طلب مكتمل ولم يتم خصم المخزون بعد">⚠️ بانتظار الخصم</span>';
+    }
+  } else if (order.status === 'ملغي') {
+    return '<span class="inv-deduct-pill cancelled" title="طلب ملغي لا يؤثر على المخزون">🚫 ملغي (لا خصم)</span>';
+  } else {
+    return '<span class="inv-deduct-pill protected" title="المخزون محمي حتى اكتمال الطلب وتسليمه">🛡️ مخزون محمي</span>';
+  }
+}
+
+function applyOrderInventoryDeduction(order, user) {
+  if (!order) return { success: false, reason: 'order_not_found' };
+  
+  // Guard 1: Double deduction prevention
+  if (order.inventoryDeduction === 'applied') {
+    return { success: false, reason: 'already_applied', orderNumber: order.orderNumber };
+  }
+  
+  // Guard 2: Only completed orders can be deducted
+  if (order.status !== 'مكتمل') {
+    return { success: false, reason: 'not_completed', orderNumber: order.orderNumber };
+  }
+
+  const author = user || getCurrentUser() || ERP_STATE.currentPartner || 'طه';
+  const cleanOrderNum = (order.orderNumber || order.id || Date.now()).toString().replace('#', '');
+  const txId = `TX-${cleanOrderNum}`;
+  const nowTime = new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' });
+  const nowDate = new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' });
+
+  const deductedItems = [];
+  (order.items || []).forEach(item => {
+    let prod = null;
+    if (item.id) {
+      prod = ERP_STATE.products.find(p => p.id === item.id);
+    }
+    if (!prod && item.name) {
+      const cleanName = item.name.toLowerCase().trim();
+      prod = ERP_STATE.products.find(p => 
+        (p.nameAr && p.nameAr.toLowerCase().trim() === cleanName) ||
+        (p.nameEn && p.nameEn.toLowerCase().trim() === cleanName)
+      );
+    }
+    
+    if (prod) {
+      const oldStock = Number(prod.stock) || 0;
+      const qtyToDeduct = Number(item.qty) || 1;
+      const newStock = Math.max(0, oldStock - qtyToDeduct);
+      prod.stock = newStock;
+      
+      if (prod.stock === 0) prod.status = 'نافد';
+      else if (prod.stock <= 10) prod.status = 'منخفض';
+      else prod.status = 'متوفر';
+
+      deductedItems.push({
+        name: prod.nameAr || item.name,
+        qty: qtyToDeduct,
+        oldStock: oldStock,
+        newStock: newStock,
+        price: item.price
+      });
+
+      // Individual product audit log entry
+      logOperation({
+        user: author,
+        action: 'خصم مخزون لإكمال الطلب',
+        target: `${prod.nameAr} (${order.orderNumber})`,
+        oldVal: `${oldStock} قطعة`,
+        newVal: `${newStock} قطعة (-${qtyToDeduct})`,
+        details: `«خصم كمية (-${qtyToDeduct}) من المنتج ${prod.nameAr} لإكمال الطلب ${order.orderNumber} للطالب ${order.customerName} (المخزون: ${oldStock} ➔ ${newStock})»`
+      });
+    } else {
+      deductedItems.push({
+        name: item.name,
+        qty: Number(item.qty) || 1,
+        oldStock: '-',
+        newStock: '-',
+        price: item.price
+      });
+    }
+  });
+
+  // Record inventory transaction
+  const transaction = {
+    id: txId,
+    orderId: order.id,
+    orderNumber: order.orderNumber,
+    invoiceNumber: order.invoiceNumber || `#INV-2026-${cleanOrderNum}`,
+    customerName: order.customerName,
+    status: 'applied',
+    date: nowDate,
+    time: nowTime,
+    user: author,
+    items: (order.items || []).map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+    totalQty: (order.items || []).reduce((sum, i) => sum + (Number(i.qty) || 1), 0),
+    notes: 'خصم معتمد ومطبق لمخزون الطلب المكتمل'
+  };
+
+  const existingTxIdx = (ERP_STATE.inventoryTransactions || []).findIndex(t => 
+    t.id === txId || (order.id && t.orderId === order.id)
+  );
+  if (existingTxIdx >= 0) {
+    ERP_STATE.inventoryTransactions[existingTxIdx] = transaction;
+  } else {
+    ERP_STATE.inventoryTransactions.unshift(transaction);
+  }
+
+  order.inventoryDeduction = 'applied';
+
+  try {
+    localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
+    localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+    localStorage.setItem('abs_erp_inventory_transactions', JSON.stringify(ERP_STATE.inventoryTransactions));
+  } catch (_) {}
+
+  return {
+    success: true,
+    txId: txId,
+    orderNumber: order.orderNumber,
+    deductedItems: deductedItems
+  };
+}
+
+function reverseOrderInventoryDeduction(order, user) {
+  if (!order) return { success: false, reason: 'order_not_found' };
+  
+  if (order.inventoryDeduction !== 'applied') {
+    order.inventoryDeduction = (order.status === 'ملغي') ? 'cancelled' : 'not_applied';
+    try {
+      localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+    } catch (_) {}
+    return { success: false, reason: 'was_not_applied' };
+  }
+
+  const author = user || getCurrentUser() || ERP_STATE.currentPartner || 'طه';
+  const cleanOrderNum = (order.orderNumber || order.id || Date.now()).toString().replace('#', '');
+  const txId = `TX-${cleanOrderNum}`;
+
+  (order.items || []).forEach(item => {
+    let prod = null;
+    if (item.id) prod = ERP_STATE.products.find(p => p.id === item.id);
+    if (!prod && item.name) {
+      const cleanName = item.name.toLowerCase().trim();
+      prod = ERP_STATE.products.find(p => 
+        (p.nameAr && p.nameAr.toLowerCase().trim() === cleanName) ||
+        (p.nameEn && p.nameEn.toLowerCase().trim() === cleanName)
+      );
+    }
+    if (prod) {
+      const oldStock = Number(prod.stock) || 0;
+      const qtyToRestore = Number(item.qty) || 1;
+      const newStock = oldStock + qtyToRestore;
+      prod.stock = newStock;
+      
+      if (prod.stock === 0) prod.status = 'نافد';
+      else if (prod.stock <= 10) prod.status = 'منخفض';
+      else prod.status = 'متوفر';
+
+      logOperation({
+        user: author,
+        action: 'إلغاء خصم واستعادة مخزون',
+        target: `${prod.nameAr} (${order.orderNumber})`,
+        oldVal: `${oldStock} قطعة`,
+        newVal: `${newStock} قطعة (+${qtyToRestore})`,
+        details: `«استرجاع كمية (+${qtyToRestore}) إلى مخزون ${prod.nameAr} بسبب إلغاء/تعديل الطلب ${order.orderNumber}»`
+      });
+    }
+  });
+
+  const tx = (ERP_STATE.inventoryTransactions || []).find(t => 
+    t.id === txId || (order.id && t.orderId === order.id)
+  );
+  if (tx) {
+    tx.status = 'reversed';
+    tx.notes = 'تم إلغاء الخصم واسترجاع الكميات للمخزون';
+  }
+
+  order.inventoryDeduction = (order.status === 'ملغي') ? 'cancelled' : 'not_applied';
+
+  try {
+    localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
+    localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+    localStorage.setItem('abs_erp_inventory_transactions', JSON.stringify(ERP_STATE.inventoryTransactions));
+  } catch (_) {}
+
+  return { success: true, orderNumber: order.orderNumber };
+}
+
+function applyOrderDeductionDirectly(orderId) {
+  const order = ERP_STATE.orders.find(o => o.id === orderId || o.orderNumber === orderId || o.orderNumber === `#${orderId}`);
+  if (!order) return;
+  const author = getCurrentUser() || ERP_STATE.currentPartner || 'طه';
+  const res = applyOrderInventoryDeduction(order, author);
+  if (res && res.success) {
+    showToast(`تم خصم أصناف الطلب ${order.orderNumber} بنجاح وتسجيل المعاملة ${res.txId} 📦`, 'success');
+    renderInventoryReconciliationUI(CURRENT_RECON_FILTER);
+    renderInventoryTable();
+    updateDashboardRealUI();
+  } else {
+    showToast(`تعذر تنفيذ الخصم: ${res ? res.reason : 'خطأ'}`, 'warning');
+  }
+}
+
+function reconcileInventoryAndOrders(options = {}) {
+  const { autoApply = false, user = null } = options;
+  const author = user || getCurrentUser() || ERP_STATE.currentPartner || 'طه';
+  const orders = ERP_STATE.orders || [];
+  const transactions = ERP_STATE.inventoryTransactions || [];
+
+  const completedDeducted = [];
+  const completedPending = [];
+  const pendingProtected = [];
+  const cancelled = [];
+  const review = [];
+
+  const seenOrderNumbers = new Set();
+
+  orders.forEach(order => {
+    const rawNum = (order.orderNumber || '').trim();
+    if (rawNum && seenOrderNumbers.has(rawNum)) {
+      review.push({
+        order,
+        category: 'review',
+        label: 'مكرر / للمراجعة',
+        reason: 'رقم طلب مكرر في السجل'
+      });
+      return;
+    }
+    if (rawNum) seenOrderNumbers.add(rawNum);
+
+    const hasTx = transactions.some(t => 
+      t.status === 'applied' && (
+        (order.id && t.orderId === order.id) ||
+        (order.orderNumber && t.orderNumber === order.orderNumber)
+      )
+    );
+
+    if (order.status === 'ملغي') {
+      cancelled.push({
+        order,
+        category: 'cancelled',
+        label: 'ملغي (لا خصم)',
+        hasTx,
+        reason: 'طلب ملغي — غير مخصوم من المخزون'
+      });
+    } else if (order.status === 'مكتمل') {
+      if (order.inventoryDeduction === 'applied' || hasTx) {
+        order.inventoryDeduction = 'applied';
+        completedDeducted.push({
+          order,
+          category: 'completed_deducted',
+          label: 'مكتمل ومخصوم',
+          hasTx: true,
+          reason: 'مكتمل ومخصوم مسبقاً ضمن رصيد المخزون التأسيسي (محمي من التكرار)'
+        });
+      } else {
+        completedPending.push({
+          order,
+          category: 'completed_pending',
+          label: 'مكتمل بانتظار الخصم',
+          hasTx: false,
+          reason: 'طلب مكتمل لم يتم تنفيذ حركة خصم المخزون له بعد'
+        });
+      }
+    } else {
+      pendingProtected.push({
+        order,
+        category: 'pending_protected',
+        label: 'غير مكتمل (محمي)',
+        hasTx,
+        reason: `حالة الطلب (${order.status}) — محمي من الخصم حتى التسليم النهائي`
+      });
+    }
+  });
+
+  const newlyDeducted = [];
+  if (autoApply && completedPending.length > 0) {
+    const pendingToProcess = [...completedPending];
+    pendingToProcess.forEach(item => {
+      const result = applyOrderInventoryDeduction(item.order, author);
+      if (result && result.success) {
+        newlyDeducted.push(item.order);
+        item.category = 'completed_deducted';
+        item.label = 'مكتمل ومخصوم';
+        item.hasTx = true;
+        item.reason = 'تم تنفيذ الخصم التلقائي بنجاح';
+        completedDeducted.push(item);
+      }
+    });
+
+    const newlyIds = new Set(newlyDeducted.map(o => o.id));
+    for (let i = completedPending.length - 1; i >= 0; i--) {
+      if (newlyIds.has(completedPending[i].order.id)) {
+        completedPending.splice(i, 1);
+      }
+    }
+  }
+
+  return {
+    totalChecked: orders.length,
+    completedDeductedCount: completedDeducted.length,
+    completedPendingCount: completedPending.length,
+    pendingProtectedCount: pendingProtected.length,
+    cancelledCount: cancelled.length,
+    reviewCount: review.length,
+    newlyDeductedCount: newlyDeducted.length,
+    groups: {
+      completed_deducted: completedDeducted,
+      completed_pending: completedPending,
+      pending_protected: pendingProtected,
+      cancelled: cancelled,
+      review: review
+    }
+  };
+}
+
+function switchInventorySubView(view, btn) {
+  CURRENT_INVENTORY_SUBVIEW = view;
+  const stockCard = document.getElementById('inventoryStockCard');
+  const reconCard = document.getElementById('inventoryReconCard');
+  const tabStock = document.getElementById('invSubTabStock');
+  const tabRecon = document.getElementById('invSubTabRecon');
+
+  if (tabStock) tabStock.classList.toggle('active', view === 'stock');
+  if (tabRecon) tabRecon.classList.toggle('active', view === 'recon');
+
+  if (view === 'stock') {
+    if (stockCard) stockCard.style.display = '';
+    if (reconCard) reconCard.style.display = 'none';
+    renderInventoryTable();
+  } else {
+    if (stockCard) stockCard.style.display = 'none';
+    if (reconCard) reconCard.style.display = '';
+    renderInventoryReconciliationUI(CURRENT_RECON_FILTER);
+  }
+}
+
+function filterReconTable(category, btn) {
+  CURRENT_RECON_FILTER = category;
+  document.querySelectorAll('#inventoryReconCard .table-filter-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderInventoryReconciliationUI(category);
+}
+
+function runAutomaticInventoryReconciliation() {
+  const author = getCurrentUser() || ERP_STATE.currentPartner || 'طه';
+  const result = reconcileInventoryAndOrders({ autoApply: true, user: author });
+  
+  renderInventoryReconciliationUI(CURRENT_RECON_FILTER);
+  renderInventoryTable();
+  updateDashboardRealUI();
+
+  let toastMsg = `تمت التسوية بنجاح: ${result.totalChecked} طلبات مفحوصة (${result.completedDeductedCount} مكتمل ومخصوم، ${result.pendingProtectedCount} محمي)`;
+  if (result.newlyDeductedCount > 0) {
+    toastMsg += ` — تم خصم ${result.newlyDeductedCount} طلبات مكتملة جديدة! ⚡`;
+  }
+  showToast(toastMsg, 'success');
+}
+
+function renderInventoryReconciliationUI(filter = CURRENT_RECON_FILTER) {
+  const tbody = document.getElementById('inventoryReconTableBody');
+  if (!tbody) return;
+
+  const reconData = reconcileInventoryAndOrders({ autoApply: false });
+
+  // Update KPI counters
+  const kpiCompleted = document.getElementById('reconKpiCompletedCount');
+  const kpiPending = document.getElementById('reconKpiPendingCount');
+  const kpiProtected = document.getElementById('reconKpiProtectedCount');
+  const kpiCancelled = document.getElementById('reconKpiCancelledCount');
+  const kpiReview = document.getElementById('reconKpiReviewCount');
+
+  if (kpiCompleted) kpiCompleted.textContent = reconData.completedDeductedCount;
+  if (kpiPending) kpiPending.textContent = reconData.completedPendingCount;
+  if (kpiProtected) kpiProtected.textContent = reconData.pendingProtectedCount;
+  if (kpiCancelled) kpiCancelled.textContent = reconData.cancelledCount;
+  if (kpiReview) kpiReview.textContent = reconData.reviewCount;
+
+  // Update Tab Count Badges
+  const tabAll = document.getElementById('reconTabAllCount');
+  const tabDeducted = document.getElementById('reconTabDeductedCount');
+  const tabPending = document.getElementById('reconTabPendingCount');
+  const tabProtected = document.getElementById('reconTabProtectedCount');
+  const tabCancelled = document.getElementById('reconTabCancelledCount');
+  const pendingBadge = document.getElementById('invReconPendingBadge');
+
+  if (tabAll) tabAll.textContent = reconData.totalChecked;
+  if (tabDeducted) tabDeducted.textContent = reconData.completedDeductedCount;
+  if (tabPending) tabPending.textContent = reconData.completedPendingCount;
+  if (tabProtected) tabProtected.textContent = reconData.pendingProtectedCount;
+  if (tabCancelled) tabCancelled.textContent = reconData.cancelledCount;
+
+  if (pendingBadge) {
+    if (reconData.completedPendingCount > 0) {
+      pendingBadge.textContent = reconData.completedPendingCount;
+      pendingBadge.style.display = 'inline-block';
+    } else {
+      pendingBadge.style.display = 'none';
+    }
+  }
+
+  // Determine items to render based on filter
+  let itemsToRender = [];
+  if (filter === 'all') {
+    itemsToRender = [
+      ...reconData.groups.completed_pending,
+      ...reconData.groups.completed_deducted,
+      ...reconData.groups.pending_protected,
+      ...reconData.groups.cancelled,
+      ...reconData.groups.review
+    ];
+  } else if (reconData.groups[filter]) {
+    itemsToRender = reconData.groups[filter];
+  }
+
+  if (itemsToRender.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          لا توجد سجلات مطابقة لهذا الفلتر
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = itemsToRender.map(item => {
+    const o = item.order;
+    const invNum = o.invoiceNumber || `#INV-2026-${(o.orderNumber || '').replace('#', '')}`;
+    const tx = (ERP_STATE.inventoryTransactions || []).find(t => 
+      t.status === 'applied' && (t.orderId === o.id || t.orderNumber === o.orderNumber)
+    );
+    const txBadge = tx 
+      ? `<span class="num-mono" style="font-weight: 700; color: var(--status-success); font-size: 0.75rem;">${tx.id}</span>`
+      : `<span style="color: var(--text-muted); font-size: 0.75rem;">—</span>`;
+
+    let deductBadge = '';
+    let actionBtn = '';
+
+    if (item.category === 'completed_deducted') {
+      deductBadge = '<span class="inv-deduct-pill deducted">✅ مخصوم ومعتمد</span>';
+      actionBtn = `<button class="btn-secondary btn-sm" onclick="openOrderDetailsById('${o.id}')">التفاصيل</button>`;
+    } else if (item.category === 'completed_pending') {
+      deductBadge = '<span class="inv-deduct-pill pending">⚠️ بانتظار الخصم</span>';
+      actionBtn = `<button class="btn-primary btn-sm" onclick="applyOrderDeductionDirectly('${o.id}')">خصم فوري ⚡</button>`;
+    } else if (item.category === 'cancelled') {
+      deductBadge = '<span class="inv-deduct-pill cancelled">🚫 ملغي (لا خصم)</span>';
+      actionBtn = `<button class="btn-secondary btn-sm" onclick="openOrderDetailsById('${o.id}')">التفاصيل</button>`;
+    } else if (item.category === 'review') {
+      deductBadge = '<span class="inv-deduct-pill review">⚠️ مراجعة تدقيق</span>';
+      actionBtn = `<button class="btn-secondary btn-sm" onclick="openOrderDetailsById('${o.id}')">مراجعة</button>`;
+    } else {
+      deductBadge = '<span class="inv-deduct-pill protected">🛡️ محمي حتى الاكتمال</span>';
+      actionBtn = `<button class="btn-secondary btn-sm" onclick="openOrderDetailsById('${o.id}')">عرض</button>`;
+    }
+
+    const itemsSummary = (o.items || []).map(i => `${i.name} (×${i.qty})`).join(', ');
+
+    return `
+      <tr>
+        <td>
+          <div class="num-mono" style="font-weight: 800; color: var(--primary);">${o.orderNumber}</div>
+          <div class="num-mono" style="font-size: 0.7rem; color: var(--text-muted);">${o.date || '—'}</div>
+        </td>
+        <td>
+          <span class="num-mono" style="font-weight: 700; color: var(--text-main); font-size: 0.8rem;">${invNum}</span>
+        </td>
+        <td>
+          <div style="font-weight: 700; color: var(--text-main); font-size: 0.825rem;">${o.customerName}</div>
+          <div class="num-mono" style="font-size: 0.725rem; color: var(--text-muted);">${o.phone || ''}</div>
+        </td>
+        <td>
+          <span class="status-pill ${getOrderStatusClass(o.status)}">${o.status}</span>
+        </td>
+        <td>
+          <div style="font-size: 0.775rem; color: var(--text-main); max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${itemsSummary}">
+            <strong>${o.itemsCount || (o.items || []).length} صنف:</strong> ${itemsSummary}
+          </div>
+        </td>
+        <td>${txBadge}</td>
+        <td>${deductBadge}</td>
+        <td>${actionBtn}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// -------------------------------------------------------------
 // 10. EXPENSES & FINANCE
 // -------------------------------------------------------------
 function renderExpensesTable() {
@@ -1579,7 +2221,8 @@ async function syncWithUserServer() {
         }
 
         ERP_STATE.orders = dbOrders.map(o => {
-          const fallbackOrder = initialOrdersMap[o.id] || initialOrdersMap[o.order_number] || null;
+          const existingOrder = (ERP_STATE.orders || []).find(eo => eo.id === o.id || eo.orderNumber === `#${o.order_number}`);
+          const fallbackOrder = existingOrder || initialOrdersMap[o.id] || initialOrdersMap[o.order_number] || null;
 
           // Items mapping
           let itemsList = itemsByOrderId[o.id];
@@ -1617,6 +2260,28 @@ async function syncWithUserServer() {
           // Phone mapping
           const phone = o.customer_phone || o.phone_number || o.customer_phone_secondary || (fallbackOrder ? fallbackOrder.phone : '') || '';
 
+          // Preserve invoice number & inventory deduction status
+          const invNum = (fallbackOrder && fallbackOrder.invoiceNumber)
+            ? fallbackOrder.invoiceNumber
+            : `#INV-2026-${(o.order_number || o.id.slice(0, 8)).replace('#', '')}`;
+
+          let deductStatus = (fallbackOrder && fallbackOrder.inventoryDeduction)
+            ? fallbackOrder.inventoryDeduction
+            : null;
+
+          if (!deductStatus) {
+            const hasExistingTx = (ERP_STATE.inventoryTransactions || []).some(t =>
+              t.status === 'applied' && (t.orderId === o.id || t.orderNumber === `#${o.order_number}`)
+            );
+            if (cleanStatus === 'مكتمل') {
+              deductStatus = hasExistingTx ? 'applied' : 'not_applied';
+            } else if (cleanStatus === 'ملغي') {
+              deductStatus = 'cancelled';
+            } else {
+              deductStatus = 'not_applied';
+            }
+          }
+
           return {
             id: o.id,
             orderNumber: `#${o.order_number || o.id.slice(0, 8)}`,
@@ -1628,20 +2293,33 @@ async function syncWithUserServer() {
             itemsCount: itemsList.reduce((sum, it) => sum + (Number(it.qty) || 1), 0),
             items: itemsList,
             total: finalTotal,
+            subtotal: (fallbackOrder && fallbackOrder.subtotal) ? fallbackOrder.subtotal : finalTotal,
+            hasDiscount: fallbackOrder ? fallbackOrder.hasDiscount : false,
+            discountAmount: fallbackOrder ? fallbackOrder.discountAmount : 0,
+            discountReason: fallbackOrder ? fallbackOrder.discountReason : '',
             shippingFee: Number(o.shipping_fee || o.shipping_cost || 0),
             status: cleanStatus,
-            assignedTo: 'طه',
+            assignedTo: (fallbackOrder && fallbackOrder.assignedTo) || 'طه',
             date: o.created_at ? new Date(o.created_at).toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '30/09',
-            notes: o.notes || o.delivery_notes || ''
+            notes: o.notes || o.delivery_notes || '',
+            invoiceNumber: invNum,
+            inventoryDeduction: deductStatus
           };
         });
+
+        try {
+          localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+        } catch (_) {}
       }
     }
 
     updateDashboardRealUI();
     if (ERP_STATE.activeScreen === 'orders') renderOrdersTable();
     else if (ERP_STATE.activeScreen === 'products') renderProductsTable();
-    else if (ERP_STATE.activeScreen === 'inventory') renderInventoryTable();
+    else if (ERP_STATE.activeScreen === 'inventory') {
+      renderInventoryTable();
+      renderInventoryReconciliationUI();
+    }
     else if (ERP_STATE.activeScreen === 'finance') updateFinanceScreenMetrics();
     else if (ERP_STATE.activeScreen === 'partners') updatePartnersScreenMetrics();
     else if (ERP_STATE.activeScreen === 'reports') updateReportsScreenMetrics();
@@ -2056,6 +2734,8 @@ async function submitStudentOrder() {
   const newOrder = {
     id: orderId,
     orderNumber: `#${orderNum}`,
+    invoiceNumber: `#INV-2026-${orderNum}`,
+    inventoryDeduction: 'not_applied',
     customerName: name,
     phone: phone,
     university: 'جامعة طرابلس',
@@ -2076,26 +2756,24 @@ async function submitStudentOrder() {
   // Prepend to ERP State orders
   ERP_STATE.orders.unshift(newOrder);
 
-  // Update product stock locally
-  STUDENT_ORDER_STATE.cart.forEach(cartItem => {
-    const prod = ERP_STATE.products.find(p => p.id === cartItem.productId);
-    if (prod) {
-      prod.stock = Math.max(0, (Number(prod.stock) || 0) - cartItem.qty);
-    }
-  });
+  // Note: Inventory stock is NOT deducted on creation; protected until status becomes 'مكتمل'
 
   // Log to Audit Trail
   ERP_STATE.auditLogs.unshift({
     id: `#${1100 + ERP_STATE.auditLogs.length}`,
     time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
-    date: 'اليوم',
+    date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }),
     user: partnerName,
     action: 'إنشاء طلب طالب (بالنيابة)',
-    details: `تم إنشاء الطلب #${orderNum} للطالب/ة ${name} (${newOrder.itemsCount} صنفاً) بقيمة ${totalPrice} د.ل`,
+    details: `تم إنشاء الطلب #${orderNum} للطالب/ة ${name} (${newOrder.itemsCount} صنفاً) بقيمة ${totalPrice} د.ل — المخزون محمي حتى اكتمال الطلب`,
     oldVal: '-',
     newVal: `${totalPrice} د.ل`
   });
-  localStorage.setItem('abs_erp_audit', JSON.stringify(ERP_STATE.auditLogs));
+
+  try {
+    localStorage.setItem('abs_erp_audit', JSON.stringify(ERP_STATE.auditLogs));
+    localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+  } catch (_) {}
 
   // Store last created order for WhatsApp and print
   STUDENT_ORDER_STATE.lastCreatedOrder = newOrder;
@@ -2668,6 +3346,7 @@ function submitNewOrderWithInvoice() {
     shippingFee: shippingFee,
     total: total,
     status: 'جديد',
+    inventoryDeduction: 'not_applied',
     paymentMethod: 'cash_on_delivery',
     paymentStatus: 'كاش عند الاستلام',
     assignedTo: activeUser,
@@ -2675,20 +3354,7 @@ function submitNewOrderWithInvoice() {
     createdAt: new Date().toISOString()
   };
 
-  // 6. Deduct Inventory Stock
-  POS_ORDER_STATE.cart.forEach(cartItem => {
-    const prod = ERP_STATE.products.find(p => p.id === cartItem.id);
-    if (prod) {
-      prod.stock = Math.max(0, prod.stock - cartItem.qty);
-      if (prod.stock === 0) {
-        prod.status = 'نافد';
-      } else if (prod.stock <= 10) {
-        prod.status = 'منخفض';
-      } else {
-        prod.status = 'متوفر';
-      }
-    }
-  });
+  // 6. Inventory Protection: Stock is NOT deducted on creation; deducted ONLY upon reaching 'مكتمل'
 
   // 7. Add to Global Orders List
   ERP_STATE.orders.unshift(newOrder);
@@ -2704,13 +3370,12 @@ function submitNewOrderWithInvoice() {
     target: `${newOrder.orderNumber} (${newOrder.invoiceNumber})`,
     oldVal: '-',
     newVal: `${newOrder.total} د.ل`,
-    details: `«${activeUser} قام بإنشاء الطلب ${newOrder.orderNumber} والفاتورة ${newOrder.invoiceNumber} للطالب ${newOrder.customerName} ${discountDetails}»`
+    details: `«${activeUser} قام بإنشاء الطلب ${newOrder.orderNumber} والفاتورة ${newOrder.invoiceNumber} للطالب ${newOrder.customerName} ${discountDetails} — المخزون محمي حتى اكتمال الطلب»`
   });
 
   // 9. Persist to LocalStorage
   try {
     localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
-    localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
   } catch (_) {}
 
   // 10. Update Dashboard and App Metrics

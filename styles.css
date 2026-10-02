@@ -3546,4 +3546,203 @@ a {
   }
 }
 
+/* ==========================================================================
+   INVENTORY & ORDERS 3-WAY RECONCILIATION STYLES
+   Order ➔ Invoice ➔ Inventory Transaction Ledger
+   ========================================================================== */
+
+.recon-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 1024px) {
+  .recon-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .recon-kpi-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.recon-kpi-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.03);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.recon-kpi-card:hover {
+  border-color: #cbd5e1;
+}
+
+.recon-kpi-card.completed {
+  border-inline-start: 3px solid var(--status-success);
+}
+.recon-kpi-card.pending {
+  border-inline-start: 3px solid #eab308;
+}
+.recon-kpi-card.protected {
+  border-inline-start: 3px solid #3b82f6;
+}
+.recon-kpi-card.cancelled {
+  border-inline-start: 3px solid #ef4444;
+}
+.recon-kpi-card.review {
+  border-inline-start: 3px solid #a855f7;
+}
+
+.recon-kpi-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.recon-kpi-num {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.recon-kpi-desc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* Pipeline Box inside Order Details */
+.recon-pipeline-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  box-shadow: inset 0 1px 0 #ffffff;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.recon-pipeline-node {
+  flex: 1;
+  min-width: 110px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recon-pipeline-node.done {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.recon-pipeline-node.waiting {
+  border-color: #fef08a;
+  background: #fefce8;
+}
+
+.recon-pipeline-node.idle {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+}
+
+.recon-pipeline-node-title {
+  font-size: 0.675rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.recon-pipeline-node-val {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.recon-pipeline-node-sub {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.recon-pipeline-arrow {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  font-weight: 900;
+  user-select: none;
+}
+
+/* Deduction Status Pills */
+.inv-deduct-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.725rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.inv-deduct-pill.applied {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.inv-deduct-pill.pending {
+  background: #fefce8;
+  color: #a16207;
+  border: 1px solid #fef08a;
+}
+
+.inv-deduct-pill.not-required {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.inv-deduct-pill.cancelled {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.inv-deduct-pill.review {
+  background: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
+.inv-deduct-pill.deducted {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.inv-deduct-pill.protected {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
 
