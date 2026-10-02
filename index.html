@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- html2canvas and jsPDF for identical storefront PDF invoice exports -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -780,14 +784,18 @@
       <section id="newOrderScreen" class="secondary-screen-view">
         <div class="page-header">
           <div class="page-header-titles">
-            <h1 class="page-greeting">إنشاء طلب جديد وإصدار فاتورة مبيعات</h1>
-            <p class="page-subtitle">تسجيل فوري لطلبات أطباء وطلبة الأسنان، تطبيق الخصومات المعتمدة، وإصدار الفواتير الرسمية.</p>
+            <h1 class="page-greeting">طلب جديد (POS)</h1>
+            <p class="page-subtitle">إضافة طلب جديد وإصدار فاتورة بنفس هوية متجر Absolute Dental الرسمي تماماً.</p>
           </div>
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <div class="locked-user-badge" style="width: auto; padding: 0.4rem 0.85rem;">
               <span class="user-pulse-dot"></span>
               <span>المستخدم المسؤول:</span>
               <strong id="newOrderActiveUserBadge">طه</strong>
+            </div>
+            <div style="background: rgba(0, 168, 150, 0.08); border: 1px solid rgba(0, 168, 150, 0.25); border-radius: var(--radius-md); padding: 0.4rem 0.85rem; font-size: 0.8rem; color: #00a896; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+              <span>الفاتورة القادمة:</span>
+              <strong id="posNextInvoiceNum" class="num-mono">#INV-2026-0019</strong>
             </div>
             <button class="btn-secondary" onclick="navigateToScreen('orders')">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
@@ -796,251 +804,177 @@
           </div>
         </div>
 
-        <!-- NEW ORDER 2-COLUMN WORKFLOW GRID -->
-        <div class="pos-workspace-grid">
+        <!-- NEW ORDER 3-COLUMN WORKFLOW GRID (Exact Match to Screen 3 & Storefront) -->
+        <div class="pos-workspace-3col">
 
-          <!-- RIGHT COLUMN: CUSTOMER DETAILS, DISCOUNT ENGINE & INVOICE SUMMARY -->
-          <div class="pos-checkout-column">
-
-            <!-- 1. CUSTOMER INFORMATION CARD -->
+          <!-- 1. RIGHT COLUMN: CUSTOMER DATA (بيانات العميل) -->
+          <div class="pos-col-customer">
             <div class="erp-card-container pos-step-customer">
               <div class="card-section-header">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <div class="card-icon-pill">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  </div>
-                  <span class="card-section-title">بيانات العميل / الطالب</span>
+                  <span class="card-section-title">بيانات العميل</span>
                 </div>
-                <span class="tag-status-active">مطلوب</span>
               </div>
 
-              <!-- Quick Preset Dropdown -->
-              <div class="form-group-custom" style="margin-bottom: 0.75rem;">
-                <label class="form-label-custom">اختيار عميل مسجل سابقاً (أو إدخال يدوي):</label>
+              <!-- Quick Search / Preset Selection -->
+              <div class="form-group-custom" style="margin-bottom: 0.65rem;">
+                <label class="form-label-custom">بحث سريع أو اختيار مسجل:</label>
                 <select id="posCustomerPresetSelect" class="form-select-custom" onchange="handleCustomerPresetSelect(this.value)">
-                  <option value="new" selected>+ طالب جديد / إدخال يدوي مباشر</option>
-                  <!-- Populated from existing orders -->
+                  <option value="new" selected>ابحث عن عميل أو أضف جديد...</option>
                 </select>
               </div>
 
               <div class="form-group-custom">
-                <label class="form-label-custom">اسم الطالب / الطبيب <span style="color:#ef4444;">*</span></label>
-                <input type="text" id="posCustomerName" class="form-input-custom" placeholder="مثال: هديل النفاتي" required>
+                <label class="form-label-custom">الاسم الكامل <span style="color:#ef4444;">*</span></label>
+                <input type="text" id="posCustomerName" class="form-input-custom" placeholder="أحمد محمد" required>
+              </div>
+
+              <div class="form-group-custom">
+                <label class="form-label-custom">رقم الهاتف <span style="color:#ef4444;">*</span></label>
+                <input type="tel" id="posCustomerPhone" class="form-input-custom num-mono" placeholder="0912345678" required>
               </div>
 
               <div class="form-row-2col">
                 <div class="form-group-custom">
-                  <label class="form-label-custom">رقم الهاتف (واتساب) <span style="color:#ef4444;">*</span></label>
-                  <input type="tel" id="posCustomerPhone" class="form-input-custom num-mono" placeholder="091xxxxxxx" required>
-                </div>
-                <div class="form-group-custom">
-                  <label class="form-label-custom">الكلية / الجامعة</label>
-                  <select id="posCustomerCollege" class="form-select-custom">
-                    <option value="جامعة طرابلس — كلية طب الأسنان" selected>جامعة طرابلس — كلية طب الأسنان</option>
-                    <option value="جامعة بنغازي — كلية طب الأسنان">جامعة بنغازي — كلية طب الأسنان</option>
-                    <option value="جامعة مصراتة — كلية طب الأسنان">جامعة مصراتة — كلية طب الأسنان</option>
-                    <option value="جامعة الزاوية — كلية طب الأسنان">جامعة الزاوية — كلية طب الأسنان</option>
-                    <option value="الجامعة الدولية للعلوم الطبية (LIMU)">الجامعة الدولية للعلوم الطبية (LIMU)</option>
-                    <option value="عيادة خاصة / طبيب ممارس">عيادة خاصة / طبيب ممارس</option>
-                    <option value="أخرى">جهة أخرى...</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="form-row-2col">
-                <div class="form-group-custom">
-                  <label class="form-label-custom">طريقة ومكان الاستلام</label>
-                  <select id="posDeliveryType" class="form-select-custom" onchange="handlePosDeliveryTypeChange(this.value)">
-                    <option value="faculty" data-fee="0" selected>استلام مباشر بالكلية (مجاني)</option>
-                    <option value="tripoli_home" data-fee="10">توصيل منزلي داخل طرابلس (+10 د.ل)</option>
-                    <option value="outside_tripoli" data-fee="15">شحن وتوصيل خارج طرابلس (+15 د.ل)</option>
-                    <option value="store" data-fee="0">استلام من مقر Absolute Dental (مجاني)</option>
+                  <label class="form-label-custom">الجامعة</label>
+                  <select id="posCustomerUniversity" class="form-select-custom" onchange="handleUniversityChange(this.value)">
+                    <option value="جامعة طرابلس" selected>جامعة طرابلس</option>
+                    <option value="جامعة بنغازي">جامعة بنغازي</option>
+                    <option value="جامعة مصراتة">جامعة مصراتة</option>
+                    <option value="جامعة الزاوية">جامعة الزاوية</option>
+                    <option value="الجامعة الدولية (LIMU)">الجامعة الدولية (LIMU)</option>
+                    <option value="أخرى">أخرى</option>
                   </select>
                 </div>
                 <div class="form-group-custom">
-                  <label class="form-label-custom">العنوان أو المدرج</label>
-                  <input type="text" id="posDeliveryAddress" class="form-input-custom" placeholder="مثال: مدرج 1، أو شارع بن عاشور" value="طرابلس — الكلية">
+                  <label class="form-label-custom">الكلية</label>
+                  <input type="text" id="posCustomerCollege" class="form-input-custom" value="كلية طب الأسنان" placeholder="كلية طب الأسنان">
                 </div>
               </div>
 
               <div class="form-group-custom">
-                <label class="form-label-custom">ملاحظات إضافية على الطلب</label>
-                <textarea id="posOrderNotes" class="form-input-custom" rows="2" placeholder="أي تفاصيل خاصة بتسليم الشحنة..."></textarea>
+                <label class="form-label-custom">طريقة ومكان الاستلام</label>
+                <select id="posDeliveryType" class="form-select-custom" onchange="handlePosDeliveryTypeChange(this.value)">
+                  <option value="faculty" data-fee="0" selected>استلام مباشر بالكلية (مجاني)</option>
+                  <option value="tripoli_home" data-fee="10">توصيل لطرابلس (+10 د.ل)</option>
+                  <option value="outside_tripoli" data-fee="15">توصيل خارج طرابلس (+15 د.ل)</option>
+                  <option value="store" data-fee="0">استلام من المقر (مجاني)</option>
+                </select>
+              </div>
+
+              <div class="form-group-custom">
+                <label class="form-label-custom">العنوان</label>
+                <input type="text" id="posDeliveryAddress" class="form-input-custom" placeholder="عنوان التوصيل (اختياري)">
+              </div>
+
+              <div class="form-group-custom">
+                <label class="form-label-custom">ملاحظات</label>
+                <textarea id="posOrderNotes" class="form-input-custom" rows="2" placeholder="ملاحظات خاصة بالطلب (اختياري)"></textarea>
               </div>
             </div>
-
-            <!-- 2. SMART DISCOUNT ENGINE (محرك الخصومات الذكي) -->
-            <div class="erp-card-container discount-engine-box pos-step-discount">
-              <div class="card-section-header">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <div class="card-icon-pill discount">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
-                  </div>
-                  <span class="card-section-title">محرك الخصومات والتخفيضات التجارية</span>
-                </div>
-                <label class="discount-toggle-label">
-                  <input type="checkbox" id="posDiscountEnabled" onchange="togglePosDiscount(this.checked)">
-                  <span class="toggle-slider"></span>
-                  <span class="toggle-text">تفعيل الخصم</span>
-                </label>
-              </div>
-
-              <div id="posDiscountControlsWrap" class="discount-controls-content" style="display: none;">
-                <div class="discount-type-tabs">
-                  <button type="button" class="discount-type-btn active" id="btnDiscountFixed" onclick="setPosDiscountType('fixed')">
-                    <span>مبلغ ثابت (د.ل)</span>
-                  </button>
-                  <button type="button" class="discount-type-btn" id="btnDiscountPercent" onclick="setPosDiscountType('percent')">
-                    <span>نسبة مئوية (%)</span>
-                  </button>
-                </div>
-
-                <div class="form-row-2col" style="margin-top: 0.75rem;">
-                  <div class="form-group-custom">
-                    <label class="form-label-custom" id="posDiscountValueLabel">قيمة الخصم بالدينار (د.ل) <span style="color:#ef4444;">*</span></label>
-                    <input type="number" id="posDiscountValue" class="form-input-custom num-mono" min="0" step="1" value="0" placeholder="0" oninput="calculatePosTotals()">
-                  </div>
-                  <div class="form-group-custom">
-                    <label class="form-label-custom">سبب وتصنيف الخصم</label>
-                    <select id="posDiscountReason" class="form-select-custom" onchange="handleDiscountReasonChange(this.value)">
-                      <option value="خصم زميل كلية أسنان" selected>خصم زميل كلية أسنان</option>
-                      <option value="خصم كمية (Bulk Purchase)">خصم كمية (Bulk Purchase)</option>
-                      <option value="عرض ترويجي خاص">عرض ترويجي خاص</option>
-                      <option value="طالب متفوق / مندوب دفعة">طالب متفوق / مندوب دفعة</option>
-                      <option value="تخفيض إداري معتمد">تخفيض إداري معتمد</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Instant Discount Feedback -->
-                <div class="discount-preview-badge">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                  <span>مقدار الخصم المحسوب:</span>
-                  <strong class="num-mono" id="posCalculatedDiscountDisplay" style="color: var(--status-success); font-size: 0.95rem;">0 د.ل</strong>
-                  <span style="font-size: 0.7rem; color: var(--text-muted); margin-inline-start: auto;">(يخصم مباشرة من المبيعات ولا يعتبر مصروفاً)</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- 3. FINANCIAL TOTALS & INVOICE GENERATION -->
-            <div class="erp-card-container pos-totals-card pos-step-totals">
-              <div class="card-section-header">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <div class="card-icon-pill">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                  </div>
-                  <span class="card-section-title">ملخص الحساب والفاتورة</span>
-                </div>
-                <div class="invoice-seq-tag num-mono" id="posNextInvoiceNum">#INV-2026-0019</div>
-              </div>
-
-              <div class="pos-financial-breakdown">
-                <div class="pos-line-item">
-                  <span class="pos-line-label">المجموع الإجمالي للأصناف (Subtotal):</span>
-                  <span class="pos-line-val num-mono" id="posSubtotalDisplay">0 د.ل</span>
-                </div>
-                <div class="pos-line-item discount-line" id="posDiscountLineItem" style="display: none;">
-                  <span class="pos-line-label">الخصم التجاري الممنوح:</span>
-                  <span class="pos-line-val num-mono" id="posDiscountTotalDisplay" style="color: var(--status-success);">-0 د.ل</span>
-                </div>
-                <div class="pos-line-item">
-                  <span class="pos-line-label">تكلفة الشحن والتوصيل:</span>
-                  <span class="pos-line-val num-mono" id="posShippingDisplay">مجاني (0 د.ل)</span>
-                </div>
-                <div class="pos-grand-total-row">
-                  <div>
-                    <div class="pos-grand-label">الصافي الإجمالي المطلوب دفعه:</div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted);">طريقة الدفع: كاش عند الاستلام</div>
-                  </div>
-                  <div class="pos-grand-amount num-mono" id="posNetTotalDisplay">0 <span style="font-size: 1rem;">د.ل</span></div>
-                </div>
-              </div>
-
-              <!-- Author Audit Disclaimer -->
-              <div class="pos-audit-disclaimer">
-                <span class="user-pulse-dot"></span>
-                <span>سيتم تسجيل الطلب والفاتورة باسم المستخدم المعتمد:</span>
-                <strong id="posActiveUserSessionNotice">طه</strong>
-                <span>في سجل العمليات (Audit Trail) فورياً.</span>
-              </div>
-
-              <!-- Main Submission Buttons -->
-              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 1rem;">
-                <button type="button" class="btn-primary" id="btnSubmitPosOrder" onclick="submitNewOrderWithInvoice()" style="padding: 0.85rem 1.25rem; font-size: 0.95rem; justify-content: center; font-weight: 800;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
-                  <span>✓ اعتماد الطلب وإصدار الفاتورة الرسمية</span>
-                </button>
-                <button type="button" class="btn-secondary" onclick="clearPosCartAndReset()" style="justify-content: center;">
-                  <span>تفريغ السلة وإعادة التعيين</span>
-                </button>
-              </div>
-
-            </div>
-
           </div>
 
+          <!-- 2. CENTER COLUMN: PRODUCTS CATALOG (المنتجات) -->
+          <div class="pos-col-products">
+            <div class="erp-card-container pos-step-catalog">
+              <div class="card-section-header">
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                  <span class="card-section-title">المنتجات</span>
+                  <span class="num-mono" style="font-size: 0.75rem; color: var(--text-muted);" id="posCatalogTotalCount">39 منتج متاح</span>
+                </div>
+              </div>
 
-          <!-- LEFT COLUMN: PRODUCTS CATALOG & CURRENT ORDER ITEMS -->
-          <div class="pos-catalog-column">
+              <!-- Search Bar -->
+              <div style="position: relative; margin: 0.5rem 0;">
+                <input type="text" id="posCatalogSearchInput" class="form-input-custom pos-storefront-search" placeholder="ابحث عن منتج بالاسم أو الرمز SKU..." oninput="handlePosCatalogSearch(this.value)">
+              </div>
 
-            <!-- 1. LIVE CART LINE ITEMS TABLE -->
+              <!-- Category Filter Chips (Matching Storefront & Clinical Specialties) -->
+              <div class="student-filter-chips pos-category-chips">
+                <button type="button" class="filter-chip active" onclick="filterPosCatalogCategory('all', this)">الكل</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('tools', this)">أدوات</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('consumables', this)">استهلاكية</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('materials', this)">مواد طب الأسنان</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('devices', this)">أجهزة</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('cons', this)">الكونس</button>
+                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('crown', this)">الكراون</button>
+              </div>
+
+              <!-- Product Cards Grid (Storefront Cards 1:1 Aspect Ratio) -->
+              <div class="pos-storefront-products-grid" id="posProductsCatalogGrid">
+                <!-- Dynamically rendered with exact ProductCard.jsx design tokens -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. LEFT COLUMN: ORDER CART & SUMMARY (سلة الطلب) -->
+          <div class="pos-col-cart">
             <div class="erp-card-container pos-step-cart">
               <div class="card-section-header">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <div class="card-icon-pill">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-                  </div>
-                  <span class="card-section-title">سلة أصناف الطلب (<span id="posCartItemsCount">0</span> أصناف)</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                  <span class="card-section-title">سلة الطلب (<span id="posCartItemsCount">0</span>)</span>
+                  <button type="button" class="text-btn-danger" onclick="clearPosCartAndReset()" style="font-size: 0.75rem;">تفريغ</button>
                 </div>
-                <button type="button" class="text-btn-danger" onclick="clearPosCartAndReset()">مسح الكل</button>
               </div>
 
-              <!-- Cart Items List Container -->
+              <!-- Cart Line Items -->
               <div id="posCartItemsContainer" class="pos-cart-list">
-                <!-- If empty, shows clean empty state -->
-                <div class="pos-cart-empty-state" id="posCartEmptyState">
-                  <div class="empty-cart-icon">🛒</div>
-                  <div style="font-weight: 700; color: var(--text-main); font-size: 0.9rem;">السلة فارغة حالياً</div>
-                  <div style="font-size: 0.775rem; color: var(--text-muted); max-width: 280px; text-align: center;">اختر الأدوات والمستلزمات من الكتالوج أدناه لإضافتها فورياً للطلب وتطبيق الخصومات.</div>
-                </div>
+                <!-- Items or Empty State -->
               </div>
-            </div>
 
-            <!-- 2. DENTAL PRODUCTS CATALOG WITH REAL IMAGES -->
-            <div class="erp-card-container pos-step-catalog" style="flex: 1;">
-              <div class="card-section-header">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <div class="card-icon-pill">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+              <!-- Native Storefront Discount Control (الخصم) -->
+              <div class="pos-storefront-discount-block">
+                <div class="pos-discount-header-row">
+                  <span class="pos-discount-title">الخصم</span>
+                  <label class="discount-inline-toggle">
+                    <input type="checkbox" id="posDiscountEnabled" onchange="togglePosDiscount(this.checked)">
+                    <span class="disc-toggle-txt">تطبيق الخصم</span>
+                  </label>
+                </div>
+
+                <div id="posDiscountControlsWrap" class="pos-discount-controls" style="display: none;">
+                  <div class="pos-discount-tabs">
+                    <button type="button" class="pos-disc-tab-btn active" id="btnDiscountFixed" onclick="setPosDiscountType('fixed')">
+                      مبلغ ثابت
+                    </button>
+                    <button type="button" class="pos-disc-tab-btn" id="btnDiscountPercent" onclick="setPosDiscountType('percent')">
+                      نسبة مئوية
+                    </button>
                   </div>
-                  <span class="card-section-title">كتالوج منتجات Absolute Dental (28 صنفاً من السيرفر)</span>
-                </div>
-                <span class="num-mono" style="font-size: 0.75rem; color: var(--text-muted);" id="posCatalogTotalCount">28 منتج متصل</span>
-              </div>
-
-              <!-- Search and Filter Bar -->
-              <div style="display: flex; flex-direction: column; gap: 8px; margin: 0.75rem 0;">
-                <div style="position: relative;">
-                  <input type="text" id="posCatalogSearchInput" class="form-input-custom" placeholder="🔍 ابحث بالاسم (بور، كاست، هاندبيس، شمع، مرآة...) أو الرمز SKU..." oninput="handlePosCatalogSearch(this.value)">
-                </div>
-
-                <div class="student-filter-chips">
-                  <button type="button" class="filter-chip active" onclick="filterPosCatalogCategory('all', this)">الكل</button>
-                  <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('cons', this)">الكونس (Cons)</button>
-                  <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('crown', this)">الكراون (Crown)</button>
-                  <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('burs', this)">بورات وحفر</button>
-                  <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('sets', this)">كاست وهاندبيس</button>
-                  <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('teeth', this)">أسنان وشمع</button>
-                  <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('exam', this)">أدوات فحص</button>
+                  <div class="pos-discount-input-row" style="margin-top: 0.5rem;">
+                    <input type="number" id="posDiscountValue" class="form-input-custom num-mono" min="0" step="1" value="0" placeholder="0" oninput="calculatePosTotals()">
+                    <span class="pos-discount-unit" id="posDiscountUnitDisplay">د.ل</span>
+                  </div>
                 </div>
               </div>
 
-              <!-- Products Grid with Real Images -->
-              <div class="pos-products-grid" id="posProductsCatalogGrid">
-                <!-- Dynamically rendered from ERP_STATE.products -->
+              <!-- Totals Breakdown -->
+              <div class="pos-totals-summary-block">
+                <div class="pos-summary-line">
+                  <span>المجموع الفرعي</span>
+                  <span class="num-mono" id="posSubtotalDisplay">0 د.ل</span>
+                </div>
+                <div class="pos-summary-line discount" id="posDiscountLineItem" style="display: none;">
+                  <span>الخصم</span>
+                  <span class="num-mono" id="posDiscountTotalDisplay" style="color: #ef4444;">-0 د.ل</span>
+                </div>
+                <div class="pos-summary-line">
+                  <span>التوصيل</span>
+                  <span class="num-mono" id="posShippingDisplay" style="color: #00a896;">مجاني</span>
+                </div>
+                <div class="pos-summary-total-row">
+                  <span>الإجمالي</span>
+                  <span class="num-mono" id="posNetTotalDisplay">0 د.ل</span>
+                </div>
               </div>
+
+              <!-- Submit Button (Exact Storefront Solid Brown #684835) -->
+              <button type="button" class="btn-storefront-submit" id="btnSubmitPosOrder" onclick="submitNewOrderWithInvoice()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
+                <span>اعتماد الطلب وإصدار الفاتورة</span>
+              </button>
+
             </div>
-
           </div>
 
         </div>
@@ -1774,153 +1708,135 @@
      1.5 OFFICIAL ABSOLUTE DENTAL SALES INVOICE MODAL (#invoiceViewModal)
      ========================================================= -->
 <div id="invoiceViewModal" class="modal-overlay" onclick="if(event.target === this) closeModal('invoiceViewModal')">
-  <div class="modal-dialog modal-dialog-xl" style="max-width: 840px !important;">
-    <div class="modal-header">
+  <div class="modal-dialog modal-dialog-xl" style="max-width: 820px !important;">
+    <div class="modal-header no-print">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="modal-title">فاتورة مبيعات معتمدة <span id="invHeaderNumber" class="num-mono" style="color: var(--primary);">#INV-2026-0019</span></span>
-        <span class="status-pill completed">فاتورة رسمية</span>
+        <span class="modal-title">فاتورة مبيعات <span id="invHeaderNumber" class="num-mono" style="color: #0a335c;">#INV-1068</span></span>
+        <span class="status-pill completed" id="invHeaderStatusPill">مكتمل</span>
       </div>
       <button class="modal-close-btn" onclick="closeModal('invoiceViewModal')">✕</button>
     </div>
 
     <div class="modal-body" style="background: #f8fafc; padding: 1.5rem;">
-      <!-- PRINTABLE A4 INVOICE SHEET -->
-      <div class="invoice-paper-printable" id="printableInvoiceDocument">
+      <!-- PRINTABLE A4 INVOICE SHEET (Identical to Storefront InvoiceView.jsx & Screen 5) -->
+      <div class="invoice-paper-printable storefront-invoice" id="printableInvoiceDocument">
         
-        <!-- Header: Absolute Dental Identity -->
-        <div class="inv-doc-header">
-          <div class="inv-brand-col">
-            <div class="inv-brand-logo-row">
-              <div class="inv-logo-box">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="#2563eb">
-                  <path d="M12 2C8.69 2 6 4.69 6 8c0 2.21.89 4.21 2.34 5.66.66.66 1.07 1.55 1.16 2.48l.5 5.86c.07.82.76 1.45 1.58 1.45.69 0 1.28-.44 1.48-1.09l1.19-3.96c.15-.49.6-.84 1.12-.84.51 0 .97.35 1.12.84l1.19 3.96c.2.65.79 1.09 1.48 1.09.82 0 1.51-.63 1.58-1.45l.5-5.86c.09-.93.5-1.82 1.16-2.48C21.11 12.21 22 10.21 22 8c0-3.31-2.69-6-6-6h-4z"/>
-                </svg>
-              </div>
-              <div>
-                <h1 class="inv-company-name">ABSOLUTE DENTAL</h1>
-                <p class="inv-company-tagline">مستلزمات وأدوات أطباء وطلبة طب الأسنان — ليبيا</p>
-              </div>
-            </div>
-            <div class="inv-company-meta">
-              <span>طرابلس، ليبيا — هاتف: 091-2801073</span>
-              <span>سجل تجاري وترخيص توريد معتمد</span>
-            </div>
+        <!-- Top Logo & Brand Name (Centered) -->
+        <div class="invoice-brand-center-header">
+          <img src="assets/brand-logo-trimmed.png" alt="Absolute Dental" class="inv-logo-img" onerror="this.onerror=null; this.src='assets/brand-logo.png';">
+          <h1 class="inv-brand-title">Absolute Dental</h1>
+        </div>
+
+        <!-- Subheader Row (Company details & Invoice meta) -->
+        <div class="invoice-header-row">
+          <!-- Company Info (Right in RTL) -->
+          <div class="inv-company-details">
+            <div class="inv-comp-name">Absolute Dental</div>
+            <div class="inv-comp-line">طرابلس، ليبيا 🇱🇾</div>
+            <div class="inv-comp-line num-mono" style="direction: ltr; display: inline-block;">091 234 5678</div>
+            <div class="inv-comp-line email">absolute.dental.ly@gmail.com</div>
           </div>
 
-          <div class="inv-meta-col">
-            <div class="inv-badge-title">فاتورة مبيعات</div>
-            <div class="inv-meta-row">
-              <span class="inv-meta-label">رقم الفاتورة:</span>
-              <strong class="inv-meta-value num-mono" id="invDocNumber">#INV-2026-0019</strong>
-            </div>
-            <div class="inv-meta-row">
-              <span class="inv-meta-label">رقم الطلب:</span>
-              <span class="inv-meta-value num-mono" id="invDocOrderRef">#75735422</span>
-            </div>
-            <div class="inv-meta-row">
-              <span class="inv-meta-label">تاريخ الإصدار:</span>
-              <span class="inv-meta-value" id="invDocDate">2026-10-01 19:30</span>
-            </div>
-            <div class="inv-meta-row">
-              <span class="inv-meta-label">المسؤول المنفّذ:</span>
-              <span class="inv-meta-value" id="invDocAuthor">طه (شريك مؤسس)</span>
+          <!-- Invoice Meta (Left in RTL) -->
+          <div class="inv-meta-details">
+            <div class="inv-type-title">فاتورة مبيعات</div>
+            <div class="inv-number num-mono" id="invDocNumber">#INV-1068</div>
+            <div class="inv-datetime" id="invDocDate">09:26 02-10-2026</div>
+            <div class="inv-status-pill-wrap">
+              <span class="inv-status-pill" id="invDocStatusPill">مكتمل</span>
             </div>
           </div>
         </div>
 
-        <!-- Customer & Order Information Box -->
-        <div class="inv-customer-panel">
-          <div class="inv-cust-col">
-            <span class="inv-cust-label">فاتورة موجهة إلى (العميل / الطالب):</span>
-            <div class="inv-cust-name" id="invDocCustomerName">هديل النفاتي</div>
-            <div class="inv-cust-sub" id="invDocCustomerPhone">هاتف: 0912801073</div>
-          </div>
-          <div class="inv-cust-col">
-            <span class="inv-cust-label">الجهة الأكاديمية ومكان التسليم:</span>
-            <div class="inv-cust-val" id="invDocCollege">جامعة طرابلس — كلية طب الأسنان</div>
-            <div class="inv-cust-sub" id="invDocAddress">مكان التسليم: طرابلس</div>
-          </div>
-          <div class="inv-cust-col">
-            <span class="inv-cust-label">حالة السداد:</span>
-            <div class="inv-payment-badge" id="invDocPaymentStatus">كاش عند الاستلام</div>
-            <div class="inv-cust-sub" id="invDocNotesWrap" style="margin-top: 4px;">ملاحظات: <span id="invDocNotes">-</span></div>
-          </div>
-        </div>
-
-        <!-- Invoice Line Items Table -->
-        <table class="inv-table">
-          <thead>
-            <tr>
-              <th style="width: 35px; text-align: center;">#</th>
-              <th>الأداة / المستلزم الطبي</th>
-              <th style="width: 80px; text-align: center;">الكمية</th>
-              <th style="width: 100px; text-align: left;">سعر الوحدة</th>
-              <th style="width: 120px; text-align: left;">المجموع</th>
-            </tr>
-          </thead>
-          <tbody id="invDocItemsBody">
-            <!-- Items rendered via JS -->
-          </tbody>
-        </table>
-
-        <!-- Financial Summary Breakdown -->
-        <div class="inv-summary-container">
-          <div class="inv-terms-box">
-            <div class="inv-terms-title">شروط وسياسة Absolute Dental:</div>
-            <ul class="inv-terms-list">
-              <li>كافة الأدوات والمستلزمات مطابقة لمواصفات وتوصيات كليات طب الأسنان.</li>
-              <li>يرجى معاينة واستلام الأصناف والتأكد من مطابقتها فور الاستلام.</li>
-              <li>لأي استفسار أو دعم فني يرجى التواصل عبر الواتساب على 091-2801073.</li>
-            </ul>
-            <div class="inv-stamp-mark">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>معتمد ومفحوص — Absolute Dental Hub</span>
+        <!-- Customer Information Grid -->
+        <div class="invoice-customer-box">
+          <h4 class="inv-cust-box-title">معلومات العميل</h4>
+          <div class="inv-cust-grid">
+            <div class="inv-cust-cell">
+              <span class="inv-cust-label">الاسم:</span>
+              <strong class="inv-cust-value" id="invDocCustomerName">أحمد محمد</strong>
             </div>
-          </div>
-
-          <div class="inv-calc-box">
-            <div class="inv-calc-row">
-              <span>المجموع الفرعي (Subtotal):</span>
-              <span class="num-mono" id="invDocSubtotal">378 د.ل</span>
+            <div class="inv-cust-cell">
+              <span class="inv-cust-label">رقم الهاتف:</span>
+              <strong class="inv-cust-value num-mono" id="invDocCustomerPhone">0912345678</strong>
             </div>
-            <div class="inv-calc-row inv-discount-row" id="invDocDiscountRow" style="display: none;">
-              <span>الخصم التجاري (<span id="invDocDiscountBadge">خصم خاص</span>):</span>
-              <span class="num-mono" id="invDocDiscountVal" style="color: #16a34a; font-weight: 800;">-0 د.ل</span>
+            <div class="inv-cust-cell full-width">
+              <span class="inv-cust-label">الجامعة / الكلية:</span>
+              <span class="inv-cust-value" id="invDocCollege">كلية طب الأسنان - جامعة طرابلس</span>
             </div>
-            <div class="inv-calc-row">
-              <span>رسوم التوصيل والشحن:</span>
-              <span class="num-mono" id="invDocShippingVal">0 د.ل</span>
-            </div>
-            <div class="inv-calc-row inv-grand-total">
-              <span style="font-weight: 900;">الصافي الإجمالي المطلوب:</span>
-              <span class="num-mono" id="invDocNetTotal" style="font-size: 1.35rem; font-weight: 900; color: #2563eb;">378 د.ل</span>
+            <div class="inv-cust-cell full-width" id="invDocAddressWrap">
+              <span class="inv-cust-label">العنوان:</span>
+              <span class="inv-cust-value" id="invDocAddress">طرابلس</span>
             </div>
           </div>
         </div>
 
-        <!-- Footer Notice -->
-        <div class="inv-footer-bar">
-          <span>شكراً لاختياركم Absolute Dental 🦷 — نتمنى لكم مسيرة دراسية وطبية موفقة.</span>
-          <span class="num-mono" style="font-size: 0.7rem; color: #94a3b8;">Generated by Absolute Dental ERP 2.0</span>
+        <!-- Invoice Items Table -->
+        <div class="invoice-table-wrapper">
+          <table class="invoice-items-table">
+            <thead>
+              <tr>
+                <th style="width: 38px; text-align: center;">#</th>
+                <th>المنتج</th>
+                <th style="width: 100px; text-align: center;">السعر</th>
+                <th style="width: 75px; text-align: center;">الكمية</th>
+                <th style="width: 110px; text-align: left;">الإجمالي</th>
+              </tr>
+            </thead>
+            <tbody id="invDocItemsBody">
+              <!-- Dynamically rendered via JS with 48x48 thumbnails -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Financial Totals Section -->
+        <div class="invoice-totals-section">
+          <div class="invoice-totals-box">
+            <div class="inv-totals-row">
+              <span>المجموع الفرعي:</span>
+              <span class="num-mono" id="invDocSubtotal">37 د.ل</span>
+            </div>
+            <div class="inv-totals-row discount" id="invDocDiscountRow" style="display: none;">
+              <span>الخصم:</span>
+              <span class="num-mono" id="invDocDiscountVal">-2 د.ل</span>
+            </div>
+            <div class="inv-totals-row">
+              <span>التوصيل:</span>
+              <span class="num-mono" id="invDocShippingVal" style="color: #00a896;">مجاني بالكلية</span>
+            </div>
+            <div class="inv-totals-row total">
+              <span>الإجمالي:</span>
+              <span class="num-mono" id="invDocNetTotal">35 د.ل</span>
+            </div>
+            <div class="inv-totals-note">
+              *(ملاحظة: تكلفة التوصيل تُضاف وتُحدد عبر الواتساب عند تأكيد الطلب)*
+            </div>
+          </div>
+        </div>
+
+        <!-- Thank You Footer -->
+        <div class="invoice-footer-thanks">
+          <div class="inv-thanks-main">شكراً لتسوقكم مع Absolute Dental ❤️</div>
+          <div class="inv-thanks-sub">دائماً معكم في رحلتكم نحو ابتسامة أفضل</div>
         </div>
 
       </div>
     </div>
 
-    <!-- Modal Footer with Printing, PDF, and WhatsApp Actions -->
-    <div class="modal-footer" style="justify-content: space-between;">
+    <!-- Modal Footer Actions (no-print) -->
+    <div class="modal-footer no-print" style="justify-content: space-between;">
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button type="button" class="btn-primary" onclick="printInvoiceFromModal()">
+        <button type="button" class="btn-storefront-print" onclick="printInvoiceFromModal()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
-          <span>طباعة الفاتورة 🖨️</span>
+          <span>طباعة</span>
         </button>
-        <button type="button" class="btn-secondary" onclick="downloadInvoicePDFFromModal()">
+        <button type="button" class="btn-storefront-pdf" id="btnDownloadInvoicePdf" onclick="downloadInvoicePDFFromModal()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>تحميل / حفظ PDF 📄</span>
+          <span>تحميل PDF</span>
         </button>
-        <button type="button" class="btn-secondary" style="color: #16a34a; border-color: #bbf7d0; background: #f0fdf4;" onclick="shareInvoiceWhatsAppFromModal()">
+        <button type="button" class="btn-storefront-share" onclick="shareInvoiceWhatsAppFromModal()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.301-.15-1.78-.879-2.056-.98-.276-.1-.477-.15-.678.15-.2.3-.778.98-.954 1.18-.176.2-.351.226-.653.075-.301-.15-1.272-.469-2.423-1.496-.896-.799-1.5-1.786-1.677-2.087-.176-.3-.019-.462.132-.612.136-.135.301-.351.452-.527.15-.176.2-.3.301-.502.101-.2.05-.376-.025-.527-.075-.15-.678-1.632-.929-2.235-.244-.588-.492-.508-.678-.518-.176-.01-.377-.01-.578-.01-.2 0-.527.075-.803.376-.276.3-1.055 1.03-1.055 2.511 0 1.482 1.08 2.912 1.231 3.113.15.2 2.124 3.245 5.148 4.551.719.311 1.281.497 1.719.636.722.229 1.378.197 1.898.119.579-.088 1.78-.728 2.03-1.431.251-.703.251-1.306.176-1.431-.076-.125-.276-.2-.577-.35z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.174L2 22l4.982-1.408A9.957 9.957 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.61 0-3.11-.47-4.38-1.28l-.31-.2-2.96.84.83-2.88-.2-.33A8.163 8.163 0 0 1 3.8 12c0-4.52 3.68-8.2 8.2-8.2s8.2 3.68 8.2 8.2c0 4.52-3.68 8.2-8.2 8.2z"/></svg>
-          <span>مشاركة واتساب 📲</span>
+          <span>مشاركة</span>
         </button>
       </div>
       <button type="button" class="btn-secondary" onclick="closeModal('invoiceViewModal')">إغلاق</button>

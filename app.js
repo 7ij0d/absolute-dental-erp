@@ -578,6 +578,7 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
       <td>
         <div style="display: flex; gap: 4px;">
           <button class="order-open-btn" onclick="openOrderDetailsById('${order.id}')">فتح</button>
+          <button class="btn-secondary btn-sm" onclick="openInvoiceModal('${order.id}')" title="فاتورة مبيعات معتمدة">🧾</button>
           <button class="btn-secondary btn-sm" onclick="openWhatsAppForOrder('${order.id}')" title="واتساب">💬</button>
           <button class="btn-secondary btn-sm" onclick="openDeliverySlipById('${order.id}')" title="بوليصة شحن">🖨️</button>
         </div>
@@ -2849,10 +2850,11 @@ const POS_ORDER_STATE = {
   customerPreset: 'new',
   customerName: '',
   phone: '',
-  college: 'جامعة طرابلس — كلية طب الأسنان',
+  university: 'جامعة طرابلس',
+  college: 'كلية طب الأسنان',
   deliveryType: 'faculty',
   deliveryFee: 0,
-  address: 'طرابلس — الكلية',
+  address: '',
   notes: '',
   cart: [],
   discountEnabled: false,
@@ -2864,6 +2866,39 @@ const POS_ORDER_STATE = {
   netTotal: 0,
   lastCreatedInvoiceOrder: null
 };
+
+function resolveProductImage(p) {
+  if (!p) return 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format';
+  if (p.image) return p.image;
+  if (p.image_url) return p.image_url;
+  if (p.id && !String(p.id).startsWith('prod-')) {
+    return `https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/${p.id}.jpg`;
+  }
+  return 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format';
+}
+
+function toggleStorefrontFav(event, productId) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  try {
+    const favs = JSON.parse(localStorage.getItem('smylodent_favs') || '[]');
+    const isFav = favs.includes(productId);
+    const updated = isFav ? favs.filter(id => id !== productId) : [...favs, productId];
+    localStorage.setItem('smylodent_favs', JSON.stringify(updated));
+    const btn = document.getElementById(`favBtn-${productId}`);
+    if (btn) {
+      if (!isFav) {
+        btn.classList.add('active');
+        btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="#EF4444" stroke="#EF4444" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
+      } else {
+        btn.classList.remove('active');
+        btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
+      }
+    }
+  } catch (_) {}
+}
 
 function initNewOrderScreen() {
   const activeUser = getCurrentUser() || ERP_STATE.currentPartner || 'طه';
@@ -2905,18 +2940,19 @@ function populateCustomerPresets() {
       customers.push({
         name: name,
         phone: o.phone || '',
+        university: o.university || 'جامعة طرابلس',
         college: o.college || 'كلية طب الأسنان',
-        address: o.address || 'طرابلس',
+        address: o.address || '',
         notes: o.notes || ''
       });
     }
   });
 
   select.innerHTML = `
-    <option value="new" selected>+ طالب جديد / إدخال يدوي مباشر</option>
+    <option value="new" selected>ابحث عن عميل أو أضف جديد...</option>
     ${customers.map(c => `
       <option value="${encodeURIComponent(JSON.stringify(c))}">
-        👤 ${c.name} — ${c.phone ? c.phone : ''} (${c.college})
+        👤 ${c.name} — ${c.phone ? c.phone : ''} (${c.university})
       </option>
     `).join('')}
   `;
@@ -2924,36 +2960,55 @@ function populateCustomerPresets() {
 
 function handleCustomerPresetSelect(val) {
   if (val === 'new') {
-    document.getElementById('posCustomerName').value = '';
-    document.getElementById('posCustomerPhone').value = '';
-    document.getElementById('posCustomerCollege').value = 'جامعة طرابلس — كلية طب الأسنان';
-    document.getElementById('posDeliveryAddress').value = 'طرابلس — الكلية';
-    document.getElementById('posOrderNotes').value = '';
+    if (document.getElementById('posCustomerName')) document.getElementById('posCustomerName').value = '';
+    if (document.getElementById('posCustomerPhone')) document.getElementById('posCustomerPhone').value = '';
+    if (document.getElementById('posCustomerUniversity')) document.getElementById('posCustomerUniversity').value = 'جامعة طرابلس';
+    if (document.getElementById('posCustomerCollege')) document.getElementById('posCustomerCollege').value = 'كلية طب الأسنان';
+    if (document.getElementById('posDeliveryAddress')) document.getElementById('posDeliveryAddress').value = '';
+    if (document.getElementById('posOrderNotes')) document.getElementById('posOrderNotes').value = '';
     POS_ORDER_STATE.customerName = '';
     POS_ORDER_STATE.phone = '';
-    POS_ORDER_STATE.address = 'طرابلس — الكلية';
+    POS_ORDER_STATE.university = 'جامعة طرابلس';
+    POS_ORDER_STATE.college = 'كلية طب الأسنان';
+    POS_ORDER_STATE.address = '';
     POS_ORDER_STATE.notes = '';
     return;
   }
 
   try {
     const cust = JSON.parse(decodeURIComponent(val));
-    document.getElementById('posCustomerName').value = cust.name;
-    document.getElementById('posCustomerPhone').value = cust.phone;
-    if (cust.college && document.getElementById('posCustomerCollege')) {
-      const opt = Array.from(document.getElementById('posCustomerCollege').options).find(o => o.value.includes(cust.college) || cust.college.includes(o.value));
-      if (opt) opt.selected = true;
+    if (document.getElementById('posCustomerName')) document.getElementById('posCustomerName').value = cust.name || '';
+    if (document.getElementById('posCustomerPhone')) document.getElementById('posCustomerPhone').value = cust.phone || '';
+    if (document.getElementById('posCustomerUniversity') && cust.university) {
+      document.getElementById('posCustomerUniversity').value = cust.university;
     }
-    document.getElementById('posDeliveryAddress').value = cust.address || 'طرابلس';
-    document.getElementById('posOrderNotes').value = cust.notes || '';
+    if (document.getElementById('posCustomerCollege')) {
+      document.getElementById('posCustomerCollege').value = cust.college || 'كلية طب الأسنان';
+    }
+    if (document.getElementById('posDeliveryAddress')) {
+      document.getElementById('posDeliveryAddress').value = cust.address || '';
+    }
+    if (document.getElementById('posOrderNotes')) {
+      document.getElementById('posOrderNotes').value = cust.notes || '';
+    }
 
-    POS_ORDER_STATE.customerName = cust.name;
-    POS_ORDER_STATE.phone = cust.phone;
-    POS_ORDER_STATE.address = cust.address;
-    POS_ORDER_STATE.notes = cust.notes;
+    POS_ORDER_STATE.customerName = cust.name || '';
+    POS_ORDER_STATE.phone = cust.phone || '';
+    POS_ORDER_STATE.university = cust.university || 'جامعة طرابلس';
+    POS_ORDER_STATE.college = cust.college || 'كلية طب الأسنان';
+    POS_ORDER_STATE.address = cust.address || '';
+    POS_ORDER_STATE.notes = cust.notes || '';
 
     showToast(`تم استرجاع بيانات العميل: ${cust.name}`);
   } catch (_) {}
+}
+
+function handleUniversityChange(val) {
+  POS_ORDER_STATE.university = val;
+  const collegeInput = document.getElementById('posCustomerCollege');
+  if (collegeInput && (!collegeInput.value || collegeInput.value === 'كلية طب الأسنان')) {
+    collegeInput.value = 'كلية طب الأسنان';
+  }
 }
 
 let posCatalogSearchFilter = '';
@@ -2980,18 +3035,30 @@ function renderPosProductsCatalog(query = posCatalogSearchFilter, category = pos
 
   let filtered = [...ERP_STATE.products];
 
-  // Category filter
+  // Category filter matching storefront specialties & chips
   if (category && category !== 'all') {
     filtered = filtered.filter(p => {
       const cat = (p.category || '').toLowerCase();
-      const name = (p.nameAr || '').toLowerCase();
-      if (category === 'cons') return cat.includes('كونس') || cat.includes('cons') || name.includes('coxo') || name.includes('handpiece') || name.includes('قبضة') || name.includes('bur') || name.includes('بور');
-      if (category === 'crown') return cat.includes('كراون') || cat.includes('crown') || name.includes('coxo') || name.includes('handpiece') || name.includes('قبضة') || name.includes('cast') || name.includes('كاست');
-      if (category === 'burs') return cat.includes('بور') || name.includes('bur') || name.includes('بور');
-      if (category === 'sets') return cat.includes('كاست') || name.includes('cast') || name.includes('handpiece') || name.includes('هاندبيس');
-      if (category === 'teeth') return cat.includes('شمع') || cat.includes('أسنان') || name.includes('wax') || name.includes('teeth') || name.includes('شمع');
-      if (category === 'exam') return cat.includes('فحص') || name.includes('mirror') || name.includes('probe') || name.includes('spatula') || name.includes('مرآة');
-      return true;
+      const name = ((p.nameAr || '') + ' ' + (p.nameEn || '') + ' ' + (p.sku || '')).toLowerCase();
+      if (category === 'cons') {
+        return cat.includes('كونس') || cat.includes('cons') || name.includes('coxo') || name.includes('handpiece') || name.includes('bur') || name.includes('بور') || name.includes('قبضة');
+      }
+      if (category === 'crown') {
+        return cat.includes('كراون') || cat.includes('crown') || name.includes('coxo') || name.includes('handpiece') || name.includes('cast') || name.includes('كاست');
+      }
+      if (category === 'tools') {
+        return cat.includes('أدوات') || cat.includes('ادوات') || cat.includes('tool') || cat.includes('فحص') || name.includes('mirror') || name.includes('probe') || name.includes('pliers') || name.includes('spatula') || name.includes('carver');
+      }
+      if (category === 'consumables') {
+        return cat.includes('استهلاك') || cat.includes('consumable') || cat.includes('شمع') || name.includes('wax') || name.includes('cotton') || name.includes('gloves') || name.includes('sheet');
+      }
+      if (category === 'materials') {
+        return cat.includes('مواد') || cat.includes('material') || cat.includes('composite') || cat.includes('alginate') || cat.includes('stone') || cat.includes('جبس');
+      }
+      if (category === 'devices') {
+        return cat.includes('أجهزة') || cat.includes('اجهزة') || cat.includes('device') || cat.includes('light') || cat.includes('handpiece') || cat.includes('apex') || name.includes('penlight');
+      }
+      return cat.includes(category);
     });
   }
 
@@ -3005,50 +3072,71 @@ function renderPosProductsCatalog(query = posCatalogSearchFilter, category = pos
     );
   }
 
-  if (countEl) countEl.textContent = `${filtered.length} صنف متاح`;
+  if (countEl) countEl.textContent = `${filtered.length} منتج متاح`;
 
   if (filtered.length === 0) {
     container.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem;">
-        🔍 لا توجد أصناف مطابقة لكلمة البحث
+      <div style="grid-column: 1 / -1; text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: 0.85rem;">
+        🔍 لا توجد أصناف مطابقة لكلمة البحث في هذا التصنيف
       </div>
     `;
     return;
   }
 
+  // Read favorites from localStorage
+  let favs = [];
+  try {
+    favs = JSON.parse(localStorage.getItem('smylodent_favs') || '[]');
+  } catch (_) {}
+
   container.innerHTML = filtered.map(p => {
+    const isOutOfStock = (p.stock !== null && p.stock !== undefined && p.stock <= 0);
+    const isLimited = !isOutOfStock && (p.stock > 0 && p.stock <= 5);
+
     let stockClass = 'in';
-    let stockLabel = `${p.stock} متوفر`;
-    if (p.stock <= 0) {
+    let stockLabel = 'متوفر';
+    if (isOutOfStock) {
       stockClass = 'out';
-      stockLabel = 'نافد';
-    } else if (p.stock <= 10) {
+      stockLabel = 'غير متوفر';
+    } else if (isLimited) {
       stockClass = 'low';
-      stockLabel = `${p.stock} متبقي`;
+      stockLabel = `متبقي ${p.stock}`;
     }
 
-    const isOutOfStock = p.stock <= 0;
-    const defaultImg = 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/d02e821e-91e3-4ed4-869e-f636142d8247.jpg';
-    const prodImg = p.image || defaultImg;
+    // STRICT STOREFRONT MANDATE: English Name ONLY inside card
+    const displayName = p.nameEn || p.nameAr || 'Dental Instrument';
+    const prodImg = resolveProductImage(p);
+    const isFav = favs.includes(p.id);
 
     return `
-      <div class="pos-product-card" id="posProdCard-${p.id}">
-        <div class="pos-prod-thumb-wrap">
-          <img src="${prodImg}" alt="${p.nameAr}" class="pos-prod-img" loading="lazy" onerror="this.onerror=null; this.src='${defaultImg}';">
-        </div>
-        <div class="pos-prod-body">
-          <div class="pos-prod-name-ar" title="${p.nameAr}">${p.nameAr}</div>
-          <div class="pos-prod-name-en">${p.sku || p.nameEn || ''}</div>
-        </div>
-        <div class="pos-prod-footer">
-          <div>
-            <span class="pos-prod-price num-mono">${p.sellingPrice} <span style="font-size: 0.7rem;">د.ل</span></span>
-            <div style="margin-top: 2px;">
-              <span class="pos-prod-stock-pill ${stockClass}">${stockLabel}</span>
-            </div>
+      <div class="product-card" id="posProdCard-${p.id}" style="opacity: ${isOutOfStock ? '0.72' : '1'};">
+        <div class="product-card-image">
+          <img src="${prodImg}" alt="${displayName}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format';">
+          
+          <div class="product-card-badge">
+            ${isOutOfStock ? '<span class="badge badge-unavailable">غير متوفر</span>' : ''}
+            ${isLimited ? '<span class="badge badge-limited">كمية محدودة</span>' : ''}
           </div>
-          <button type="button" class="pos-prod-add-btn" onclick="posAddToCart('${p.id}')" ${isOutOfStock ? 'disabled title="المنتج نافد من المخزون"' : 'title="إضافة للطلب"'}>
-            +
+
+          <button type="button" class="product-fav-btn ${isFav ? 'active' : ''}" id="favBtn-${p.id}" onclick="toggleStorefrontFav(event, '${p.id}')" title="المفضلة">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? '#EF4444' : 'none'}" stroke="${isFav ? '#EF4444' : 'currentColor'}" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          </button>
+        </div>
+
+        <div class="product-card-body">
+          <h3 class="product-card-name" title="${displayName}">${displayName}</h3>
+          <div class="product-card-sku">${p.sku || ''}</div>
+          
+          <div class="product-card-price-row">
+            <span class="product-card-price num-mono">${p.sellingPrice} <span style="font-size: 0.74rem; font-weight: 600; color: #8B8177;">د.ل</span></span>
+            <span class="product-card-stock-pill ${stockClass}">${stockLabel}</span>
+          </div>
+
+          <button type="button" class="product-add-cart-btn" id="btnAddToCart-${p.id}" onclick="posAddToCart('${p.id}', this)" ${isOutOfStock ? 'disabled title="المنتج غير متوفر"' : 'title="أضف للسلة"'}>
+            ${isOutOfStock ? '<span>غير متوفر</span>' : `
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <span>أضف للسلة</span>
+            `}
           </button>
         </div>
       </div>
@@ -3056,19 +3144,19 @@ function renderPosProductsCatalog(query = posCatalogSearchFilter, category = pos
   }).join('');
 }
 
-function posAddToCart(productId) {
+function posAddToCart(productId, btnEl) {
   const prod = ERP_STATE.products.find(p => p.id === productId);
   if (!prod) return;
 
   if (prod.stock <= 0) {
-    showToast(`عذراً، الصنف "${prod.nameAr}" غير متوفر حالياً في المخزون`, 'warning');
+    showToast(`عذراً، الصنف "${prod.nameEn || prod.nameAr}" غير متوفر حالياً في المخزون`, 'warning');
     return;
   }
 
   const existing = POS_ORDER_STATE.cart.find(i => i.id === productId);
   if (existing) {
     if (existing.qty >= prod.stock) {
-      showToast(`الكمية المتاحة من "${prod.nameAr}" هي ${prod.stock} قطع فقط`, 'warning');
+      showToast(`الكمية المتاحة من "${prod.nameEn || prod.nameAr}" هي ${prod.stock} قطع فقط`, 'warning');
       return;
     }
     existing.qty += 1;
@@ -3076,7 +3164,7 @@ function posAddToCart(productId) {
     POS_ORDER_STATE.cart.push({
       id: prod.id,
       nameAr: prod.nameAr,
-      nameEn: prod.nameEn || '',
+      nameEn: prod.nameEn || prod.nameAr,
       sku: prod.sku || '',
       price: Number(prod.sellingPrice) || 0,
       qty: 1,
@@ -3085,9 +3173,23 @@ function posAddToCart(productId) {
     });
   }
 
+  // Visual feedback: animate button to green checkmark state
+  if (btnEl) {
+    btnEl.classList.add('added');
+    const prevHtml = btnEl.innerHTML;
+    btnEl.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>تمت الإضافة</span>
+    `;
+    setTimeout(() => {
+      btnEl.classList.remove('added');
+      btnEl.innerHTML = prevHtml;
+    }, 1800);
+  }
+
   renderPosCartItems();
   calculatePosTotals();
-  showToast(`تمت إضافة "${prod.nameAr}" إلى السلة 🛒`);
+  showToast(`تمت إضافة "${prod.nameEn || prod.nameAr}" إلى السلة 🛒`);
 }
 
 function posUpdateCartQty(productId, delta) {
@@ -3150,36 +3252,38 @@ function renderPosCartItems() {
     container.innerHTML = `
       <div class="pos-cart-empty-state" id="posCartEmptyState">
         <div class="empty-cart-icon">🛒</div>
-        <div style="font-weight: 700; color: var(--text-main); font-size: 0.9rem;">السلة فارغة حالياً</div>
-        <div style="font-size: 0.775rem; color: var(--text-muted); max-width: 280px; text-align: center;">اختر الأدوات والمستلزمات من الكتالوج أدناه لإضافتها فورياً للطلب وتطبيق الخصومات.</div>
+        <div style="font-weight: 700; color: #3A3530; font-size: 0.9rem;">السلة فارغة حالياً</div>
+        <div style="font-size: 0.775rem; color: #8B8177; max-width: 260px; text-align: center;">اختر الأدوات والمستلزمات من الكتالوج لإضافتها إلى الطلب.</div>
       </div>
     `;
     return;
   }
 
-  const defaultImg = 'https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/d02e821e-91e3-4ed4-869e-f636142d8247.jpg';
+  container.innerHTML = POS_ORDER_STATE.cart.map(item => {
+    const prodImg = item.image || resolveProductImage(item);
+    const displayName = item.nameEn || item.nameAr || 'Dental Instrument';
 
-  container.innerHTML = POS_ORDER_STATE.cart.map(item => `
-    <div class="pos-cart-item-row">
-      <img src="${item.image || defaultImg}" alt="${item.nameAr}" class="pos-cart-thumb" onerror="this.onerror=null; this.src='${defaultImg}';">
-      <div class="pos-cart-info">
-        <div class="pos-cart-item-title" title="${item.nameAr}">${item.nameAr}</div>
-        <div class="pos-cart-item-meta">
-          <span class="num-mono" style="font-weight: 700; color: var(--primary);">${item.price} د.ل / قطعة</span>
-          <span style="font-size: 0.65rem; color: var(--text-muted);">${item.sku || ''}</span>
+    return `
+      <div class="pos-cart-row">
+        <button type="button" class="pos-cart-del-btn" onclick="posRemoveCartItem('${item.id}')" title="حذف الصنف">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+
+        <div style="flex: 1; min-width: 0;">
+          <div class="pos-cart-item-title" title="${displayName}">${displayName}</div>
+          <div class="pos-cart-item-price num-mono">${item.price} د.ل / قطعة</div>
         </div>
+
+        <div class="pos-cart-stepper">
+          <button type="button" class="pos-cart-step-btn" onclick="posUpdateCartQty('${item.id}', -1)">-</button>
+          <span class="num-mono" style="font-weight: 800; font-size: 0.82rem; min-width: 20px; text-align: center;">${item.qty}</span>
+          <button type="button" class="pos-cart-step-btn" onclick="posUpdateCartQty('${item.id}', 1)">+</button>
+        </div>
+
+        <img src="${prodImg}" alt="${displayName}" class="pos-cart-thumb-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format';">
       </div>
-      <div class="pos-cart-qty-ctrl">
-        <button type="button" class="qty-stepper-btn" onclick="posUpdateCartQty('${item.id}', -1)">-</button>
-        <span class="num-mono" style="font-weight: 800; font-size: 0.85rem; min-width: 20px; text-align: center;">${item.qty}</span>
-        <button type="button" class="qty-stepper-btn" onclick="posUpdateCartQty('${item.id}', 1)">+</button>
-      </div>
-      <div class="num-mono" style="font-weight: 900; font-size: 0.9rem; color: var(--text-main); min-width: 55px; text-align: left;">
-        ${(item.price * item.qty).toLocaleString()} د.ل
-      </div>
-      <button type="button" class="cart-item-delete-btn" onclick="posRemoveCartItem('${item.id}')" title="حذف">✕</button>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function togglePosDiscount(enabled) {
@@ -3196,16 +3300,16 @@ function setPosDiscountType(type) {
   POS_ORDER_STATE.discountType = type;
   const btnFixed = document.getElementById('btnDiscountFixed');
   const btnPercent = document.getElementById('btnDiscountPercent');
-  const label = document.getElementById('posDiscountValueLabel');
+  const unitDisplay = document.getElementById('posDiscountUnitDisplay');
 
   if (type === 'fixed') {
     if (btnFixed) btnFixed.classList.add('active');
     if (btnPercent) btnPercent.classList.remove('active');
-    if (label) label.innerHTML = 'قيمة الخصم بالدينار (د.ل) <span style="color:#ef4444;">*</span>';
+    if (unitDisplay) unitDisplay.textContent = 'د.ل';
   } else {
     if (btnPercent) btnPercent.classList.add('active');
     if (btnFixed) btnFixed.classList.remove('active');
-    if (label) label.innerHTML = 'نسبة الخصم المئوية (%) <span style="color:#ef4444;">*</span>';
+    if (unitDisplay) unitDisplay.textContent = '%';
   }
 
   calculatePosTotals();
@@ -3285,7 +3389,8 @@ function submitNewOrderWithInvoice() {
 
   const customerName = (document.getElementById('posCustomerName')?.value || '').trim();
   const phone = (document.getElementById('posCustomerPhone')?.value || '').trim();
-  const college = document.getElementById('posCustomerCollege')?.value || 'جامعة طرابلس — كلية طب الأسنان';
+  const university = document.getElementById('posCustomerUniversity')?.value || POS_ORDER_STATE.university || 'جامعة طرابلس';
+  const college = (document.getElementById('posCustomerCollege')?.value || POS_ORDER_STATE.college || 'كلية طب الأسنان').trim();
   const address = (document.getElementById('posDeliveryAddress')?.value || 'طرابلس — الكلية').trim();
   const notes = (document.getElementById('posOrderNotes')?.value || '').trim();
 
@@ -3325,17 +3430,19 @@ function submitNewOrderWithInvoice() {
     invoiceNumber: invoiceNum,
     customerName: customerName,
     phone: phone,
-    university: college.includes('بنغازي') ? 'جامعة بنغازي' : (college.includes('مصراتة') ? 'جامعة مصراتة' : 'جامعة طرابلس'),
+    university: university,
     college: college,
     address: address,
     notes: notes,
     itemsCount: POS_ORDER_STATE.cart.reduce((s, i) => s + i.qty, 0),
     items: POS_ORDER_STATE.cart.map(i => ({
       name: i.nameAr,
-      sku: i.sku,
+      nameEn: i.nameEn || i.nameAr,
+      sku: i.sku || '',
       qty: i.qty,
       price: i.price,
-      total: i.qty * i.price
+      total: i.qty * i.price,
+      image: i.image || resolveProductImage(i)
     })),
     subtotal: subtotal,
     hasDiscount: hasDiscount,
@@ -3393,7 +3500,7 @@ function submitNewOrderWithInvoice() {
 }
 
 // -------------------------------------------------------------
-// OFFICIAL INVOICE DISPLAY & ACTIONS
+// OFFICIAL INVOICE DISPLAY & ACTIONS (Exact Storefront Architecture)
 // -------------------------------------------------------------
 function openInvoiceModal(orderId) {
   const order = ERP_STATE.orders.find(o => o.id === orderId || o.orderNumber === orderId || o.orderNumber === `#${orderId}`) || POS_ORDER_STATE.lastCreatedInvoiceOrder || ERP_STATE.orders[0];
@@ -3403,56 +3510,84 @@ function openInvoiceModal(orderId) {
 
   const invNumber = order.invoiceNumber || `#INV-2026-${order.orderNumber.replace('#', '')}`;
   const orderNumber = order.orderNumber;
-  const activeUser = order.assignedTo || getCurrentUser() || 'طه';
+  const status = order.status || 'مكتمل';
 
   // Header & Meta Elements
   const headerNum = document.getElementById('invHeaderNumber');
   if (headerNum) headerNum.textContent = invNumber;
 
+  const headerStatusPill = document.getElementById('invHeaderStatusPill');
+  if (headerStatusPill) headerStatusPill.textContent = status;
+
   const docNum = document.getElementById('invDocNumber');
   if (docNum) docNum.textContent = invNumber;
 
-  const docOrderRef = document.getElementById('invDocOrderRef');
-  if (docOrderRef) docOrderRef.textContent = orderNumber;
-
   const docDate = document.getElementById('invDocDate');
-  if (docDate) docDate.textContent = order.date || new Date().toLocaleString('ar-LY');
+  if (docDate) {
+    try {
+      const d = order.createdAt ? new Date(order.createdAt) : new Date();
+      docDate.textContent = d.toLocaleDateString('ar-LY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (_) {
+      docDate.textContent = order.date || new Date().toLocaleString('ar-LY');
+    }
+  }
 
-  const docAuthor = document.getElementById('invDocAuthor');
-  if (docAuthor) docAuthor.textContent = `${activeUser} (شريك مؤسس)`;
+  const docStatusPill = document.getElementById('invDocStatusPill');
+  if (docStatusPill) docStatusPill.textContent = status;
 
   // Customer Elements
   const custName = document.getElementById('invDocCustomerName');
-  if (custName) custName.textContent = order.customerName;
+  if (custName) custName.textContent = order.customerName || 'عميل';
 
   const custPhone = document.getElementById('invDocCustomerPhone');
-  if (custPhone) custPhone.textContent = `هاتف: ${order.phone || '091-0000000'}`;
+  if (custPhone) custPhone.textContent = order.phone || '-';
 
   const custCollege = document.getElementById('invDocCollege');
-  if (custCollege) custCollege.textContent = `${order.university || 'جامعة طرابلس'} — ${order.college || 'كلية طب الأسنان'}`;
+  if (custCollege) {
+    const uni = order.university || 'جامعة طرابلس';
+    const col = order.college || 'كلية طب الأسنان';
+    custCollege.textContent = `${col} - ${uni}`;
+  }
 
   const custAddress = document.getElementById('invDocAddress');
-  if (custAddress) custAddress.textContent = `مكان التسليم: ${order.address || 'طرابلس'}`;
+  if (custAddress) custAddress.textContent = order.address || 'طرابلس';
 
-  const custPayment = document.getElementById('invDocPaymentStatus');
-  if (custPayment) custPayment.textContent = order.paymentStatus || 'كاش عند الاستلام';
-
-  const notesEl = document.getElementById('invDocNotes');
-  if (notesEl) notesEl.textContent = order.notes ? order.notes : 'لا توجد ملاحظات خاصة';
-
-  // Items Table
+  // Items Table Body (48x48 thumbnails & English Names)
   const tbody = document.getElementById('invDocItemsBody');
   if (tbody) {
     const items = order.items || [];
-    tbody.innerHTML = items.map((it, idx) => `
-      <tr>
-        <td style="text-align: center; color: var(--text-muted);">${idx + 1}</td>
-        <td><strong>${it.name}</strong></td>
-        <td class="num-mono" style="text-align: center; font-weight: 700;">${it.qty}</td>
-        <td class="num-mono" style="text-align: left;">${it.price} د.ل</td>
-        <td class="num-mono" style="text-align: left; font-weight: 800; color: var(--text-main);">${(it.price * it.qty).toLocaleString()} د.ل</td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = items.map((it, idx) => {
+      const itemTotal = (it.price * it.qty).toLocaleString();
+      const primaryName = it.nameEn || it.name || 'Dental Instrument';
+      const secondaryName = (it.nameEn && it.name && it.nameEn !== it.name) ? it.name : (it.sku || '');
+      const imgUrl = it.image || resolveProductImage({ id: it.id, sku: it.sku, image: it.image });
+
+      return `
+        <tr class="invoice-table-row">
+          <td style="text-align: center; color: #64748b; font-weight: 600;">${idx + 1}</td>
+          <td>
+            <div class="inv-item-flex">
+              <div class="inv-item-thumb">
+                <img src="${imgUrl}" alt="${primaryName}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format';">
+              </div>
+              <div class="inv-item-titles">
+                <span class="inv-item-name-en">${primaryName}</span>
+                ${secondaryName ? `<span class="inv-item-name-sub">${secondaryName}</span>` : ''}
+              </div>
+            </div>
+          </td>
+          <td class="num-mono" style="text-align: center; font-weight: 600; color: #334155;">${it.price} د.ل</td>
+          <td class="num-mono" style="text-align: center; font-weight: 700; color: #0f172a;">${it.qty}</td>
+          <td class="num-mono" style="text-align: left; font-weight: 800; color: #0a335c;">${itemTotal} د.ل</td>
+        </tr>
+      `;
+    }).join('');
   }
 
   // Financial Breakdown
@@ -3465,12 +3600,10 @@ function openInvoiceModal(orderId) {
   if (subtotalEl) subtotalEl.textContent = `${subtotal.toLocaleString()} د.ل`;
 
   const discountRow = document.getElementById('invDocDiscountRow');
-  const discountBadge = document.getElementById('invDocDiscountBadge');
   const discountVal = document.getElementById('invDocDiscountVal');
   if (discountRow) {
     if (order.hasDiscount || discountAmount > 0) {
       discountRow.style.display = 'flex';
-      if (discountBadge) discountBadge.textContent = order.discountReason || 'تخفيض تجاري معتمد';
       if (discountVal) discountVal.textContent = `-${discountAmount.toLocaleString()} د.ل`;
     } else {
       discountRow.style.display = 'none';
@@ -3479,7 +3612,7 @@ function openInvoiceModal(orderId) {
 
   const shippingVal = document.getElementById('invDocShippingVal');
   if (shippingVal) {
-    shippingVal.textContent = shippingFee > 0 ? `${shippingFee} د.ل` : 'مجاني (0 د.ل)';
+    shippingVal.textContent = shippingFee > 0 ? `${shippingFee} د.ل` : 'مجاني بالكلية';
   }
 
   const netTotalEl = document.getElementById('invDocNetTotal');
@@ -3489,25 +3622,104 @@ function openInvoiceModal(orderId) {
 }
 
 function printInvoiceFromModal() {
+  const order = POS_ORDER_STATE.lastCreatedInvoiceOrder;
+  const rawNum = order ? (order.invoiceNumber || order.orderNumber || 'INV-2026').replace(/\D/g, '') : 'INV-2026';
+  const originalTitle = document.title;
+  document.title = `Absolute_Dental_Invoice_${rawNum}`;
   window.print();
+  setTimeout(() => { document.title = originalTitle; }, 1500);
 }
 
-function downloadInvoicePDFFromModal() {
-  const order = POS_ORDER_STATE.lastCreatedInvoiceOrder;
-  const invNum = order ? (order.invoiceNumber || order.orderNumber).replace('#', '') : 'INV-2026';
+async function downloadInvoicePDFFromModal() {
+  const order = POS_ORDER_STATE.lastCreatedInvoiceOrder || ERP_STATE.orders[0];
+  const rawNum = order ? (order.invoiceNumber || order.orderNumber || 'INV-2026').replace(/\D/g, '') : 'INV-2026';
+  const pdfFileName = `Absolute_Dental_Invoice_${rawNum}.pdf`;
+
+  const btn = document.getElementById('btnDownloadInvoicePdf');
+  const originalBtnHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg class="spinner-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+      <span>جاري تجهيز PDF...</span>
+    `;
+  }
+
+  const sheetElement = document.getElementById('printableInvoiceDocument');
+  if (!sheetElement) {
+    if (btn) { btn.disabled = false; btn.innerHTML = originalBtnHtml; }
+    window.print();
+    return;
+  }
+
   const originalTitle = document.title;
-  document.title = `Absolute_Dental_Invoice_${invNum}`;
-  window.print();
-  setTimeout(() => { document.title = originalTitle; }, 1000);
+  document.title = `Absolute_Dental_Invoice_${rawNum}`;
+
+  try {
+    if (typeof html2canvas !== 'undefined' && typeof window.jspdf !== 'undefined') {
+      const { jsPDF } = window.jspdf;
+      const canvas = await html2canvas(sheetElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        imageTimeout: 5000,
+        ignoreElements: (el) => el.classList?.contains('no-print')
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.96);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
+      const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+      const margin = 10;
+      const printWidth = pageWidth - (margin * 2);
+      const printHeight = (canvas.height * printWidth) / canvas.width;
+
+      let heightLeft = printHeight;
+      let position = margin;
+
+      pdf.addImage(imgData, 'JPEG', margin, position, printWidth, printHeight, undefined, 'FAST');
+      heightLeft -= (pageHeight - (margin * 2));
+
+      while (heightLeft > 0) {
+        position = heightLeft - printHeight + margin;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', margin, position, printWidth, printHeight, undefined, 'FAST');
+        heightLeft -= (pageHeight - (margin * 2));
+      }
+
+      pdf.save(pdfFileName);
+      showToast('تم تحميل الفاتورة الرسمية بصيغة PDF بنجاح 📄✨');
+    } else {
+      window.print();
+    }
+  } catch (err) {
+    console.warn('PDF generation fallback to print:', err);
+    window.print();
+  } finally {
+    setTimeout(() => {
+      document.title = originalTitle;
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
+      }
+    }, 1200);
+  }
 }
 
 function shareInvoiceWhatsAppFromModal() {
-  const order = POS_ORDER_STATE.lastCreatedInvoiceOrder;
+  const order = POS_ORDER_STATE.lastCreatedInvoiceOrder || ERP_STATE.orders[0];
   if (!order) return;
 
   const cleanPhone = (order.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '');
   const invNum = order.invoiceNumber || `#INV-2026-${order.orderNumber.replace('#', '')}`;
-  const itemsText = (order.items || []).map(i => `• ${i.name} (${i.qty}x) = ${(i.price * i.qty)} د.ل`).join('\n');
+  const itemsText = (order.items || []).map(i => `• ${i.nameEn || i.name} (${i.qty}x) = ${(i.price * i.qty)} د.ل`).join('\n');
   const discountText = (order.hasDiscount && order.discountAmount > 0)
     ? `🏷️ *الخصم التجاري الممنوح:* -${order.discountAmount} د.ل (${order.discountReason || 'خصم خاص'})\n`
     : '';
@@ -3517,19 +3729,19 @@ function shareInvoiceWhatsAppFromModal() {
 
 📄 *رقم الفاتورة:* ${invNum}
 📦 *رقم الطلب:* ${order.orderNumber}
-🏛️ *الكلية / الجامعة:* ${order.college}
-📍 *مكان التسليم:* ${order.address}
+🏛️ *الجامعة / الكلية:* ${order.university || 'جامعة طرابلس'} - ${order.college || 'كلية طب الأسنان'}
+📍 *مكان التسليم:* ${order.address || 'طرابلس'}
 
 🛒 *الأصناف:*
 ${itemsText}
 
 💵 *المجموع الفرعي:* ${order.subtotal || order.total} د.ل
-${discountText}🚚 *رسوم التوصيل:* ${order.shippingFee > 0 ? order.shippingFee + ' د.ل' : 'مجاني'}
+${discountText}🚚 *رسوم التوصيل:* ${order.shippingFee > 0 ? order.shippingFee + ' د.ل' : 'مجاني بالكلية'}
 ✨ *الصافي المطلوب دفعه:* *${order.total} د.ل*
 💳 *طريقة السداد:* كاش عند الاستلام
 
 بضاعتكم مفحوصة ومضمونة 🦷
-لأي استفسار تواصلوا معنا مباشرة على 091-2801073
+لأي استفسار تواصلوا معنا مباشرة على 0946859163 / 091 234 5678
 *Absolute Dental Operations Hub*`;
 
   window.open(`https://wa.me/218${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
