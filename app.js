@@ -36,7 +36,7 @@ const VERIFIED_PRODUCT_CATALOG_DATA = {
   "75fb4e12-d06f-4a0e-b7ac-d571b9e996ab": { cost: 12.00, sellingPrice: 15, supplier: "شركة اللامعة للأدوية والمعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
   "0c18deeb-a571-419b-adf2-8060db42d8cf": { cost: 1.80, sellingPrice: 3, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
   "fa042791-6d8d-48c1-8f60-f1a103162a1e": { cost: 180.00, sellingPrice: 250, supplier: "شركة باب الشفاء ومورد معتمد", category: "كاستات وقبضات (سنة 2)", subject: "fixed-prosthodontics" },
-  "c9442057-a22f-4ce8-a237-d37f2024146f": { cost: 50.00, sellingPrice: 60, supplier: "شركة سندس لمعدات طب الأسنان", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "c9442057-a22f-4ce8-a237-d37f2024146f": { cost: 55.00, sellingPrice: 60, supplier: "شركة سندس لمعدات طب الأسنان", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
   "e009eaf4-f041-4706-b27d-daa394e512d3": { cost: 12.00, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
   "c554e6ff-3a55-4e36-aed6-562f70601342": { cost: 12.00, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
   "72e1069c-4319-42ff-a38c-2af8f8e4e546": { cost: 2.00, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
@@ -1211,7 +1211,16 @@ function renderProductsTable(searchQuery = '') {
         <td style="font-weight: 700; color: var(--text-main);">${p.nameAr}</td>
         <td class="num-mono" style="color: var(--text-muted); font-size: 0.75rem;">${p.sku}</td>
         <td style="color: var(--text-muted); font-size: 0.75rem;">${p.category}</td>
-        <td class="num-mono">${p.costPrice} د.ل</td>
+        <td>
+          ${p.id === 'c9442057-a22f-4ce8-a237-d37f2024146f' ? `
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <span class="num-mono" style="font-weight:700;">${p.costPrice} د.ل</span>
+              <span class="badge" title="سجل دفعات الشراء: دفعة 1 بـ 50 د.ل (5 قطع) | دفعة 2 بـ 60 د.ل (رأس مال) | دفعة 3 بـ 55 د.ل (الدفعة الحالية 20 قطعة بالمخزن)" style="font-size:0.65rem; background:rgba(56,189,248,0.12); color:#38bdf8; border:1px solid rgba(56,189,248,0.25); cursor:help; border-radius:4px; padding:1px 5px; width:fit-content;">
+                3 دفعات (50 / 60 / 55)
+              </span>
+            </div>
+          ` : `<span class="num-mono">${p.costPrice} د.ل</span>`}
+        </td>
         <td class="num-mono" style="font-weight: 800; color: var(--primary);">${p.sellingPrice} د.ل</td>
         <td class="num-mono" style="color: var(--status-success); font-weight: 700;">+${margin}%</td>
         <td class="num-mono" style="font-weight: 800;">${p.stock}</td>
@@ -1260,6 +1269,30 @@ function openEditProductModal(productId) {
 
   const authorBadge = document.getElementById('editProductAuthor');
   if (authorBadge) authorBadge.textContent = user;
+
+  const batchNotice = document.getElementById('editProductBatchNotice');
+  if (batchNotice) {
+    if (prod.id === 'c9442057-a22f-4ce8-a237-d37f2024146f') {
+      batchNotice.style.display = 'block';
+      batchNotice.innerHTML = `
+        <div style="font-weight: 700; color: #38bdf8; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+          <span>📦</span>
+          <span>سجل دفعات الشراء الفعلية (3 دفعات بأسعار متغيرة):</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.78rem;">
+          <div>• <b>23/07/2026 (فاتورة A5338 - سندس):</b> 5 قطع × 50.00 د.ل (تم تصريفها بالكامل)</div>
+          <div>• <b>18/09/2026 (فاتورة خارجية - رأس مال):</b> 1 قطعة × 60.00 د.ل (بيعت مباشرة برأس مالها بدون ربح)</div>
+          <div>• <b>29/09/2026 (فاتورة A5671 - سندس):</b> 20 قطعة × 55.00 د.ل (رصيد المخزن الحالي)</div>
+        </div>
+        <div style="margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(56, 189, 248, 0.25); font-weight: 700; color: var(--primary);">
+          المتوسط المرجح التراكمي: 54.23 د.ل | تكلفة الدفعة الحالية في الرف: 55.00 د.ل
+        </div>
+      `;
+    } else {
+      batchNotice.style.display = 'none';
+      batchNotice.innerHTML = '';
+    }
+  }
 
   openModal('editProductModal');
 }
