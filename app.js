@@ -120,6 +120,11 @@ function logoutCurrentUser() {
     });
   }
 
+  const menu = document.getElementById('headerUserMenu');
+  if (menu) menu.classList.remove('active');
+  const dropdown = document.querySelector('.header-user-dropdown');
+  if (dropdown) dropdown.classList.remove('open');
+
   sessionStorage.removeItem('abs_erp_active_user');
   closeMobileSidebar();
 
@@ -131,6 +136,46 @@ function logoutCurrentUser() {
 
   showToast('تم إنهاء الجلسة وتسجيل الخروج الآمن');
 }
+
+function toggleUserDropdown(event) {
+  if (event) event.stopPropagation();
+  const menu = document.getElementById('headerUserMenu');
+  const dropdown = document.querySelector('.header-user-dropdown');
+  if (!menu) return;
+  const isOpen = menu.classList.contains('active');
+  if (isOpen) {
+    menu.classList.remove('active');
+    dropdown && dropdown.classList.remove('open');
+  } else {
+    menu.classList.add('active');
+    dropdown && dropdown.classList.add('open');
+  }
+}
+
+function switchUserPrompt() {
+  const menu = document.getElementById('headerUserMenu');
+  if (menu) menu.classList.remove('active');
+  const dropdown = document.querySelector('.header-user-dropdown');
+  if (dropdown) dropdown.classList.remove('open');
+
+  const overlay = document.getElementById('userSelectOverlay');
+  if (overlay) {
+    overlay.classList.remove('hidden');
+    overlay.style.display = 'flex';
+  }
+}
+
+// Global click handler to close user menu dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('headerUserMenu');
+  const dropdown = document.querySelector('.header-user-dropdown');
+  if (menu && menu.classList.contains('active')) {
+    if (!dropdown || !dropdown.contains(e.target)) {
+      menu.classList.remove('active');
+      dropdown && dropdown.classList.remove('open');
+    }
+  }
+});
 
 function updateSessionUserUI(userName) {
   const topName = document.getElementById('topHeaderUserName');

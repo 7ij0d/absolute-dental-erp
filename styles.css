@@ -7,30 +7,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Surface & Background Tokens (Warm Clean Minimalist Aesthetic) */
-  --bg-page: #faf9f6;
-  --bg-surface: #ffffff;
-  --bg-subtle: #f5f3ef;
-  --bg-muted: #f8f7f4;
-  --bg-hover: #f3f1ec;
+  /* Surface & Background Tokens (Absolute Dental Warm Ivory Aesthetic) */
+  --bg-page: #F7F4EE;         /* Authentic Storefront Warm Ivory */
+  --bg-surface: #FFFFFF;
+  --bg-subtle: #F0ECE1;
+  --bg-muted: #F5EFE6;
+  --bg-hover: #EBE5D8;
 
-  /* Sidebar Tokens (Absolute Dental Deep Espresso) */
-  --sidebar-bg: #231d19;
-  --sidebar-surface: #2b231e;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-text: #c0b7b1;
-  --sidebar-text-hover: #ffffff;
-  --sidebar-active-bg: rgba(255, 255, 255, 0.12);
-  --sidebar-active-text: #ffffff;
+  /* Sidebar Tokens (Absolute Dental Deep Warm Espresso) */
+  --sidebar-bg: #28201A;      /* Deep Luxury Warm Espresso */
+  --sidebar-surface: #322822;
+  --sidebar-border: rgba(205, 191, 166, 0.14);
+  --sidebar-text: #C7BDB5;    /* Warm Sand/Ivory text */
+  --sidebar-text-hover: #FFFFFF;
+  --sidebar-active-bg: rgba(205, 191, 166, 0.18);
+  --sidebar-active-text: #FFFFFF;
   --sidebar-width: 250px;
 
-  /* Primary Brand Action Color (Absolute Dental Solid Espresso) */
-  --primary: #2e2520;
-  --primary-hover: #1f1814;
-  --primary-subtle: #f7f4f0;
-  --primary-border: #dcd4cc;
+  /* Primary Brand Action Color (Absolute Dental Official Brown) */
+  --primary: #564F45;         /* Official Storefront Primary Brown */
+  --primary-hover: #3A3530;
+  --primary-subtle: #F2ECE1;
+  --primary-border: #DCD3C5;
 
-  /* Financial & Functional Status Colors (Subtle & Restrained) */
+  /* Financial & Functional Status Colors (Warm & Harmonized) */
   --status-success: #16a34a;
   --status-success-bg: #f0fdf4;
   --status-success-border: #bbf7d0;
@@ -51,11 +51,11 @@
   --status-purple-bg: #f5f3ff;
   --status-purple-border: #ddd6fe;
 
-  /* Text Hierarchy */
-  --text-main: #0f172a;       /* Deep Slate Navy for headings & metrics */
-  --text-body: #334155;       /* Slate 700 */
-  --text-muted: #64748b;      /* Slate 500 */
-  --text-subtle: #94a3b8;     /* Slate 400 */
+  /* Text Hierarchy (Warm Dark Espresso instead of cold slate) */
+  --text-main: #2D251F;       /* Rich Deep Warm Espresso for headings & metrics */
+  --text-body: #4A423B;       /* Warm Espresso Body */
+  --text-muted: #7E7469;      /* Warm Muted Neutral */
+  --text-subtle: #A3998E;     /* Warm Subtle */
 
   /* ── Absolute Dental Storefront Design System Tokens ── */
   --brand-gold: #CDBFA6;
@@ -65,15 +65,15 @@
   --brand-brown-2: #6B6159;
   --brand-brown-3: #8B8177;
   --brand-light: #FAF8F4;
-  --btn-storefront: #684835;
-  --btn-storefront-hover: #543929;
+  --btn-storefront: #564F45;
+  --btn-storefront-hover: #3A3530;
   --teal-invoice: #00a896;
   --navy-invoice: #0a335c;
 
   /* Borders & Dividers */
-  --border-card: #e2e8f0;
-  --border-subtle: #f1f5f9;
-  --border-focus: #2563eb;
+  --border-card: #E0D9CE;     /* Warm Storefront Border */
+  --border-subtle: #EAE4D9;
+  --border-focus: #564F45;
 
   /* Elevation Shadows (Soft & Restrained) */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -297,6 +297,7 @@ a {
   background-color: var(--sidebar-active-bg);
   color: var(--sidebar-active-text);
   font-weight: 700;
+  border-inline-start: 3px solid var(--brand-gold);
 }
 
 .nav-item svg {
@@ -386,13 +387,13 @@ a {
   width: 44px;
   height: 44px;
   border-radius: var(--radius-md);
-  background: #1e293b;
+  background: #3A322B;
   overflow: hidden;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #38bdf8;
+  color: var(--brand-gold);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -585,7 +586,7 @@ a {
 
 .search-container:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(86, 79, 69, 0.12);
 }
 
 .search-container svg {
@@ -697,24 +698,28 @@ a {
   padding: 0.35rem 0.65rem;
   border-radius: var(--radius-md);
   cursor: pointer;
+  position: relative;
   transition: var(--transition);
+  border: 1px solid transparent;
 }
 
 .header-user-dropdown:hover {
-  background-color: rgba(0, 0, 0, 0.03);
+  background-color: rgba(86, 79, 69, 0.05);
+  border-color: var(--border-card);
 }
 
 .header-avatar {
   width: 34px;
   height: 34px;
   border-radius: var(--radius-pill);
-  background-color: #0b1329;
+  background-color: var(--brand-brown);
   color: #ffffff;
   font-weight: 700;
   font-size: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 3px rgba(86, 79, 69, 0.25);
 }
 
 .header-user-info {
@@ -738,6 +743,89 @@ a {
   width: 14px;
   height: 14px;
   color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.header-user-dropdown.open .header-chevron {
+  transform: rotate(180deg);
+}
+
+/* Luxury User Dropdown Menu */
+.user-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 250px;
+  background-color: #ffffff;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-dropdown);
+  padding: 0.5rem;
+  z-index: 100;
+}
+
+.user-dropdown-menu.active {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-menu-header {
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 0.35rem;
+}
+
+.user-menu-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.user-menu-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: var(--primary-subtle);
+  color: var(--primary);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+}
+
+.user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-body);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.user-menu-item:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.user-menu-divider {
+  height: 1px;
+  background-color: var(--border-subtle);
+  margin: 0.35rem 0;
+}
+
+.user-menu-item.logout {
+  color: var(--status-danger);
+}
+
+.user-menu-item.logout:hover {
+  background-color: var(--status-danger-bg);
+  color: #b91c1c;
 }
 
 /* Mobile Toggle */
@@ -805,12 +893,12 @@ a {
   align-items: center;
   gap: 0.5rem;
   transition: var(--transition);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 2px 8px rgba(86, 79, 69, 0.2);
 }
 
 .btn-primary:hover {
   background-color: var(--primary-hover);
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 14px rgba(86, 79, 69, 0.3);
   transform: translateY(-1px);
 }
 
@@ -2615,7 +2703,7 @@ a {
 }
 
 .user-btn-avatar.taha {
-  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  background: linear-gradient(135deg, #7C6853, #564F45);
 }
 
 .user-btn-avatar.yasi {
@@ -2717,9 +2805,9 @@ a {
 
 /* Action Buttons in Products Table */
 .btn-action-edit {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1d4ed8;
+  background: #f5efe6;
+  border: 1px solid #e2d9cd;
+  color: #564f45;
   padding: 3px 8px;
   border-radius: var(--radius-sm);
   font-size: 0.725rem;
@@ -2729,7 +2817,8 @@ a {
 }
 
 .btn-action-edit:hover {
-  background: #dbeafe;
+  background: #eae2d6;
+  color: #3A3530;
 }
 
 .btn-action-delete {
@@ -2765,8 +2854,8 @@ a {
 }
 
 .audit-user-badge.taha {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .audit-user-badge.yasi {
@@ -3595,7 +3684,7 @@ a {
 
 .inv-item-name-en {
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-main);
   font-size: 0.88rem;
   line-height: 1.35;
   direction: ltr;
@@ -3846,7 +3935,7 @@ a {
   border-inline-start: 3px solid #eab308;
 }
 .recon-kpi-card.protected {
-  border-inline-start: 3px solid #3b82f6;
+  border-inline-start: 3px solid #b45309;
 }
 .recon-kpi-card.cancelled {
   border-inline-start: 3px solid #ef4444;
@@ -3926,7 +4015,7 @@ a {
 .recon-pipeline-node-val {
   font-size: 0.85rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-main);
 }
 
 .recon-pipeline-node-sub {
@@ -3967,9 +4056,9 @@ a {
 }
 
 .inv-deduct-pill.not-required {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
+  background: #f7f4ee;
+  color: #7e7469;
+  border: 1px solid #e0d9ce;
 }
 
 .inv-deduct-pill.cancelled {
@@ -3991,9 +4080,9 @@ a {
 }
 
 .inv-deduct-pill.protected {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
+  background: #fefce8;
+  color: #92400e;
+  border: 1px solid #fef08a;
 }
 
 /* ==========================================================================
