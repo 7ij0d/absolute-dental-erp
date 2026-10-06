@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.07_CLEAN_SLATE_RESET_V5';
+const ERP_DATABASE_VERSION = '2026.10.07_BATCH_PRICING_V6';
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
     localStorage.removeItem('abs_erp_products');
@@ -34,35 +34,37 @@ const SUPABASE_CONFIG = {
 // 100% Matching 16 Real Procurement Invoices & Storefront Subjects
 // -------------------------------------------------------------
 const VERIFIED_PRODUCT_CATALOG_DATA = {
-  "d02e821e-91e3-4ed4-869e-f636142d8247": { cost: 0, sellingPrice: 0, supplier: "شركة السند المتين للمعدات الطبية", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "5528000b-cde4-4b27-8745-7956dc0e4b78": { cost: 0, sellingPrice: 0, supplier: "شركة السند المتين للمعدات الطبية", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "6c359465-a522-4654-933f-a64c627c6b38": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "item-penlight-clear": { cost: 1.75, sellingPrice: 4, supplier: "مورد أدوات فحص", category: "أدوات الفحص والعيادة", subject: "fixed-prosthodontics" },
+  "item-penlight-led": { cost: 2.50, sellingPrice: 5, supplier: "مورد أدوات فحص", category: "أدوات الفحص والعيادة", subject: "fixed-prosthodontics" },
+  "d02e821e-91e3-4ed4-869e-f636142d8247": { cost: 1.15, sellingPrice: 2, supplier: "شركة السند المتين للمعدات الطبية", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "5528000b-cde4-4b27-8745-7956dc0e4b78": { cost: 1.15, sellingPrice: 2, supplier: "شركة السند المتين للمعدات الطبية", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "6c359465-a522-4654-933f-a64c627c6b38": { cost: 4, sellingPrice: 5, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
   "106ad65c-3074-4cfb-8643-840f36f833f5": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
-  "5b7d387c-f150-4e64-90fe-b21ac1249ebc": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "أدوات الفحص والعيادة", subject: "fixed-prosthodontics" },
-  "ba48f5b5-38c2-4571-94f5-67be7d38aab3": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
+  "5b7d387c-f150-4e64-90fe-b21ac1249ebc": { cost: 11, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "أدوات الفحص والعيادة", subject: "fixed-prosthodontics" },
+  "ba48f5b5-38c2-4571-94f5-67be7d38aab3": { cost: 15, sellingPrice: 17, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
   "8a2c351d-359c-4f5e-8c37-3d4ecb1eba19": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
   "e625888c-c1b0-4479-9117-76a1215a75f4": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
   "2ebc663e-0967-4d6a-b8be-b07b9e84659c": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
   "7eaed4a6-5d82-480e-b35e-0ca2d15c90dc": { cost: 0, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "صناعة الأسنان المتحركة (سنة 2)", subject: "removable-prosthodontics" },
   "c78f57a0-54d0-4602-aa05-d92a82398a2f": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
   "36e0d204-3613-44b0-b74e-0ba7869420c4": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "ad31f7c7-d710-4622-8e3f-377b9c657818": { cost: 0, sellingPrice: 0, supplier: "مورد معدات طبية", category: "كونس وكراون (سنة 2)", subject: "restorative-dentistry" },
-  "af6c097d-6f53-4ce3-8d52-f9b9fc095295": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "أدوات الفحص واللثة", subject: "periodontics" },
+  "ad31f7c7-d710-4622-8e3f-377b9c657818": { cost: 115, sellingPrice: 135, supplier: "مورد معدات طبية", category: "كونس وكراون (سنة 2)", subject: "restorative-dentistry" },
+  "af6c097d-6f53-4ce3-8d52-f9b9fc095295": { cost: 12, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "أدوات الفحص واللثة", subject: "periodontics" },
   "76f62cd7-df40-4e85-97d1-6fb63b09e2f1": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
   "4caab5ef-1c9c-411e-8b6e-76781a07fd97": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "75fb4e12-d06f-4a0e-b7ac-d571b9e996ab": { cost: 0, sellingPrice: 0, supplier: "شركة اللامعة للأدوية والمعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
-  "0c18deeb-a571-419b-adf2-8060db42d8cf": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
+  "75fb4e12-d06f-4a0e-b7ac-d571b9e996ab": { cost: 11, sellingPrice: 15, supplier: "شركة اللامعة للأدوية والمعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
+  "0c18deeb-a571-419b-adf2-8060db42d8cf": { cost: 1, sellingPrice: 3, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
   "fa042791-6d8d-48c1-8f60-f1a103162a1e": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء ومورد معتمد", category: "كاستات وقبضات (سنة 2)", subject: "fixed-prosthodontics" },
   "c9442057-a22f-4ce8-a237-d37f2024146f": { cost: 0, sellingPrice: 0, supplier: "شركة سندس لمعدات طب الأسنان", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
-  "e009eaf4-f041-4706-b27d-daa394e512d3": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
-  "c554e6ff-3a55-4e36-aed6-562f70601342": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "e009eaf4-f041-4706-b27d-daa394e512d3": { cost: 12, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "c554e6ff-3a55-4e36-aed6-562f70601342": { cost: 12, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
   "72e1069c-4319-42ff-a38c-2af8f8e4e546": { cost: 0, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
   "d2a56c58-bf46-47aa-b803-6546aa7491c5": { cost: 0, sellingPrice: 0, supplier: "شركة كراون / باب الشفاء", category: "صناعة الأسنان الثابتة (سنة 2)", subject: "fixed-prosthodontics" },
   "2a8f9bde-fb3f-485d-a1bd-d62aa0b83556": { cost: 0, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
-  "8f344bd9-91ec-4787-8371-f489cccf635e": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "كاستات تعليمية (سنة 2)", subject: "fixed-prosthodontics" },
+  "8f344bd9-91ec-4787-8371-f489cccf635e": { cost: 105, sellingPrice: 125, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "كاستات تعليمية (سنة 2)", subject: "fixed-prosthodontics" },
   "187f6429-fee1-4f50-8edc-2a18bac1de35": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
   "627bdb62-3364-497b-8aa6-3b911ad78f26": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "8806943f-d3bf-443b-b623-7002b354a355": { cost: 0, sellingPrice: 0, supplier: "شركة المسار الطبي للمعدات", category: "كونس وكراون (سنة 2)", subject: "restorative-dentistry" },
+  "8806943f-d3bf-443b-b623-7002b354a355": { cost: 215, sellingPrice: 225, supplier: "شركة المسار الطبي للمعدات", category: "كونس وكراون (سنة 2)", subject: "restorative-dentistry" },
 };
 
 let supabaseClient = null;
@@ -277,7 +279,7 @@ const ERP_STATE = {
     });
 
     try { localStorage.setItem('abs_erp_products', JSON.stringify(list)); } catch (_) {}
-    list = list.filter(p => !String(p.id).startsWith("prod-"));
+    list = list.filter(p => !['prod-box-trans-165', 'prod-box-mauve', 'prod-box-pink', 'prod-bag-17', 'prod-bag-16-col', 'prod-scrub-black', 'prod-toy-tooth'].includes(p.id));
     return list;
   })(),
 
@@ -1168,7 +1170,7 @@ function renderProductsTable(searchQuery = '') {
   const tbody = document.getElementById('fullProductsTableBody');
   if (!tbody) return;
 
-  let list = (ERP_STATE.products || []).filter(p => !String(p.id).startsWith('prod-'));
+  let list = (ERP_STATE.products || []).filter(p => !['prod-box-trans-165', 'prod-box-mauve', 'prod-box-pink', 'prod-bag-17', 'prod-bag-16-col', 'prod-scrub-black', 'prod-toy-tooth'].includes(p.id));
   if (searchQuery) {
     const q = searchQuery.toLowerCase().trim();
     list = list.filter(p => (p.nameAr || '').toLowerCase().includes(q) || (p.nameEn || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q));
@@ -1645,7 +1647,7 @@ function renderInventorySubjectChips() {
   const container = document.getElementById('invSubjectChipsContainer');
   if (!container) return;
 
-  const catalog = (ERP_STATE.products || []).filter(p => !String(p.id).startsWith('prod-'));
+  const catalog = (ERP_STATE.products || []).filter(p => !['prod-box-trans-165', 'prod-box-mauve', 'prod-box-pink', 'prod-bag-17', 'prod-bag-16-col', 'prod-scrub-black', 'prod-toy-tooth'].includes(p.id));
   
   const relevantProducts = CURRENT_INVENTORY_YEAR === 'all'
     ? catalog
@@ -1702,7 +1704,7 @@ function renderInventoryTable() {
   const tbody = document.getElementById('inventoryTableBody');
   if (!tbody) return;
 
-  const catalog = (ERP_STATE.products || []).filter(p => !String(p.id).startsWith('prod-'));
+  const catalog = (ERP_STATE.products || []).filter(p => !['prod-box-trans-165', 'prod-box-mauve', 'prod-box-pink', 'prod-bag-17', 'prod-bag-16-col', 'prod-scrub-black', 'prod-toy-tooth'].includes(p.id));
   const completedOrders = ERP_STATE.orders.filter(o => o.status === 'مكتمل');
 
   // Update Year Tab Count Badges
@@ -3335,7 +3337,7 @@ function resolveProductImage(p) {
     }
     return url;
   }
-  if (p.id && !String(p.id).startsWith('prod-')) {
+  if (p.id && !['prod-box-trans-165', 'prod-box-mauve', 'prod-box-pink', 'prod-bag-17', 'prod-bag-16-col', 'prod-scrub-black', 'prod-toy-tooth'].includes(p.id)) {
     return `https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/${p.id}.jpg`;
   }
   return 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format';
