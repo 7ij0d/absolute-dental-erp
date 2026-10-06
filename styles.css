@@ -4458,5 +4458,348 @@ a {
   transform: none;
 }
 
+/* ==========================================================================
+   17. INVENTORY ACADEMIC TAXONOMY & SUBJECT DIVISION
+   ========================================================================== */
+.inv-taxonomy-filter-wrapper {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-card);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Level 1: Academic Year Filter Tabs */
+.inv-year-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1.25rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid var(--border-card);
+}
+
+.inv-year-tab {
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-pill);
+  padding: 0.5rem 1rem;
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: var(--text-body);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.inv-year-tab:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.inv-year-tab:active {
+  transform: scale(0.97);
+}
+
+.inv-year-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(11, 19, 41, 0.18);
+}
+
+.inv-year-tab .tab-icon {
+  font-size: 0.95rem;
+}
+
+.inv-year-tab .inv-tab-count {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.06);
+  color: inherit;
+  font-family: monospace;
+}
+
+.inv-year-tab.active .inv-tab-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Level 2: Subject Chips & Search Bar */
+.inv-subject-and-search-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: #ffffff;
+  flex-wrap: wrap;
+}
+
+.inv-subject-chips-scroll {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.inv-subject-chip {
+  background: #f8fafc;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.8rem;
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.inv-subject-chip:hover {
+  background: #f1f5f9;
+  color: var(--text-main);
+  border-color: #cbd5e1;
+}
+
+.inv-subject-chip:active {
+  transform: scale(0.97);
+}
+
+.inv-subject-chip.active {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #4338ca;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(67, 56, 202, 0.12);
+}
+
+.inv-subject-chip .chip-count {
+  font-size: 0.675rem;
+  font-weight: 800;
+  opacity: 0.85;
+  font-family: monospace;
+}
+
+.inv-search-box-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.inv-search-input {
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  border: 1px solid var(--border-card);
+  background: #f8fafc;
+  min-width: 220px;
+  transition: var(--transition);
+}
+
+.inv-search-input:focus {
+  background: #ffffff;
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11, 19, 41, 0.08);
+}
+
+.inv-filtered-metric-badge {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: #f1f5f9;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  font-family: monospace;
+  border: 1px solid var(--border-card);
+}
+
+/* Grouped Section Header Rows */
+.inv-group-header-row {
+  background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border-top: 2px solid #e2e8f0;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.inv-group-header-row:hover {
+  background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%) !important;
+}
+
+.inv-group-header-cell {
+  padding: 0.85rem 1.25rem !important;
+}
+
+.inv-group-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.inv-group-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.inv-group-icon {
+  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: #ffffff;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-card);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.inv-group-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.inv-group-year-tag {
+  font-size: 0.675rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.02em;
+}
+
+.inv-group-year-tag.y1 {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.inv-group-year-tag.y2 {
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
+.inv-group-year-tag.gen {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.inv-group-meta-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.inv-group-stat-pill {
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-pill);
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  color: var(--text-body);
+  font-family: monospace;
+}
+
+/* In-Row Subject Badge */
+.inv-item-subject-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.675rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+.inv-item-subject-tag.y1-anat {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.inv-item-subject-tag.y1-mat {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.inv-item-subject-tag.y2-rest {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.inv-item-subject-tag.y2-fixed {
+  background: #fae8ff;
+  color: #86198f;
+}
+
+.inv-item-subject-tag.y2-remov {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.inv-item-subject-tag.y2-perio {
+  background: #cffafe;
+  color: #155e75;
+}
+
+.inv-item-subject-tag.gen-box {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.inv-item-subject-tag.gen-misc {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* Responsiveness for mobile/iPad */
+@media (max-width: 768px) {
+  .inv-year-tabs {
+    padding: 0.65rem 0.85rem;
+  }
+  .inv-subject-and-search-row {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.65rem 0.85rem;
+  }
+  .inv-search-box-wrap {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .inv-search-input {
+    width: 100%;
+    min-width: 0;
+  }
+  .inv-filtered-metric-badge {
+    text-align: center;
+  }
+  .inv-group-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}
+
 
 

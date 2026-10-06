@@ -788,11 +788,54 @@
         <div id="inventoryStockCard" class="erp-table-card">
           <div class="table-controls-bar">
             <div>
-              <div class="card-title">مستويات المخزون الحقيقي</div>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">الأرقام مطابقة حسابياً بعد خصم الطلبات المكتملة فقط</span>
+              <div class="card-title">مستويات المخزون الحقيقي — تصنيف أكاديمي للمواد</div>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">الأرقام مطابقة حسابياً بعد خصم الطلبات المكتملة فقط • مقسمة حسب السنوات والمقررات الدراسية</span>
             </div>
-            <button class="btn-secondary btn-sm" onclick="switchInventorySubView('recon', document.getElementById('invSubTabRecon'))">عرض سجل التدقيق والتسوية 🔍</button>
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+              <button class="btn-outline btn-sm" id="btnToggleInventoryGrouping" onclick="toggleInventoryGrouping()" title="تبديل طريقة العرض">
+                <span id="groupingToggleIcon">🗂️</span> <span id="groupingToggleText">عرض مقسم حسب المواد</span>
+              </button>
+              <button class="btn-secondary btn-sm" onclick="switchInventorySubView('recon', document.getElementById('invSubTabRecon'))">عرض سجل التدقيق والتسوية 🔍</button>
+            </div>
           </div>
+
+          <!-- Academic Year & Subject Division Filter Bar -->
+          <div class="inv-taxonomy-filter-wrapper">
+            <!-- Level 1: Academic Year Filter Tabs -->
+            <div class="inv-year-tabs" id="invYearFilterTabs">
+              <button class="inv-year-tab active" data-year="all" onclick="filterInventoryByYear('all', this)">
+                <span class="tab-label">جميع المخزون</span>
+                <span class="inv-tab-count" id="invYearCountAll">39</span>
+              </button>
+              <button class="inv-year-tab" data-year="year1" onclick="filterInventoryByYear('year1', this)">
+                <span class="tab-icon">🎓</span>
+                <span class="tab-label">أدوات سنة أولى</span>
+                <span class="inv-tab-count" id="invYearCountY1">10</span>
+              </button>
+              <button class="inv-year-tab" data-year="year2" onclick="filterInventoryByYear('year2', this)">
+                <span class="tab-icon">🦷</span>
+                <span class="tab-label">أدوات سنة ثانية</span>
+                <span class="inv-tab-count" id="invYearCountY2">20</span>
+              </button>
+              <button class="inv-year-tab" data-year="general" onclick="filterInventoryByYear('general', this)">
+                <span class="tab-icon">🎒</span>
+                <span class="tab-label">مستلزمات وبوكسات عامة</span>
+                <span class="inv-tab-count" id="invYearCountGen">9</span>
+              </button>
+            </div>
+
+            <!-- Level 2: Subject Chips & Live Search Row -->
+            <div class="inv-subject-and-search-row">
+              <div class="inv-subject-chips-scroll" id="invSubjectChipsContainer">
+                <!-- Dynamically populated chips based on active year -->
+              </div>
+              <div class="inv-search-box-wrap">
+                <input type="text" id="invLiveSearchInput" class="form-input-clean inv-search-input" placeholder="🔍 بحث بالاسم أو SKU..." oninput="handleInventorySearch(this.value)">
+                <span class="inv-filtered-metric-badge" id="invFilteredMetricBadge">39 صنفاً (696 قطعة)</span>
+              </div>
+            </div>
+          </div>
+
           <div style="overflow-x: auto;">
             <table class="clean-inventory-table">
               <thead>

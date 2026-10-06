@@ -1492,23 +1492,344 @@ function deleteProduct(productId) {
 }
 
 // -------------------------------------------------------------
-// 9. INVENTORY MANAGEMENT
+// 9. INVENTORY MANAGEMENT (ACADEMIC YEAR & SUBJECT DIVISION ENGINE)
 // -------------------------------------------------------------
+let CURRENT_INVENTORY_YEAR = 'all';
+let CURRENT_INVENTORY_SUBJECT = 'all';
+let CURRENT_INVENTORY_SEARCH = '';
+let INVENTORY_GROUPED_MODE = true;
+
+/**
+ * 100% Comprehensive Academic Taxonomy Classifier for Absolute Dental ERP
+ * Maps catalog products to Academic Year (سنة أولى / سنة ثانية / عام) and dental subject.
+ */
+function getProductAcademicTaxonomy(p) {
+  const cat = (p.category || '').toLowerCase();
+  const subj = (p.subject || '').toLowerCase();
+  const name = ((p.nameAr || '') + ' ' + (p.nameEn || '')).toLowerCase();
+
+  // 1. Year 1 Tools (أدوات سنة أولى)
+  if (cat.includes('سنة 1') || cat.includes('سنة أولى') || subj === 'dental-materials' || (subj === 'dental-anatomy' && !cat.includes('سنة 2'))) {
+    let subjectKey = 'anatomy';
+    let subjectNameAr = 'تشريح الأسنان (Dental Anatomy)';
+    let subjectShortName = 'تشريح أسنان';
+    let subjectIcon = '🦴';
+    let tagClass = 'y1-anat';
+    let orderIndex = 1;
+
+    if (subj === 'dental-materials' || cat.includes('مواد')) {
+      subjectKey = 'materials';
+      subjectNameAr = 'مواد طب الأسنان (Dental Materials)';
+      subjectShortName = 'مواد أسنان';
+      subjectIcon = '🧪';
+      tagClass = 'y1-mat';
+      orderIndex = 2;
+    }
+
+    return {
+      yearKey: 'year1',
+      yearNameAr: 'أدوات سنة أولى',
+      yearTagClass: 'y1',
+      yearIcon: '🎓',
+      subjectKey,
+      subjectNameAr,
+      subjectShortName,
+      subjectIcon,
+      tagClass,
+      orderIndex
+    };
+  }
+
+  // 2. Year 2 Tools (أدوات سنة ثانية)
+  if (cat.includes('سنة 2') || cat.includes('سنة ثانية') || subj === 'restorative-dentistry' || subj === 'fixed-prosthodontics' || subj === 'removable-prosthodontics' || subj === 'periodontics') {
+    let subjectKey = 'restorative';
+    let subjectNameAr = 'علاج تحفظي / كونس (Restorative)';
+    let subjectShortName = 'علاج تحفظي / كونس';
+    let subjectIcon = '🩺';
+    let tagClass = 'y2-rest';
+    let orderIndex = 10;
+
+    if (subj === 'fixed-prosthodontics' || cat.includes('ثابتة') || cat.includes('كراون') || cat.includes('كاستات')) {
+      subjectKey = 'fixed';
+      subjectNameAr = 'كراون وتعويضات ثابتة (Fixed Prosthodontics)';
+      subjectShortName = 'كراون وثابتة';
+      subjectIcon = '👑';
+      tagClass = 'y2-fixed';
+      orderIndex = 11;
+    } else if (subj === 'removable-prosthodontics' || cat.includes('متحركة') || name.includes('baseplate')) {
+      subjectKey = 'removable';
+      subjectNameAr = 'صناعة أسنان متحركة (Removable Prosthodontics)';
+      subjectShortName = 'أطقم ومتحركة';
+      subjectIcon = '🧰';
+      tagClass = 'y2-remov';
+      orderIndex = 12;
+    } else if (subj === 'periodontics' || cat.includes('لثة')) {
+      subjectKey = 'periodontics';
+      subjectNameAr = 'أدوات الفحص واللثة (Periodontics)';
+      subjectShortName = 'فحص ولثة';
+      subjectIcon = '🔍';
+      tagClass = 'y2-perio';
+      orderIndex = 13;
+    } else if (name.includes('central incisor')) {
+      subjectKey = 'restorative';
+      subjectNameAr = 'علاج تحفظي / كونس (Restorative)';
+      subjectShortName = 'علاج تحفظي / كونس';
+      subjectIcon = '🩺';
+      tagClass = 'y2-rest';
+      orderIndex = 10;
+    }
+
+    return {
+      yearKey: 'year2',
+      yearNameAr: 'أدوات سنة ثانية',
+      yearTagClass: 'y2',
+      yearIcon: '🦷',
+      subjectKey,
+      subjectNameAr,
+      subjectShortName,
+      subjectIcon,
+      tagClass,
+      orderIndex
+    };
+  }
+
+  // 3. General & Equipment (مستلزمات وبوكسات عامة)
+  let subjectKey = 'boxes';
+  let subjectNameAr = 'شنط وبوكسات الأدوات (Boxes & Bags)';
+  let subjectShortName = 'شنط وبوكسات';
+  let subjectIcon = '🧰';
+  let tagClass = 'gen-box';
+  let orderIndex = 20;
+
+  if (cat.includes('ملابس') || name.includes('scrub') || name.includes('سكراب')) {
+    subjectKey = 'scrubs';
+    subjectNameAr = 'ملابس طبية وسكراب (Medical Scrubs)';
+    subjectShortName = 'ملابس وسكراب';
+    subjectIcon = '🥼';
+    tagClass = 'gen-misc';
+    orderIndex = 22;
+  } else if (cat.includes('كشاف') || name.includes('penlight') || name.includes('كشاف')) {
+    subjectKey = 'penlights';
+    subjectNameAr = 'كشافات وأدوات فحص (Penlights & Examination)';
+    subjectShortName = 'كشافات وفحص';
+    subjectIcon = '🔦';
+    tagClass = 'gen-misc';
+    orderIndex = 21;
+  } else if (cat.includes('مجسم') || name.includes('toy') || name.includes('دبدوب')) {
+    subjectKey = 'educational';
+    subjectNameAr = 'مجسمات تعليمية (Educational Models)';
+    subjectShortName = 'مجسمات تعليمية';
+    subjectIcon = '🧸';
+    tagClass = 'gen-misc';
+    orderIndex = 23;
+  }
+
+  return {
+    yearKey: 'general',
+    yearNameAr: 'مستلزمات وبوكسات عامة',
+    yearTagClass: 'gen',
+    yearIcon: '🎒',
+    subjectKey,
+    subjectNameAr,
+    subjectShortName,
+    subjectIcon,
+    tagClass,
+    orderIndex
+  };
+}
+
+/**
+ * Filter inventory table by Academic Year
+ */
+function filterInventoryByYear(yearKey, btn) {
+  CURRENT_INVENTORY_YEAR = yearKey;
+  CURRENT_INVENTORY_SUBJECT = 'all'; // Reset subject filter upon year tab switch
+  
+  document.querySelectorAll('#invYearFilterTabs .inv-year-tab').forEach(b => b.classList.remove('active'));
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    const defaultBtn = document.querySelector(`#invYearFilterTabs .inv-year-tab[data-year="${yearKey}"]`);
+    if (defaultBtn) defaultBtn.classList.add('active');
+  }
+
+  renderInventorySubjectChips();
+  renderInventoryTable();
+}
+
+/**
+ * Filter inventory table by Specific Subject
+ */
+function filterInventoryBySubject(subjectKey, btn) {
+  CURRENT_INVENTORY_SUBJECT = subjectKey;
+
+  document.querySelectorAll('#invSubjectChipsContainer .inv-subject-chip').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  renderInventoryTable();
+}
+
+/**
+ * Real-time instant live search inside inventory catalog
+ */
+function handleInventorySearch(val) {
+  CURRENT_INVENTORY_SEARCH = (val || '').trim().toLowerCase();
+  renderInventoryTable();
+}
+
+/**
+ * Toggle between Subject-Grouped view and Flat table view
+ */
+function toggleInventoryGrouping() {
+  INVENTORY_GROUPED_MODE = !INVENTORY_GROUPED_MODE;
+  const toggleBtn = document.getElementById('btnToggleInventoryGrouping');
+  const toggleIcon = document.getElementById('groupingToggleIcon');
+  const toggleText = document.getElementById('groupingToggleText');
+
+  if (toggleIcon) toggleIcon.textContent = INVENTORY_GROUPED_MODE ? '🗂️' : '📄';
+  if (toggleText) toggleText.textContent = INVENTORY_GROUPED_MODE ? 'عرض مقسم حسب المواد' : 'عرض جدول مسطح';
+
+  if (toggleBtn) {
+    if (INVENTORY_GROUPED_MODE) {
+      toggleBtn.classList.remove('btn-secondary');
+      toggleBtn.classList.add('btn-outline');
+    } else {
+      toggleBtn.classList.remove('btn-outline');
+      toggleBtn.classList.add('btn-secondary');
+    }
+  }
+
+  renderInventoryTable();
+}
+
+/**
+ * Render dynamic subject filter chips based on currently active year
+ */
+function renderInventorySubjectChips() {
+  const container = document.getElementById('invSubjectChipsContainer');
+  if (!container) return;
+
+  const catalog = ERP_STATE.products || [];
+  
+  // Available subjects pool based on active year filter
+  const relevantProducts = CURRENT_INVENTORY_YEAR === 'all'
+    ? catalog
+    : catalog.filter(p => getProductAcademicTaxonomy(p).yearKey === CURRENT_INVENTORY_YEAR);
+
+  // Group and count subjects
+  const subjectsMap = {};
+  relevantProducts.forEach(p => {
+    const tax = getProductAcademicTaxonomy(p);
+    if (!subjectsMap[tax.subjectKey]) {
+      subjectsMap[tax.subjectKey] = {
+        key: tax.subjectKey,
+        name: tax.subjectShortName,
+        icon: tax.subjectIcon,
+        yearKey: tax.yearKey,
+        orderIndex: tax.orderIndex,
+        count: 0
+      };
+    }
+    subjectsMap[tax.subjectKey].count++;
+  });
+
+  const subjectsList = Object.values(subjectsMap).sort((a, b) => a.orderIndex - b.orderIndex);
+
+  let allLabel = 'جميع المواد';
+  if (CURRENT_INVENTORY_YEAR === 'year1') allLabel = 'جميع مواد سنة أولى';
+  else if (CURRENT_INVENTORY_YEAR === 'year2') allLabel = 'جميع مواد سنة ثانية';
+  else if (CURRENT_INVENTORY_YEAR === 'general') allLabel = 'جميع المستلزمات والشنط';
+
+  const isAllActive = (CURRENT_INVENTORY_SUBJECT === 'all');
+
+  let html = `
+    <button class="inv-subject-chip ${isAllActive ? 'active' : ''}" onclick="filterInventoryBySubject('all', this)">
+      <span>${allLabel}</span>
+      <span class="chip-count">(${relevantProducts.length})</span>
+    </button>
+  `;
+
+  subjectsList.forEach(s => {
+    const isActive = (CURRENT_INVENTORY_SUBJECT === s.key);
+    html += `
+      <button class="inv-subject-chip ${isActive ? 'active' : ''}" onclick="filterInventoryBySubject('${s.key}', this)">
+        <span>${s.icon} ${s.name}</span>
+        <span class="chip-count">(${s.count})</span>
+      </button>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+/**
+ * Render Main Inventory Table with Academic Categorization, Subject Groups and Sold Calculations
+ */
 function renderInventoryTable() {
   const tbody = document.getElementById('inventoryTableBody');
   if (!tbody) return;
 
+  const catalog = ERP_STATE.products || [];
   const completedOrders = ERP_STATE.orders.filter(o => o.status === 'مكتمل');
 
-  tbody.innerHTML = ERP_STATE.products.map(p => {
-    // Calculate pieces sold across all completed orders
+  // Update Year Tab Count Badges
+  const countAll = catalog.length;
+  const countY1 = catalog.filter(p => getProductAcademicTaxonomy(p).yearKey === 'year1').length;
+  const countY2 = catalog.filter(p => getProductAcademicTaxonomy(p).yearKey === 'year2').length;
+  const countGen = catalog.filter(p => getProductAcademicTaxonomy(p).yearKey === 'general').length;
+
+  const elCountAll = document.getElementById('invYearCountAll');
+  const elCountY1 = document.getElementById('invYearCountY1');
+  const elCountY2 = document.getElementById('invYearCountY2');
+  const elCountGen = document.getElementById('invYearCountGen');
+  if (elCountAll) elCountAll.textContent = countAll;
+  if (elCountY1) elCountY1.textContent = countY1;
+  if (elCountY2) elCountY2.textContent = countY2;
+  if (elCountGen) elCountGen.textContent = countGen;
+
+  // Make sure chips are updated
+  if (!document.getElementById('invSubjectChipsContainer')?.children.length) {
+    renderInventorySubjectChips();
+  }
+
+  // Filter Catalog
+  let filteredProducts = catalog.filter(p => {
+    const tax = getProductAcademicTaxonomy(p);
+
+    // 1. Year Filter
+    if (CURRENT_INVENTORY_YEAR !== 'all' && tax.yearKey !== CURRENT_INVENTORY_YEAR) {
+      return false;
+    }
+
+    // 2. Subject Filter
+    if (CURRENT_INVENTORY_SUBJECT !== 'all' && tax.subjectKey !== CURRENT_INVENTORY_SUBJECT) {
+      return false;
+    }
+
+    // 3. Search Filter
+    if (CURRENT_INVENTORY_SEARCH) {
+      const q = CURRENT_INVENTORY_SEARCH;
+      const matchAr = (p.nameAr || '').toLowerCase().includes(q);
+      const matchEn = (p.nameEn || '').toLowerCase().includes(q);
+      const matchSku = (p.sku || '').toLowerCase().includes(q);
+      const matchSubj = tax.subjectNameAr.toLowerCase().includes(q) || tax.subjectShortName.toLowerCase().includes(q);
+      if (!matchAr && !matchEn && !matchSku && !matchSubj) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  // Calculate Sold Counts & Real Remaining Stock
+  const enrichedProducts = filteredProducts.map(p => {
     let soldCount = 0;
     completedOrders.forEach(ord => {
       (ord.items || []).forEach(item => {
         if (item.id === p.id || (item.name && (item.name === p.nameAr || item.name === p.nameEn))) {
           soldCount += (Number(item.qty) || 1);
         } else if (item.id) {
-          const itemProd = ERP_STATE.products.find(x => x.id === item.id);
+          const itemProd = catalog.find(x => x.id === item.id);
           if (itemProd && itemProd.shared_inventory_product_id === p.id) {
             soldCount += (Number(item.qty) || 1) * (Number(itemProd.unit_multiplier) || 1);
           }
@@ -1518,38 +1839,134 @@ function renderInventoryTable() {
 
     const currentStock = Number(p.stock) || 0;
     const baseStock = currentStock + soldCount;
+    const taxonomy = getProductAcademicTaxonomy(p);
+
+    return {
+      product: p,
+      currentStock,
+      baseStock,
+      soldCount,
+      taxonomy
+    };
+  });
+
+  // Calculate filtered totals
+  const totalFilteredPieces = enrichedProducts.reduce((sum, item) => sum + item.currentStock, 0);
+  const metricBadge = document.getElementById('invFilteredMetricBadge');
+  if (metricBadge) {
+    metricBadge.textContent = `${enrichedProducts.length} صنفاً (${totalFilteredPieces} قطعة متبقية)`;
+  }
+
+  // Empty state handling
+  if (enrichedProducts.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔍</div>
+          <div style="font-weight: 700; color: var(--text-main);">لم يتم العثور على أصناف مطابقة للبحث أو الفلتر المختار</div>
+          <div style="font-size: 0.8rem; margin-top: 4px;">جرب تغيير السنة أو المقرر، أو مسح خانة البحث</div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Helper to render a single product row
+  const renderRow = (item) => {
+    const p = item.product;
+    const tax = item.taxonomy;
     const imgSrc = p.image || resolveProductImage(p);
 
     let statusPill = '<span class="status-pill completed">متوفر</span>';
-    if (currentStock === 0) {
+    if (item.currentStock === 0) {
       statusPill = '<span class="status-pill new">نافد</span>';
-    } else if (currentStock <= 10) {
+    } else if (item.currentStock <= 10) {
       statusPill = '<span class="status-pill preparing">منخفض</span>';
     }
 
     return `
-      <tr>
+      <tr data-subject="${tax.subjectKey}" data-year="${tax.yearKey}">
         <td>
-          <div style="display: flex; align-items: center; gap: 0.65rem;">
-            <img src="${imgSrc}" alt="${p.nameAr}" style="width: 36px; height: 36px; border-radius: var(--radius-sm); object-fit: contain; background: #f8fafc; border: 1px solid rgba(0,0,0,0.06); flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=80&q=80'">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <img src="${imgSrc}" alt="${p.nameAr}" style="width: 38px; height: 38px; border-radius: var(--radius-sm); object-fit: contain; background: #f8fafc; border: 1px solid rgba(0,0,0,0.06); flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=80&q=80'">
             <div>
-              <div style="font-weight: 700; color: var(--text-main); line-height: 1.3;">${p.nameAr}</div>
-              <div style="font-size: 0.725rem; color: var(--text-muted);">${p.nameEn !== p.nameAr ? p.nameEn : (p.category || '')}</div>
+              <div style="font-weight: 700; color: var(--text-main); line-height: 1.35;">${p.nameAr}</div>
+              <div style="font-size: 0.725rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                <span>${p.nameEn && p.nameEn !== p.nameAr ? p.nameEn : (p.category || '')}</span>
+                <span class="inv-item-subject-tag ${tax.tagClass}" title="${tax.yearNameAr} > ${tax.subjectNameAr}">
+                  ${tax.subjectIcon} ${tax.subjectShortName}
+                </span>
+              </div>
             </div>
           </div>
         </td>
-        <td class="num-mono" style="font-size: 0.775rem; color: var(--text-muted);">${p.sku || '-'}</td>
-        <td class="num-mono" style="text-align: center; font-weight: 600; color: var(--text-body);">${baseStock}</td>
-        <td class="num-mono" style="text-align: center; font-weight: 700; color: ${soldCount > 0 ? '#16a34a' : 'var(--text-muted)'};">${soldCount}</td>
-        <td class="num-mono" style="text-align: center; font-weight: 800; font-size: 0.95rem; color: ${currentStock <= 5 ? '#dc2626' : 'var(--text-main)'};">${currentStock} قطعة</td>
+        <td class="num-mono" style="font-size: 0.775rem; color: var(--text-muted); font-weight: 600;">${p.sku || '-'}</td>
+        <td class="num-mono" style="text-align: center; font-weight: 600; color: var(--text-body);">${item.baseStock}</td>
+        <td class="num-mono" style="text-align: center; font-weight: 700; color: ${item.soldCount > 0 ? '#16a34a' : 'var(--text-muted)'};">${item.soldCount}</td>
+        <td class="num-mono" style="text-align: center; font-weight: 800; font-size: 0.95rem; color: ${item.currentStock <= 5 ? '#dc2626' : 'var(--text-main)'};">${item.currentStock} قطعة</td>
         <td style="text-align: center;">${statusPill}</td>
         <td style="text-align: center;">
           <button class="btn-secondary btn-sm" onclick="openEditProductModal('${p.id}')">تعديل المخزون</button>
         </td>
       </tr>
     `;
-  }).join('');
+  };
 
+  // Rendering Mode 1: Grouped by Subject & Academic Year
+  if (INVENTORY_GROUPED_MODE && CURRENT_INVENTORY_SUBJECT === 'all') {
+    // Group by Subject
+    const groupsMap = {};
+    enrichedProducts.forEach(item => {
+      const sKey = item.taxonomy.subjectKey;
+      if (!groupsMap[sKey]) {
+        groupsMap[sKey] = {
+          taxonomy: item.taxonomy,
+          items: []
+        };
+      }
+      groupsMap[sKey].items.push(item);
+    });
+
+    // Sort groups in academic curriculum order
+    const sortedGroups = Object.values(groupsMap).sort((a, b) => a.taxonomy.orderIndex - b.taxonomy.orderIndex);
+
+    let fullHtml = '';
+    sortedGroups.forEach(group => {
+      const tax = group.taxonomy;
+      const groupTotalPieces = group.items.reduce((s, it) => s + it.currentStock, 0);
+      const groupSoldCount = group.items.reduce((s, it) => s + it.soldCount, 0);
+
+      fullHtml += `
+        <tr class="inv-group-header-row">
+          <td colspan="7" class="inv-group-header-cell">
+            <div class="inv-group-header-content">
+              <div class="inv-group-title-wrap">
+                <span class="inv-group-icon">${tax.subjectIcon}</span>
+                <span class="inv-group-title">${tax.subjectNameAr}</span>
+                <span class="inv-group-year-tag ${tax.yearTagClass}">${tax.yearIcon} ${tax.yearNameAr}</span>
+              </div>
+              <div class="inv-group-meta-stats">
+                <span class="inv-group-stat-pill">📋 ${group.items.length} أصناف</span>
+                <span class="inv-group-stat-pill" style="color: var(--primary);">📦 ${groupTotalPieces} قطعة متوفرة</span>
+                ${groupSoldCount > 0 ? `<span class="inv-group-stat-pill" style="color: #16a34a;">✓ ${groupSoldCount} بيعت</span>` : ''}
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+
+      group.items.forEach(it => {
+        fullHtml += renderRow(it);
+      });
+    });
+
+    tbody.innerHTML = fullHtml;
+  } else {
+    // Rendering Mode 2: Flat List
+    tbody.innerHTML = enrichedProducts.map(renderRow).join('');
+  }
+
+  // Update Top KPI Cards
   const m = calculateRealMetrics();
   const invScrTotal = document.getElementById('invScreenTotalPieces');
   if (invScrTotal) invScrTotal.textContent = `${m.totalStock} قطعة`;
