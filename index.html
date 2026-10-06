@@ -476,7 +476,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
               </div>
             </div>
-            <div class="kpi-value num-mono" id="invTotalPiecesKpi">0</div>
+            <div class="kpi-value num-mono" id="invScreenTotalPieces">0 قطعة</div>
           </div>
 
           <div class="kpi-card">
@@ -486,7 +486,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               </div>
             </div>
-            <div class="kpi-value num-mono" id="invLowStockKpi" style="color: var(--status-warning);">0</div>
+            <div class="kpi-value num-mono" id="invScreenLowCount" style="color: var(--status-warning);">0 أصناف</div>
           </div>
 
           <div class="kpi-card">
@@ -496,33 +496,43 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
               </div>
             </div>
-            <div class="kpi-value num-mono" id="invOutStockKpi" style="color: var(--status-danger);">39</div>
+            <div class="kpi-value num-mono" id="invScreenOutCount" style="color: var(--status-danger);">0 صنف</div>
           </div>
+        </div>
+
+        <!-- Academic Classification Tabs (Year 1 / Year 2 / All) -->
+        <div class="inv-year-tabs-nav" id="invYearFilterTabs">
+          <button type="button" class="inv-year-tab active" data-year="all" onclick="filterInventoryByYear('all', this)">
+            <span class="tab-label">📦 جميع الأصناف</span>
+            <span class="tab-count-badge" id="invYearCountAll">29</span>
+          </button>
+          <button type="button" class="inv-year-tab" data-year="year1" onclick="filterInventoryByYear('year1', this)">
+            <span class="tab-label">🎓 أدوات سنة أولى</span>
+            <span class="tab-count-badge" id="invYearCountY1">10</span>
+          </button>
+          <button type="button" class="inv-year-tab" data-year="year2" onclick="filterInventoryByYear('year2', this)">
+            <span class="tab-label">🦷 أدوات سنة ثانية</span>
+            <span class="tab-count-badge" id="invYearCountY2">19</span>
+          </button>
+        </div>
+
+        <!-- Dynamic Subject Filter Chips (تشريح أسنان، مواد أسنان، علاج تحفظي، استعاضة...) -->
+        <div class="inv-subject-chips-bar" id="invSubjectChipsContainer">
+          <!-- Dynamically populated by renderInventorySubjectChips() -->
         </div>
 
         <div class="erp-table-card">
           <div class="table-controls-bar">
-            <div style="flex: 1; max-width: 320px;">
-              <input type="text" id="inventorySearchInput" class="form-input-clean" placeholder="ابحث عن منتج..." oninput="handleInventorySearch(this.value)" style="width: 100%;">
+            <div style="flex: 1; max-width: 360px;">
+              <input type="text" id="inventorySearchInput" class="form-input-clean" placeholder="ابحث باسم المنتج، الكود SKU، المادة..." oninput="handleInventorySearch(this.value)" style="width: 100%;">
             </div>
 
-            <div class="table-filters-group">
-              <select id="inventoryCategoryFilter" class="form-select-clean" onchange="filterInventoryTable()">
-                <option value="all">كل الفئات</option>
-                <option value="restorative-dentistry">علاج تحفظي</option>
-                <option value="dental-anatomy">تشريح أسنان</option>
-                <option value="dental-materials">مواد طب أسنان</option>
-                <option value="fixed-prosthodontics">صناعة أسنان ثابتة</option>
-                <option value="removable-prosthodontics">صناعة أسنان متحركة</option>
-                <option value="general">مستلزمات عامة</option>
-              </select>
-
-              <select id="inventoryStatusFilter" class="form-select-clean" onchange="filterInventoryTable()">
-                <option value="all">كل الحالات</option>
-                <option value="available">متوفر</option>
-                <option value="low">منخفض</option>
-                <option value="out">نافد</option>
-              </select>
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-inline-start: auto; flex-wrap: wrap;">
+              <span id="invFilteredMetricBadge" class="inv-metric-badge">29 صنفاً</span>
+              <button type="button" id="btnToggleInventoryGrouping" class="btn-outline btn-sm" onclick="toggleInventoryGrouping()" title="تبديل طريقة العرض">
+                <span id="groupingToggleIcon">🗂️</span>
+                <span id="groupingToggleText">عرض مقسم حسب المواد</span>
+              </button>
             </div>
           </div>
 
@@ -530,12 +540,12 @@
             <table class="erp-table">
               <thead>
                 <tr>
-                  <th>المنتج</th>
+                  <th style="min-width: 240px;">المنتج والمادة</th>
                   <th>SKU</th>
-                  <th>الرصيد</th>
-                  <th>الحد الأدنى</th>
-                  <th>الحالة</th>
-                  <th>آخر حركة</th>
+                  <th style="text-align: center;">الرصيد الأصلي</th>
+                  <th style="text-align: center;">المبيعات</th>
+                  <th style="text-align: center;">المتبقي بالمخزن</th>
+                  <th style="text-align: center;">الحالة</th>
                   <th style="text-align: center;">الإجراء</th>
                 </tr>
               </thead>
@@ -547,8 +557,8 @@
               <div class="empty-state-icon-circle">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
               </div>
-              <div class="empty-state-title">لا يوجد مخزون بعد</div>
-              <div class="empty-state-subtitle">سيتم عرض المنتجات هنا بعد إضافة المخزون</div>
+              <div class="empty-state-title">لا يوجد مخزون مطابق</div>
+              <div class="empty-state-subtitle">جرب تغيير فلتر السنة أو المادة أو مسح كلمة البحث</div>
             </div>
           </div>
         </div>
