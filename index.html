@@ -7,10 +7,10 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Absolute Dental — Operations ERP</title>
-  <link rel="stylesheet" href="styles.css?v=20261002-v6">
+  <link rel="stylesheet" href="styles.css?v=20261007-v1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- html2canvas and jsPDF for identical storefront PDF invoice exports -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -18,13 +18,13 @@
 <body>
 
 <!-- =========================================================
-     SECURE USER SELECTION MODAL (من المستخدم؟)
+     USER SELECTION MODAL (من المستخدم؟)
      ========================================================= -->
 <div id="userSelectOverlay" class="user-select-overlay">
   <div class="user-select-card">
     <div class="user-select-brand-badge">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m14 7 3 3-8.5 8.5-3.5 1 1-3.5Z"/></svg>
-      <span>ABSOLUTE DENTAL OPERATIONS HUB</span>
+      <span>ABSOLUTE DENTAL ERP</span>
     </div>
 
     <h2 class="user-select-title">من المستخدم؟</h2>
@@ -33,7 +33,7 @@
     <div class="user-cards-grid">
       <!-- 1. مؤمن -->
       <button type="button" class="user-select-card-btn" onclick="loginAsUser('مؤمن')" title="الدخول بحساب مؤمن (اضغط 1)">
-        <div class="user-btn-avatar momen">مؤمن</div>
+        <div class="user-btn-avatar momen">م</div>
         <div class="user-btn-name">مؤمن</div>
         <div class="user-btn-role">المشتريات والمخزون</div>
         <span class="user-btn-kbd">مفتاح 1</span>
@@ -41,7 +41,7 @@
 
       <!-- 2. طه -->
       <button type="button" class="user-select-card-btn" onclick="loginAsUser('طه')" title="الدخول بحساب طه (اضغط 2)">
-        <div class="user-btn-avatar taha">طه</div>
+        <div class="user-btn-avatar taha">ط</div>
         <div class="user-btn-name">طه</div>
         <div class="user-btn-role">العمليات والمبيعات</div>
         <span class="user-btn-kbd">مفتاح 2</span>
@@ -49,7 +49,7 @@
 
       <!-- 3. ياسي -->
       <button type="button" class="user-select-card-btn" onclick="loginAsUser('ياسي')" title="الدخول بحساب ياسي (اضغط 3)">
-        <div class="user-btn-avatar yasi">ياسي</div>
+        <div class="user-btn-avatar yasi">ي</div>
         <div class="user-btn-name">ياسي</div>
         <div class="user-btn-role">المالية والتوصيل</div>
         <span class="user-btn-kbd">مفتاح 3</span>
@@ -58,60 +58,47 @@
   </div>
 </div>
 
-<div class="app-container">
+<div class="app-container" id="appMainContainer">
 
   <!-- =========================================================
-       1. RIGHT SIDEBAR (Midnight Navy — Clean Minimalist)
+       SIDEBAR (Midnight Navy — Clean Minimalist RTL)
        ========================================================= -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="appSidebar">
     <!-- Brand Header -->
     <div class="sidebar-header">
       <a href="#" class="brand-badge" onclick="navigateToScreen('dashboard'); return false;">
         <div class="brand-logo-icon">
-          <!-- Pristine White Tooth Silhouette SVG -->
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <!-- Tooth Silhouette SVG -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C8.69 2 6 4.69 6 8c0 2.21.89 4.21 2.34 5.66.66.66 1.07 1.55 1.16 2.48l.5 5.86c.07.82.76 1.45 1.58 1.45.69 0 1.28-.44 1.48-1.09l1.19-3.96c.15-.49.6-.84 1.12-.84.51 0 .97.35 1.12.84l1.19 3.96c.2.65.79 1.09 1.48 1.09.82 0 1.51-.63 1.58-1.45l.5-5.86c.09-.93.5-1.82 1.16-2.48C21.11 12.21 22 10.21 22 8c0-3.31-2.69-6-6-6h-4z"/>
           </svg>
         </div>
         <div class="brand-titles">
           <span class="brand-name">ABSOLUTE DENTAL</span>
-          <span class="brand-sub">Operations ERP</span>
+          <span class="brand-sub">ERP</span>
         </div>
       </a>
-      <button type="button" class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="إغلاق القائمة">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
+      <button type="button" class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="إغلاق القائمة">✕</button>
     </div>
 
-    <!-- Navigation List (Intentionally Short & Clean) -->
+    <!-- Navigation List (11 Clean Core Items) -->
     <nav class="sidebar-nav">
-      <!-- 1. لوحة التحكم -->
+      <!-- 1. الرئيسية -->
       <a class="nav-item active" data-screen="dashboard" onclick="navigateToScreen('dashboard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>لوحة التحكم</span>
+        <span>الرئيسية</span>
       </a>
 
       <!-- 2. الطلبات -->
-      <div class="nav-item-expandable">
-        <a class="nav-item" data-screen="orders" onclick="toggleSubmenu('ordersSubmenu', event)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>
-          <span>الطلبات</span>
-          <span class="nav-badge" id="sideNavOrdersCount">3</span>
-          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
-        </a>
-        <div class="nav-submenu" id="ordersSubmenu">
-          <a class="submenu-item" onclick="navigateToScreen('orders')">كافة الطلبات</a>
-          <a class="submenu-item" onclick="navigateToScreen('newOrder')">+ طلب جديد وفاتورة (POS)</a>
-        </div>
-      </div>
+      <a class="nav-item" data-screen="orders" onclick="navigateToScreen('orders')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>
+        <span>الطلبات</span>
+      </a>
 
-      <!-- 3. طلب جديد (POS) Direct Link -->
-      <a class="nav-item" data-screen="newOrder" onclick="navigateToScreen('newOrder')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-        <span>طلب جديد + فاتورة</span>
+      <!-- 3. نقطة البيع POS -->
+      <a class="nav-item" data-screen="pos" onclick="navigateToScreen('pos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+        <span>نقطة البيع POS</span>
       </a>
 
       <!-- 4. المنتجات -->
@@ -126,147 +113,101 @@
         <span>المخزون</span>
       </a>
 
-      <!-- 6. المالية -->
-      <div class="nav-item-expandable">
-        <a class="nav-item" data-screen="finance" onclick="toggleSubmenu('financeSubmenu', event)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          <span>المالية</span>
-          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
-        </a>
-        <div class="nav-submenu" id="financeSubmenu">
-          <a class="submenu-item" onclick="navigateToScreen('finance', 'sales')">المبيعات</a>
-          <a class="submenu-item" onclick="navigateToScreen('finance', 'expenses')">المصروفات</a>
-          <a class="submenu-item" onclick="navigateToScreen('finance', 'profit')">الأرباح</a>
-          <a class="submenu-item" onclick="navigateToScreen('finance', 'purchases')">فواتير التوريد (16)</a>
-        </div>
-      </div>
+      <!-- 6. المشتريات -->
+      <a class="nav-item" data-screen="purchases" onclick="navigateToScreen('purchases')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>المشتريات</span>
+      </a>
 
-      <!-- 7. العملاء -->
+      <!-- 7. المبيعات -->
+      <a class="nav-item" data-screen="sales" onclick="navigateToScreen('sales')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        <span>المبيعات</span>
+      </a>
+
+      <!-- 8. المصروفات -->
+      <a class="nav-item" data-screen="expenses" onclick="navigateToScreen('expenses')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span>المصروفات</span>
+      </a>
+
+      <!-- 9. العملاء -->
       <a class="nav-item" data-screen="partners" onclick="navigateToScreen('partners')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span>العملاء</span>
       </a>
 
-      <!-- 8. التقارير -->
+      <!-- 10. التقارير -->
       <a class="nav-item" data-screen="reports" onclick="navigateToScreen('reports')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         <span>التقارير</span>
       </a>
 
-      <!-- 9. سجل العمليات -->
+      <!-- 11. سجل العمليات -->
       <a class="nav-item" data-screen="audit" onclick="navigateToScreen('audit')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
         <span>سجل العمليات</span>
       </a>
-
-      <!-- 10. الإعدادات -->
-      <a class="nav-item" data-screen="settings" onclick="navigateToScreen('settings')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>الإعدادات</span>
-      </a>
     </nav>
 
-    <!-- Sidebar Footer (User Info & Logout) -->
+    <!-- Sidebar Footer -->
     <div class="sidebar-footer">
-      <div class="user-profile-row" onclick="navigateToScreen('partners')">
-        <div class="user-avatar-badge" id="sideUserAvatar">طه</div>
+      <div class="user-profile-row" onclick="switchUserPrompt()">
+        <div class="user-avatar-badge" id="sideUserAvatar">ط</div>
         <div class="user-details">
           <span class="user-name-title" id="sideUserName">طه</span>
-          <span class="user-role-label">شريك مؤسس</span>
+          <span class="user-role-label">مدير العمليات</span>
         </div>
-        <button class="user-settings-btn" title="الإعدادات" onclick="navigateToScreen('settings'); event.stopPropagation();">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
       </div>
-
-      <div class="logout-row" onclick="logoutCurrentUser()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        <span>تسجيل الخروج</span>
-      </div>
-      <div style="padding: 0.5rem 1rem 0.25rem; font-size: 0.65rem; color: var(--brand-gold); opacity: 0.85; text-align: center; border-top: 1px solid var(--sidebar-border); letter-spacing: 0.02em;">
-        <span>v3.2 • هوية Absolute Dental الرسمية</span>
-      </div>
+      <button type="button" class="sidebar-collapse-toggle-btn" onclick="toggleSidebarCollapse()" title="تصغير / توسيع القائمة">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>تصغير القائمة</span>
+      </button>
     </div>
   </aside>
-  <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
   <!-- =========================================================
-       2. MAIN CONTENT WRAPPER
+       MAIN WRAPPER & TOP HEADER
        ========================================================= -->
   <div class="main-wrapper">
 
     <!-- Top Sticky Header -->
     <header class="top-header">
       <div class="header-right">
-        <!-- Mobile Sidebar Hamburger Toggle -->
-        <button type="button" class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="فتح القائمة">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <button type="button" class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" title="تبديل عرض القائمة">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
 
-        <!-- Global Search Field (Desktop) -->
         <div class="search-container" onclick="openCommandPalette()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <input type="text" class="search-input" placeholder="ابحث عن طلب، منتج، عميل..." readonly>
+          <input type="text" class="search-input" placeholder="البحث في المنتجات، الطلبات، العملاء..." readonly>
           <span class="search-kbd">Ctrl K</span>
         </div>
       </div>
 
-      <!-- Mobile Brand Link (Compact: Absolute Dental logo & name) -->
-      <a href="#" class="mobile-brand-link" onclick="navigateToScreen('dashboard'); return false;">
-        <div class="brand-logo-icon mobile-brand-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C8.69 2 6 4.69 6 8c0 2.21.89 4.21 2.34 5.66.66.66 1.07 1.55 1.16 2.48l.5 5.86c.07.82.76 1.45 1.58 1.45.69 0 1.28-.44 1.48-1.09l1.19-3.96c.15-.49.6-.84 1.12-.84.51 0 .97.35 1.12.84l1.19 3.96c.2.65.79 1.09 1.48 1.09.82 0 1.51-.63 1.58-1.45l.5-5.86c.09-.93.5-1.82 1.16-2.48C21.11 12.21 22 10.21 22 8c0-3.31-2.69-6-6-6h-4z"/>
-          </svg>
-        </div>
-        <span class="mobile-brand-text">ABSOLUTE DENTAL</span>
-      </a>
-
       <div class="header-left">
-        <!-- New Order Header Quick Button -->
-        <button class="btn-primary btn-sm" onclick="navigateToScreen('newOrder')" style="padding: 0.45rem 0.95rem; font-size: 0.8rem;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span>+ طلب جديد</span>
+        <!-- Notification Bell -->
+        <button type="button" class="header-icon-btn" onclick="showToast('لا توجد تنبيهات جديدة')" title="التنبيهات">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
         </button>
 
-        <!-- Notification Bell -->
-        <div class="header-icon-btn" onclick="showToast('لديك 3 تنبيهات: طلبات جديدة بانتظار التأكيد')" title="التنبيهات">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          <span class="header-badge-count">3</span>
-        </div>
-
-        <!-- Favorites Icon -->
-        <div class="header-icon-btn" onclick="navigateToScreen('products')" title="المنتجات المفضلة">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-        </div>
-
-        <!-- Luxury User Profile Dropdown (Exact Blueprint from Wireframe) -->
-        <div class="header-user-dropdown" onclick="toggleUserDropdown(event)" title="حساب المستخدم النشط">
-          <div class="header-avatar" id="topHeaderAvatar">طه</div>
-          <div class="header-user-info">
+        <!-- Current User Avatar Dropdown -->
+        <div style="position: relative;">
+          <button type="button" class="header-user-btn" onclick="toggleUserDropdown(event)" title="حساب المستخدم النشط">
+            <div class="header-avatar" id="topHeaderAvatar">ط</div>
             <span class="header-user-name" id="topHeaderUserName">طه</span>
-            <span class="header-user-role">مدير العمليات</span>
-          </div>
-          <svg class="header-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
 
-          <!-- User Menu Dropdown -->
           <div id="headerUserMenu" class="user-dropdown-menu">
-            <div class="user-menu-header">
-              <span class="user-menu-title">المستخدم النشط</span>
-              <span class="user-menu-badge">مسؤول معتمد</span>
-            </div>
             <div class="user-menu-item" onclick="switchUserPrompt(); event.stopPropagation();">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               <span>تبديل المستخدم</span>
-            </div>
-            <div class="user-menu-item" onclick="navigateToScreen('partners'); event.stopPropagation();">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <span>حسابات الشركاء</span>
             </div>
             <div class="user-menu-item" onclick="navigateToScreen('settings'); event.stopPropagation();">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
               <span>الإعدادات</span>
             </div>
-            <div class="user-menu-divider"></div>
             <div class="user-menu-item logout" onclick="logoutCurrentUser(); event.stopPropagation();">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               <span>تسجيل الخروج</span>
@@ -280,449 +221,207 @@
     <main class="page-content">
 
       <!-- =======================================================
-           PRIMARY SCREEN: CLEAN MINIMALIST DASHBOARD
+           SCREEN 1: الرئيسية (Dashboard)
            ======================================================= -->
       <section id="dashboardScreen" class="secondary-screen-view active">
-
-        <!-- Page Header Greeting & Action -->
         <div class="page-header">
           <div class="page-header-titles">
-            <h1 class="page-greeting">صباح الخير، <span id="dashGreetingName">طه</span> 👋</h1>
-            <p class="page-subtitle">إليك ملخص أداء Absolute Dental اليوم.</p>
-          </div>
-          <div>
-            <button class="btn-primary" onclick="navigateToScreen('newOrder')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>+ طلب جديد</span>
-            </button>
+            <h1 class="page-title">الرئيسية</h1>
+            <p class="page-subtitle">ملخص عمليات Absolute Dental</p>
           </div>
         </div>
 
-        <!-- 1. FOUR (4) KPI CARDS ONLY -->
+        <!-- 4 Compact KPI Blocks -->
         <div class="kpi-grid">
           <!-- Card 1: إجمالي المبيعات -->
           <div class="kpi-card">
             <div class="kpi-top-row">
-              <div class="kpi-icon-box" style="background: #fef3c7; color: #b45309;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-              </div>
-              <div class="kpi-meta">
-                <div class="kpi-label">إجمالي المبيعات</div>
-                <div class="kpi-value num-mono" id="kpiSalesVal">6,266 <span class="kpi-value-currency">د.ل</span></div>
+              <div class="kpi-label">إجمالي المبيعات</div>
+              <div class="kpi-icon-box purple">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
               </div>
             </div>
-            <div class="kpi-bottom-row">
-              <span class="kpi-badge positive">↑ 18%</span>
-              <span class="kpi-period">مقارنة بالأمس</span>
-            </div>
+            <div class="kpi-value num-mono" id="kpiSalesVal">0 د.ل</div>
+            <div class="kpi-bottom-row">0% هذا الشهر</div>
           </div>
 
           <!-- Card 2: عدد الطلبات -->
           <div class="kpi-card">
             <div class="kpi-top-row">
-              <div class="kpi-icon-box" style="background: #f5ebe6; color: #6e4b3b;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>
-              </div>
-              <div class="kpi-meta">
-                <div class="kpi-label">عدد الطلبات</div>
-                <div class="kpi-value num-mono" id="kpiOrdersVal">28</div>
+              <div class="kpi-label">عدد الطلبات</div>
+              <div class="kpi-icon-box blue">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>
               </div>
             </div>
-            <div class="kpi-bottom-row">
-              <span class="kpi-badge positive">↑ 12%</span>
-              <span class="kpi-period">مقارنة بالأمس</span>
-            </div>
+            <div class="kpi-value num-mono" id="kpiOrdersVal">0</div>
+            <div class="kpi-bottom-row">0% هذا الشهر</div>
           </div>
 
           <!-- Card 3: صافي الربح -->
           <div class="kpi-card">
             <div class="kpi-top-row">
-              <div class="kpi-icon-box" style="background: #dcfce7; color: #16a34a;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-              </div>
-              <div class="kpi-meta">
-                <div class="kpi-label">صافي الربح</div>
-                <div class="kpi-value num-mono" id="kpiProfitVal">749 <span class="kpi-value-currency">د.ل</span></div>
+              <div class="kpi-label">صافي الربح</div>
+              <div class="kpi-icon-box green">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
               </div>
             </div>
-            <div class="kpi-bottom-row">
-              <span class="kpi-badge positive">↑ 20%</span>
-              <span class="kpi-period">مقارنة بالأمس</span>
-            </div>
+            <div class="kpi-value num-mono" id="kpiProfitVal">0 د.ل</div>
+            <div class="kpi-bottom-row">0% هذا الشهر</div>
           </div>
 
           <!-- Card 4: المصروفات -->
           <div class="kpi-card">
             <div class="kpi-top-row">
-              <div class="kpi-icon-box" style="background: #fee2e2; color: #dc2626;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-              </div>
-              <div class="kpi-meta">
-                <div class="kpi-label">المصروفات</div>
-                <div class="kpi-value num-mono" id="kpiExpensesVal">760 <span class="kpi-value-currency">د.ل</span></div>
+              <div class="kpi-label">المصروفات</div>
+              <div class="kpi-icon-box red">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
               </div>
             </div>
-            <div class="kpi-bottom-row">
-              <span class="kpi-badge negative">+ -5%</span>
-              <span class="kpi-period">مقارنة بالأمس</span>
-            </div>
+            <div class="kpi-value num-mono" id="kpiExpensesVal">0 د.ل</div>
+            <div class="kpi-bottom-row">0% هذا الشهر</div>
           </div>
         </div>
 
-        <!-- 2. MAIN 2-COLUMN SECTION: EXACT SCREEN 1 FROM WIREFRAME -->
-        <div class="dashboard-simple-grid">
-
-          <!-- Right Column: الطلبات التي تحتاج إجراء -->
-          <div class="card-container">
+        <!-- Dashboard 2-Column Section -->
+        <div class="dashboard-layout-grid">
+          <!-- Right: قسم المبيعات الأخيرة -->
+          <div class="dashboard-card">
             <div class="card-header-row">
-              <div class="card-title">الطلبات التي تحتاج إجراء</div>
+              <span class="card-title">المبيعات الأخيرة</span>
               <span class="card-link" onclick="navigateToScreen('orders')">عرض الكل ←</span>
             </div>
 
-            <div style="overflow-x: auto;">
-              <table class="simple-dash-table">
+            <div class="table-responsive">
+              <table class="erp-table">
                 <thead>
                   <tr>
-                    <th>#</th>
+                    <th>رقم الطلب</th>
                     <th>العميل</th>
                     <th>المبلغ</th>
                     <th>الحالة</th>
                     <th>التاريخ</th>
-                    <th style="width: 38px; text-align: center;"></th>
                   </tr>
                 </thead>
-                <tbody id="dashboardActionOrdersTableBody">
-                  <!-- Dynamically rendered via JS -->
+                <tbody id="dashboardRecentSalesBody">
+                  <!-- Dynamically rendered or shows empty state -->
                 </tbody>
               </table>
+              <div id="dashboardRecentSalesEmpty" class="erp-empty-state">
+                <div class="empty-state-icon-circle">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>
+                </div>
+                <div class="empty-state-title">لا توجد مبيعات بعد</div>
+                <div class="empty-state-subtitle">ستظهر هنا آخر الطلبات عند تسجيلها</div>
+              </div>
             </div>
           </div>
 
-          <!-- Left Column: المخزون المنخفض -->
-          <div class="card-container">
+          <!-- Left: قسم حالة المخزون -->
+          <div class="dashboard-card">
             <div class="card-header-row">
-              <div class="card-title">المخزون المنخفض</div>
-              <span class="card-link" onclick="navigateToScreen('inventory')">عرض الكل</span>
+              <span class="card-title">حالة المخزون</span>
+              <span class="card-link" onclick="navigateToScreen('inventory')">عرض جميع المنتجات ←</span>
             </div>
 
-            <div class="low-stock-list" id="dashboardLowStockList">
-              <!-- Dynamically rendered via JS with thumbnail, name, SKU, and remaining badge -->
-            </div>
-          </div>
-
-        </div>
-
-      </section>
-
-      <!-- =======================================================
-           SECONDARY SCREEN 1: DEDICATED ORDERS (الطلبات)
-           ======================================================= -->
-      <section id="ordersScreen" class="secondary-screen-view">
-        <div class="page-header">
-          <div class="page-header-titles">
-            <h1 class="page-greeting">الطلبات</h1>
-            <p class="page-subtitle">إدارة جميع الطلبات ومتابعة حالتها</p>
-          </div>
-          <div>
-            <button class="btn-primary" onclick="navigateToScreen('newOrder')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>+ طلب جديد</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="erp-table-card">
-          <!-- Search & Filter Controls (Exact Screen 2) -->
-          <div class="orders-filter-bar">
-            <!-- Filter Pills -->
-            <div class="orders-filter-pills">
-              <button class="order-filter-btn active" onclick="filterOrdersTable('all', this)">
-                الكل <span class="order-filter-count">(<span id="ordersTotalTabCount">0</span>)</span>
-              </button>
-              <button class="order-filter-btn" onclick="filterOrdersTable('new', this)">
-                جديد <span class="order-filter-count">(<span id="ordersNewTabCount">0</span>)</span>
-              </button>
-              <button class="order-filter-btn" onclick="filterOrdersTable('preparing', this)">
-                قيد التجهيز <span class="order-filter-count">(<span id="ordersPrepTabCount">0</span>)</span>
-              </button>
-              <button class="order-filter-btn" onclick="filterOrdersTable('completed', this)">
-                مكتمل <span class="order-filter-count">(<span id="ordersCompTabCount">0</span>)</span>
-              </button>
-              <button class="order-filter-btn" onclick="filterOrdersTable('cancelled', this)">
-                ملغي <span class="order-filter-count">(<span id="ordersCancTabCount">0</span>)</span>
-              </button>
-            </div>
-
-            <!-- Search Field -->
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <input type="text" class="search-input" id="ordersTableSearchInput" placeholder="ابحث عن طلب أو عميل..." oninput="handleOrdersSearch(this.value)" style="background: var(--bg-subtle); padding: 0.45rem 0.95rem; border-radius: var(--radius-pill); border: 1px solid var(--border-card); width: 230px;">
-              <button class="btn-secondary btn-sm" onclick="syncWithUserServer()" title="تحديث السيرفر">🔄</button>
-            </div>
-          </div>
-
-          <!-- Clean Orders Table (Exact Screen 2) -->
-          <div style="overflow-x: auto;">
-            <table class="erp-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>العميل</th>
-                  <th>المنتجات</th>
-                  <th>المبلغ</th>
-                  <th>الحالة</th>
-                  <th>التاريخ</th>
-                  <th style="width: 110px; text-align: center;">إجراء</th>
-                </tr>
-              </thead>
-              <tbody id="fullOrdersTableBody">
-                <!-- Dynamically populated from state -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- =======================================================
-           SECONDARY SCREEN 1.5: NEW ORDER & INVOICE POS (طلب جديد وفاتورة)
-           ======================================================= -->
-      <section id="newOrderScreen" class="secondary-screen-view">
-        <div class="page-header">
-          <div class="page-header-titles">
-            <h1 class="page-greeting">طلب جديد (POS)</h1>
-            <p class="page-subtitle">إضافة طلب جديد وإصدار فاتورة بنفس هوية متجر Absolute Dental الرسمي تماماً.</p>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <div class="locked-user-badge" style="width: auto; padding: 0.4rem 0.85rem;">
-              <span class="user-pulse-dot"></span>
-              <span>المستخدم المسؤول:</span>
-              <strong id="newOrderActiveUserBadge">طه</strong>
-            </div>
-            <div style="background: rgba(0, 168, 150, 0.08); border: 1px solid rgba(0, 168, 150, 0.25); border-radius: var(--radius-md); padding: 0.4rem 0.85rem; font-size: 0.8rem; color: #00a896; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-              <span>الفاتورة القادمة:</span>
-              <strong id="posNextInvoiceNum" class="num-mono">#INV-2026-0019</strong>
-            </div>
-            <button class="btn-secondary" onclick="navigateToScreen('orders')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-              <span>سجل الطلبات</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- NEW ORDER 3-COLUMN WORKFLOW GRID (Exact Match to Screen 3 & Storefront) -->
-        <div class="pos-workspace-3col">
-
-          <!-- 1. RIGHT COLUMN: CUSTOMER DATA (بيانات العميل) -->
-          <div class="pos-col-customer">
-            <div class="erp-card-container pos-step-customer">
-              <div class="card-section-header">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span class="card-section-title">بيانات العميل</span>
+            <div class="inventory-status-list">
+              <div class="inv-status-item">
+                <div class="inv-status-label">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+                  <span>إجمالي المنتجات</span>
                 </div>
+                <span class="inv-status-val num-mono" id="dashTotalProducts">39</span>
               </div>
 
-              <!-- Quick Search / Preset Selection -->
-              <div class="form-group-custom" style="margin-bottom: 0.65rem;">
-                <label class="form-label-custom">بحث سريع أو اختيار مسجل:</label>
-                <select id="posCustomerPresetSelect" class="form-select-custom" onchange="handleCustomerPresetSelect(this.value)">
-                  <option value="new" selected>ابحث عن عميل أو أضف جديد...</option>
-                </select>
-              </div>
-
-              <div class="form-group-custom">
-                <label class="form-label-custom">الاسم الكامل <span style="color:#ef4444;">*</span></label>
-                <input type="text" id="posCustomerName" class="form-input-custom" placeholder="أحمد محمد" required>
-              </div>
-
-              <div class="form-group-custom">
-                <label class="form-label-custom">رقم الهاتف <span style="color:#ef4444;">*</span></label>
-                <input type="tel" id="posCustomerPhone" class="form-input-custom num-mono" placeholder="0912345678" required>
-              </div>
-
-              <div class="form-row-2col">
-                <div class="form-group-custom">
-                  <label class="form-label-custom">الجامعة</label>
-                  <select id="posCustomerUniversity" class="form-select-custom" onchange="handleUniversityChange(this.value)">
-                    <option value="جامعة طرابلس" selected>جامعة طرابلس</option>
-                    <option value="جامعة بنغازي">جامعة بنغازي</option>
-                    <option value="جامعة مصراتة">جامعة مصراتة</option>
-                    <option value="جامعة الزاوية">جامعة الزاوية</option>
-                    <option value="الجامعة الدولية (LIMU)">الجامعة الدولية (LIMU)</option>
-                    <option value="أخرى">أخرى</option>
-                  </select>
+              <div class="inv-status-item">
+                <div class="inv-status-label">
+                  <span class="dot-indicator dot-amber"></span>
+                  <span>منخفض المخزون</span>
                 </div>
-                <div class="form-group-custom">
-                  <label class="form-label-custom">الكلية</label>
-                  <input type="text" id="posCustomerCollege" class="form-input-custom" value="كلية طب الأسنان" placeholder="كلية طب الأسنان">
+                <span class="inv-status-val num-mono" id="dashLowStockCount" style="color: var(--status-warning);">0</span>
+              </div>
+
+              <div class="inv-status-item">
+                <div class="inv-status-label">
+                  <span class="dot-indicator dot-red"></span>
+                  <span>نافد</span>
                 </div>
+                <span class="inv-status-val num-mono" id="dashOutStockCount" style="color: var(--status-danger);">39</span>
               </div>
 
-              <div class="form-group-custom">
-                <label class="form-label-custom">طريقة ومكان الاستلام</label>
-                <select id="posDeliveryType" class="form-select-custom" onchange="handlePosDeliveryTypeChange(this.value)">
-                  <option value="faculty" data-fee="0" selected>استلام مباشر بالكلية (مجاني)</option>
-                  <option value="tripoli_home" data-fee="10">توصيل لطرابلس (+10 د.ل)</option>
-                  <option value="outside_tripoli" data-fee="15">توصيل خارج طرابلس (+15 د.ل)</option>
-                  <option value="store" data-fee="0">استلام من المقر (مجاني)</option>
-                </select>
-              </div>
-
-              <div class="form-group-custom">
-                <label class="form-label-custom">العنوان</label>
-                <input type="text" id="posDeliveryAddress" class="form-input-custom" placeholder="عنوان التوصيل (اختياري)">
-              </div>
-
-              <div class="form-group-custom">
-                <label class="form-label-custom">ملاحظات</label>
-                <textarea id="posOrderNotes" class="form-input-custom" rows="2" placeholder="ملاحظات خاصة بالطلب (اختياري)"></textarea>
+              <div class="inv-status-item">
+                <div class="inv-status-label">
+                  <span class="dot-indicator dot-green"></span>
+                  <span>متوفر</span>
+                </div>
+                <span class="inv-status-val num-mono" id="dashAvailStockCount" style="color: var(--status-success);">0</span>
               </div>
             </div>
           </div>
-
-          <!-- 2. CENTER COLUMN: PRODUCTS CATALOG (المنتجات) -->
-          <div class="pos-col-products">
-            <div class="erp-card-container pos-step-catalog">
-              <div class="card-section-header">
-                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                  <span class="card-section-title">المنتجات</span>
-                  <span class="num-mono" style="font-size: 0.75rem; color: var(--text-muted);" id="posCatalogTotalCount">39 منتج متاح</span>
-                </div>
-              </div>
-
-              <!-- Search Bar -->
-              <div style="position: relative; margin: 0.5rem 0;">
-                <input type="text" id="posCatalogSearchInput" class="form-input-custom pos-storefront-search" placeholder="ابحث عن منتج بالاسم أو الرمز SKU..." oninput="handlePosCatalogSearch(this.value)">
-              </div>
-
-              <!-- Category Filter Chips (Matching Storefront Academic Subjects & Specialties) -->
-              <div class="student-filter-chips pos-category-chips">
-                <button type="button" class="filter-chip active" onclick="filterPosCatalogCategory('all', this)">الكل</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('dental-anatomy', this)">تشريح الأسنان (سنة 1)</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('dental-materials', this)">مواد طب الأسنان (سنة 1)</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('restorative-dentistry', this)">علاج تحفظي / كونس (سنة 2)</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('fixed-prosthodontics', this)">كراون وتعويضات ثابتة (سنة 2)</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('removable-prosthodontics', this)">أطقم متحركة (سنة 2)</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('boxes-bags', this)">شنط وبوكسات</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('diagnostic', this)">أدوات فحص وكشافات</button>
-                <button type="button" class="filter-chip" onclick="filterPosCatalogCategory('scrubs', this)">ملابس طبية</button>
-              </div>
-
-              <!-- Product Cards Grid (Storefront Cards 1:1 Aspect Ratio) -->
-              <div class="pos-storefront-products-grid" id="posProductsCatalogGrid">
-                <!-- Dynamically rendered with exact ProductCard.jsx design tokens -->
-              </div>
-            </div>
-          </div>
-
-          <!-- 3. LEFT COLUMN: ORDER CART & SUMMARY (سلة الطلب) -->
-          <div class="pos-col-cart">
-            <div class="erp-card-container pos-step-cart">
-              <div class="card-section-header">
-                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                  <span class="card-section-title">سلة الطلب (<span id="posCartItemsCount">0</span>)</span>
-                  <button type="button" class="text-btn-danger" onclick="clearPosCartAndReset()" style="font-size: 0.75rem;">تفريغ</button>
-                </div>
-              </div>
-
-              <!-- Cart Line Items -->
-              <div id="posCartItemsContainer" class="pos-cart-list">
-                <!-- Items or Empty State -->
-              </div>
-
-              <!-- Native Storefront Discount Control (الخصم) -->
-              <div class="pos-storefront-discount-block">
-                <div class="pos-discount-header-row">
-                  <span class="pos-discount-title">الخصم</span>
-                  <label class="discount-inline-toggle">
-                    <input type="checkbox" id="posDiscountEnabled" onchange="togglePosDiscount(this.checked)">
-                    <span class="disc-toggle-txt">تطبيق الخصم</span>
-                  </label>
-                </div>
-
-                <div id="posDiscountControlsWrap" class="pos-discount-controls" style="display: none;">
-                  <div class="pos-discount-tabs">
-                    <button type="button" class="pos-disc-tab-btn active" id="btnDiscountFixed" onclick="setPosDiscountType('fixed')">
-                      مبلغ ثابت
-                    </button>
-                    <button type="button" class="pos-disc-tab-btn" id="btnDiscountPercent" onclick="setPosDiscountType('percent')">
-                      نسبة مئوية
-                    </button>
-                  </div>
-                  <div class="pos-discount-input-row" style="margin-top: 0.5rem;">
-                    <input type="number" id="posDiscountValue" class="form-input-custom num-mono" min="0" step="1" value="0" placeholder="0" oninput="calculatePosTotals()">
-                    <span class="pos-discount-unit" id="posDiscountUnitDisplay">د.ل</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Totals Breakdown -->
-              <div class="pos-totals-summary-block">
-                <div class="pos-summary-line">
-                  <span>المجموع الفرعي</span>
-                  <span class="num-mono" id="posSubtotalDisplay">0 د.ل</span>
-                </div>
-                <div class="pos-summary-line discount" id="posDiscountLineItem" style="display: none;">
-                  <span>الخصم</span>
-                  <span class="num-mono" id="posDiscountTotalDisplay" style="color: #ef4444;">-0 د.ل</span>
-                </div>
-                <div class="pos-summary-line">
-                  <span>التوصيل</span>
-                  <span class="num-mono" id="posShippingDisplay" style="color: #00a896;">مجاني</span>
-                </div>
-                <div class="pos-summary-total-row">
-                  <span>الإجمالي</span>
-                  <span class="num-mono" id="posNetTotalDisplay">0 د.ل</span>
-                </div>
-              </div>
-
-              <!-- Submit Button (Exact Storefront Solid Brown #684835) -->
-              <button type="button" class="btn-storefront-submit" id="btnSubmitPosOrder" onclick="submitNewOrderWithInvoice()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
-                <span>اعتماد الطلب وإصدار الفاتورة</span>
-              </button>
-
-            </div>
-          </div>
-
         </div>
       </section>
 
 
       <!-- =======================================================
-           SECONDARY SCREEN 2: DEDICATED PRODUCTS (المنتجات)
+           SCREEN 2: المنتجات (Products)
            ======================================================= -->
       <section id="productsScreen" class="secondary-screen-view">
         <div class="page-header">
           <div class="page-header-titles">
-            <h1 class="page-greeting">كتالوج المنتجات والتسعير</h1>
-            <p class="page-subtitle">28 صنفاً من أدوات ومستلزمات طب الأسنان متصلة بالسيرفر.</p>
+            <h1 class="page-title">المنتجات</h1>
+            <p class="page-subtitle">إدارة الكتالوج، الأسعار، والمخزون</p>
           </div>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn-primary" onclick="openAddProductModal()">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-              <span>+ إضافة صنف جديد</span>
+          <div>
+            <button type="button" class="btn-primary" onclick="openAddProductModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>+ إضافة منتج</span>
             </button>
-            <button class="btn-secondary" onclick="syncWithUserServer()">🔄 تحديث من السيرفر</button>
           </div>
         </div>
 
         <div class="erp-table-card">
+          <!-- Filter & Search Controls -->
           <div class="table-controls-bar">
-            <div style="display: flex; gap: 8px;">
-              <input type="text" class="search-input" id="productsTableSearchInput" placeholder="بحث باسم الأداة..." oninput="handleProductsSearch(this.value)" style="background: var(--bg-subtle); padding: 0.4rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-card); width: 240px;">
+            <div style="flex: 1; max-width: 320px;">
+              <input type="text" id="productsSearchInput" class="form-input-clean" placeholder="ابحث عن منتج بالاسم أو SKU..." oninput="handleProductsSearch(this.value)" style="width: 100%;">
             </div>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">إجمالي الأصناف: <strong id="productsTotalCount" style="color: var(--text-main);">39</strong> صنف</span>
+
+            <div class="table-filters-group">
+              <select id="productsCategoryFilter" class="form-select-clean" onchange="filterProductsTable()">
+                <option value="all">كل الفئات</option>
+                <option value="restorative-dentistry">علاج الأسنان التحفظي</option>
+                <option value="dental-anatomy">تشريح الأسنان</option>
+                <option value="dental-materials">مواد طب الأسنان</option>
+                <option value="fixed-prosthodontics">صناعة الأسنان الثابتة</option>
+                <option value="removable-prosthodontics">صناعة الأسنان المتحركة</option>
+                <option value="general">شنط ومستلزمات عامة</option>
+              </select>
+
+              <select id="productsYearFilter" class="form-select-clean" onchange="filterProductsTable()">
+                <option value="all">كل السنوات</option>
+                <option value="year1">سنة أولى</option>
+                <option value="year2">سنة ثانية</option>
+                <option value="general">عام</option>
+              </select>
+
+              <select id="productsStatusFilter" class="form-select-clean" onchange="filterProductsTable()">
+                <option value="all">كل الحالات</option>
+                <option value="available">متوفر</option>
+                <option value="low">منخفض</option>
+                <option value="out">نافد</option>
+              </select>
+            </div>
           </div>
 
-          <div style="overflow-x: auto;">
+          <div class="table-responsive">
             <table class="erp-table">
               <thead>
                 <tr>
-                  <th>الأداة / الصنف</th>
-                  <th>الرمز (SKU)</th>
+                  <th>المنتج</th>
+                  <th>SKU</th>
                   <th>الفئة</th>
                   <th>سعر التكلفة</th>
-                  <th>سعر البيع</th>
-                  <th>هامش الربح</th>
+                  <th>سعر الجملة</th>
+                  <th>سعر القطاعي</th>
                   <th>المخزون</th>
                   <th>الحالة</th>
                   <th style="text-align: center;">الإجراءات</th>
@@ -733,578 +432,594 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Pagination Bar -->
+          <div class="table-pagination-bar">
+            <div class="pagination-controls">
+              <button type="button" class="pagination-btn" id="btnPrevPage" onclick="changeProductsPage(-1)">‹</button>
+              <button type="button" class="pagination-btn active" id="currentPageNum">1</button>
+              <button type="button" class="pagination-btn" id="btnNextPage" onclick="changeProductsPage(1)">›</button>
+            </div>
+            <span id="productsPaginationInfo">عرض 1 - 10 من 39 منتج</span>
+          </div>
         </div>
       </section>
 
 
       <!-- =======================================================
-           SECONDARY SCREEN 3: DEDICATED INVENTORY (المخزون)
+           SCREEN 3: المخزون (Inventory)
            ======================================================= -->
       <section id="inventoryScreen" class="secondary-screen-view">
         <div class="page-header">
           <div class="page-header-titles">
-            <h1 class="page-greeting">إدارة المخزون والتسوية والطلبات</h1>
-            <p class="page-subtitle">ربط حركات المخزون بالطلبات المكتملة فعلياً والفواتير مع منع الخصم المكرر.</p>
-          </div>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn-secondary" onclick="showToast('تم إرسال طلب تزويد النواقص للموردين المعتمدين')">طلب تزويد النواقص</button>
-            <button class="btn-primary" onclick="runAutomaticInventoryReconciliation()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-              <span>تسوية المخزون والطلبات ⚡</span>
-            </button>
+            <h1 class="page-title">المخزون</h1>
+            <p class="page-subtitle">متابعة أرصدة الأصناف، الحدود الدنيا وحركات التوريد</p>
           </div>
         </div>
 
-        <div class="kpi-grid kpi-grid-3">
+        <!-- 4 Summary Blocks -->
+        <div class="kpi-grid">
           <div class="kpi-card">
-            <div class="kpi-label">إجمالي المخزون المتاح</div>
-            <div class="kpi-value num-mono" id="invScreenTotalPieces" style="color: var(--status-success);">910 قطعة</div>
-            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">متوفرة في مخزن طرابلس عبر 39 صنفاً</span>
+            <div class="kpi-top-row">
+              <div class="kpi-label">قيمة المخزون</div>
+              <div class="kpi-icon-box purple">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value num-mono" id="invValueKpi">0 د.ل</div>
           </div>
+
           <div class="kpi-card">
-            <div class="kpi-label">منتجات منخفضة المخزون</div>
-            <div class="kpi-value num-mono" id="invScreenLowCount" style="color: var(--status-warning);">2 أصناف</div>
-            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Fissure Bur SF 46، أدوات محددة</span>
+            <div class="kpi-top-row">
+              <div class="kpi-label">إجمالي القطع</div>
+              <div class="kpi-icon-box blue">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value num-mono" id="invTotalPiecesKpi">0</div>
           </div>
+
           <div class="kpi-card">
-            <div class="kpi-label">أصناف نافدة بالكامل</div>
-            <div class="kpi-value num-mono" id="invScreenOutCount" style="color: var(--status-danger);">4 أصناف</div>
-            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Round bur BR 49، Baseplates، Wax sheet، Spatula</span>
+            <div class="kpi-top-row">
+              <div class="kpi-label">منخفض المخزون</div>
+              <div class="kpi-icon-box amber">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value num-mono" id="invLowStockKpi" style="color: var(--status-warning);">0</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top-row">
+              <div class="kpi-label">نافد</div>
+              <div class="kpi-icon-box red">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value num-mono" id="invOutStockKpi" style="color: var(--status-danger);">39</div>
           </div>
         </div>
 
-        <!-- Inventory Sub-Navigation View Switcher Tabs -->
-        <div class="table-filter-tabs" style="margin-bottom: 1rem;">
-          <button class="table-filter-tab active" id="invSubTabStock" onclick="switchInventorySubView('stock', this)">
-            <span>مستويات المخزون (39 صنفاً)</span>
-          </button>
-          <button class="table-filter-tab" id="invSubTabRecon" onclick="switchInventorySubView('recon', this)">
-            <span>تسوية ومزامنة الطلبات والمخزون (Order ➔ Invoice ➔ Ledger)</span>
-            <span class="filter-count-badge" id="invReconPendingBadge" style="background: #eab308; color: #000; display: none;">0</span>
-          </button>
-        </div>
-
-        <!-- VIEW 1: DEDICATED STOCK LEVELS TABLE (SCREEN 9) -->
-        <div id="inventoryStockCard" class="erp-table-card">
+        <div class="erp-table-card">
           <div class="table-controls-bar">
-            <div>
-              <div class="card-title">مستويات المخزون الحقيقي — تصنيف أكاديمي للمواد</div>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">الأرقام مطابقة حسابياً بعد خصم الطلبات المكتملة فقط • مقسمة حسب السنوات والمقررات الدراسية</span>
+            <div style="flex: 1; max-width: 320px;">
+              <input type="text" id="inventorySearchInput" class="form-input-clean" placeholder="ابحث عن منتج..." oninput="handleInventorySearch(this.value)" style="width: 100%;">
             </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-              <button class="btn-outline btn-sm" id="btnToggleInventoryGrouping" onclick="toggleInventoryGrouping()" title="تبديل طريقة العرض">
-                <span id="groupingToggleIcon">🗂️</span> <span id="groupingToggleText">عرض مقسم حسب المواد</span>
-              </button>
-              <button class="btn-secondary btn-sm" onclick="switchInventorySubView('recon', document.getElementById('invSubTabRecon'))">عرض سجل التدقيق والتسوية 🔍</button>
+
+            <div class="table-filters-group">
+              <select id="inventoryCategoryFilter" class="form-select-clean" onchange="filterInventoryTable()">
+                <option value="all">كل الفئات</option>
+                <option value="restorative-dentistry">علاج تحفظي</option>
+                <option value="dental-anatomy">تشريح أسنان</option>
+                <option value="dental-materials">مواد طب أسنان</option>
+                <option value="fixed-prosthodontics">صناعة أسنان ثابتة</option>
+                <option value="removable-prosthodontics">صناعة أسنان متحركة</option>
+                <option value="general">مستلزمات عامة</option>
+              </select>
+
+              <select id="inventoryStatusFilter" class="form-select-clean" onchange="filterInventoryTable()">
+                <option value="all">كل الحالات</option>
+                <option value="available">متوفر</option>
+                <option value="low">منخفض</option>
+                <option value="out">نافد</option>
+              </select>
             </div>
           </div>
 
-          <!-- Academic Year & Subject Division Filter Bar -->
-          <div class="inv-taxonomy-filter-wrapper">
-            <!-- Level 1: Academic Year Filter Tabs -->
-            <div class="inv-year-tabs" id="invYearFilterTabs">
-              <button class="inv-year-tab active" data-year="all" onclick="filterInventoryByYear('all', this)">
-                <span class="tab-label">جميع المخزون</span>
-                <span class="inv-tab-count" id="invYearCountAll">39</span>
-              </button>
-              <button class="inv-year-tab" data-year="year1" onclick="filterInventoryByYear('year1', this)">
-                <span class="tab-icon">🎓</span>
-                <span class="tab-label">أدوات سنة أولى</span>
-                <span class="inv-tab-count" id="invYearCountY1">10</span>
-              </button>
-              <button class="inv-year-tab" data-year="year2" onclick="filterInventoryByYear('year2', this)">
-                <span class="tab-icon">🦷</span>
-                <span class="tab-label">أدوات سنة ثانية</span>
-                <span class="inv-tab-count" id="invYearCountY2">20</span>
-              </button>
-              <button class="inv-year-tab" data-year="general" onclick="filterInventoryByYear('general', this)">
-                <span class="tab-icon">🎒</span>
-                <span class="tab-label">مستلزمات وبوكسات عامة</span>
-                <span class="inv-tab-count" id="invYearCountGen">9</span>
-              </button>
-            </div>
-
-            <!-- Level 2: Subject Chips & Live Search Row -->
-            <div class="inv-subject-and-search-row">
-              <div class="inv-subject-chips-scroll" id="invSubjectChipsContainer">
-                <!-- Dynamically populated chips based on active year -->
-              </div>
-              <div class="inv-search-box-wrap">
-                <input type="text" id="invLiveSearchInput" class="form-input-clean inv-search-input" placeholder="🔍 بحث بالاسم أو SKU..." oninput="handleInventorySearch(this.value)">
-                <span class="inv-filtered-metric-badge" id="invFilteredMetricBadge">39 صنفاً (696 قطعة)</span>
-              </div>
-            </div>
-          </div>
-
-          <div style="overflow-x: auto;">
-            <table class="clean-inventory-table">
+          <div class="table-responsive">
+            <table class="erp-table">
               <thead>
                 <tr>
                   <th>المنتج</th>
                   <th>SKU</th>
-                  <th style="text-align: center;">المخزون الأساسي</th>
-                  <th style="text-align: center;">المباع (المكتمل)</th>
-                  <th style="text-align: center;">المتبقي الحقيقي</th>
-                  <th style="text-align: center;">الحالة</th>
-                  <th style="text-align: center;">إجراء</th>
+                  <th>الرصيد</th>
+                  <th>الحد الأدنى</th>
+                  <th>الحالة</th>
+                  <th>آخر حركة</th>
+                  <th style="text-align: center;">الإجراء</th>
                 </tr>
               </thead>
               <tbody id="inventoryTableBody">
                 <!-- Dynamically populated -->
               </tbody>
             </table>
-          </div>
-        </div>
-
-        <!-- VIEW 2: 3-WAY INVENTORY & ORDERS RECONCILIATION LEDGER -->
-        <div id="inventoryReconCard" class="erp-table-card" style="display: none;">
-          <div class="table-controls-bar">
-            <div>
-              <div class="card-title">سجل تسوية حركات المخزون والطلبات المكتملة</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
-                الربط الإلزامي: يُخصم المخزون فقط عند حالة (مكتمل) — منع الخصم المكرر وحماية الطلبات المعلقة
+            <div id="inventoryEmptyState" class="erp-empty-state" style="display: none;">
+              <div class="empty-state-icon-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
               </div>
+              <div class="empty-state-title">لا يوجد مخزون بعد</div>
+              <div class="empty-state-subtitle">سيتم عرض المنتجات هنا بعد إضافة المخزون</div>
             </div>
-            <button class="btn-secondary btn-sm" onclick="runAutomaticInventoryReconciliation()">مقارنة وتحديث فوري 🔄</button>
-          </div>
-
-          <!-- 5-Metric Reconciliation Summary -->
-          <div class="recon-kpi-grid">
-            <div class="recon-kpi-card completed">
-              <span class="recon-kpi-title">مكتمل وتم الخصم</span>
-              <span class="recon-kpi-num num-mono" id="reconKpiCompletedCount" style="color: var(--status-success);">13</span>
-              <span class="recon-kpi-desc">حركات مخزون منفذة مسبقاً</span>
-            </div>
-            <div class="recon-kpi-card pending">
-              <span class="recon-kpi-title">مكتمل بانتظار الخصم</span>
-              <span class="recon-kpi-num num-mono" id="reconKpiPendingCount" style="color: #ca8a04;">0</span>
-              <span class="recon-kpi-desc">تتطلب تنفيذ الخصم فوراً</span>
-            </div>
-            <div class="recon-kpi-card protected">
-              <span class="recon-kpi-title">غير مكتمل (محمي)</span>
-              <span class="recon-kpi-num num-mono" id="reconKpiProtectedCount" style="color: #2563eb;">4</span>
-              <span class="recon-kpi-desc">جديد / قيد التجهيز (لا خصم)</span>
-            </div>
-            <div class="recon-kpi-card cancelled">
-              <span class="recon-kpi-title">طلبات ملغاة</span>
-              <span class="recon-kpi-num num-mono" id="reconKpiCancelledCount" style="color: #dc2626;">1</span>
-              <span class="recon-kpi-desc">مستبعدة كلياً من الخصم</span>
-            </div>
-            <div class="recon-kpi-card review">
-              <span class="recon-kpi-title">مكرر / للمراجعة</span>
-              <span class="recon-kpi-num num-mono" id="reconKpiReviewCount" style="color: #9333ea;">0</span>
-              <span class="recon-kpi-desc">مطابقة أرقام المعاملات</span>
-            </div>
-          </div>
-
-          <!-- Recon Tabs Filter -->
-          <div class="table-filter-tabs" style="margin-bottom: 0.75rem;">
-            <button class="table-filter-tab active" onclick="filterReconTable('all', this)">الكل (<span id="reconTabAllCount">18</span>)</button>
-            <button class="table-filter-tab" onclick="filterReconTable('completed_deducted', this)">مكتمل ومخصوم (<span id="reconTabDeductedCount">13</span>)</button>
-            <button class="table-filter-tab" onclick="filterReconTable('completed_pending', this)">مكتمل بانتظار الخصم (<span id="reconTabPendingCount">0</span>)</button>
-            <button class="table-filter-tab" onclick="filterReconTable('pending_protected', this)">غير مكتمل (محمي) (<span id="reconTabProtectedCount">4</span>)</button>
-            <button class="table-filter-tab" onclick="filterReconTable('cancelled', this)">ملغي (<span id="reconTabCancelledCount">1</span>)</button>
-          </div>
-
-          <div style="overflow-x: auto;">
-            <table class="erp-table">
-              <thead>
-                <tr>
-                  <th>الطلب (Order)</th>
-                  <th>الفاتورة (Invoice)</th>
-                  <th>العميل</th>
-                  <th>حالة الطلب</th>
-                  <th>الأصناف والكميات</th>
-                  <th>حركة المخزون</th>
-                  <th>حالة الخصم</th>
-                  <th>الإجراء</th>
-                </tr>
-              </thead>
-              <tbody id="inventoryReconTableBody">
-                <!-- Dynamically populated by JS -->
-              </tbody>
-            </table>
           </div>
         </div>
       </section>
 
 
       <!-- =======================================================
-           SECONDARY SCREEN 4: DEDICATED FINANCE (المالية)
+           SCREEN 4: نقطة البيع (POS) — 3-COLUMN WORKFLOW
            ======================================================= -->
-      <section id="financeScreen" class="secondary-screen-view">
+      <section id="posScreen" class="secondary-screen-view">
+        <div class="page-header" style="margin-bottom: 1rem;">
+          <div class="page-header-titles">
+            <h1 class="page-title">نقطة البيع POS</h1>
+            <p class="page-subtitle">واجهة عملية سريعة لتسجيل طلبات العملاء وإصدار الفواتير الفورية</p>
+          </div>
+        </div>
+
+        <div class="pos-container">
+          <!-- 1. Right Column: بيانات العميل -->
+          <div class="pos-customer-card">
+            <span class="pos-section-title">بيانات العميل</span>
+
+            <div class="form-group">
+              <label class="form-label">الاسم الكامل *</label>
+              <input type="text" id="posCustomerName" class="form-input" placeholder="أدخل اسم العميل / الطالب" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">رقم الهاتف *</label>
+              <input type="tel" id="posCustomerPhone" class="form-input num-mono" placeholder="0912345678" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">الجامعة</label>
+              <select id="posCustomerUniv" class="form-select">
+                <option value="جامعة طرابلس" selected>جامعة طرابلس</option>
+                <option value="جامعة بنغازي">جامعة بنغازي</option>
+                <option value="جامعة مصراتة">جامعة مصراتة</option>
+                <option value="جامعة الزاوية">جامعة الزاوية</option>
+                <option value="الجامعة الدولية (LIMU)">الجامعة الدولية (LIMU)</option>
+                <option value="أخرى">أخرى</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">الكلية</label>
+              <select id="posCustomerCollege" class="form-select">
+                <option value="كلية طب الأسنان" selected>كلية طب الأسنان</option>
+                <option value="كلية الطب البشري">كلية الطب البشري</option>
+                <option value="كلية الصيدلة">كلية الصيدلة</option>
+                <option value="ممارس / عيادة">ممارس / عيادة</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">طريقة الاستلام</label>
+              <div class="delivery-toggle-group">
+                <button type="button" class="delivery-toggle-btn active" id="posBtnPickup" onclick="setPosDeliveryMode('pickup')">استلام مباشر (مجاني)</button>
+                <button type="button" class="delivery-toggle-btn" id="posBtnDelivery" onclick="setPosDeliveryMode('delivery')">توصيل (+10 د.ل)</button>
+              </div>
+            </div>
+
+            <div class="form-group" id="posAddressGroup" style="display: none;">
+              <label class="form-label">عنوان التوصيل</label>
+              <input type="text" id="posCustomerAddress" class="form-input" placeholder="المدينة / المنطقة بالتفصيل">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">ملاحظات</label>
+              <textarea id="posCustomerNotes" class="form-textarea" rows="2" placeholder="ملاحظات خاصة بالطلب (اختياري)"></textarea>
+            </div>
+          </div>
+
+          <!-- 2. Center Column: المنتجات -->
+          <div class="pos-products-card">
+            <span class="pos-section-title">المنتجات</span>
+
+            <div>
+              <input type="text" id="posProductSearch" class="form-input" placeholder="ابحث عن منتج بالاسم أو SKU..." oninput="filterPosProducts(this.value)">
+            </div>
+
+            <!-- Category Pills -->
+            <div class="pos-category-chips" id="posCategoryChips">
+              <button type="button" class="category-chip active" onclick="setPosCategory('all', this)">الكل</button>
+              <button type="button" class="category-chip" onclick="setPosCategory('restorative-dentistry', this)">علاج تحفظي</button>
+              <button type="button" class="category-chip" onclick="setPosCategory('dental-anatomy', this)">تشريح الأسنان</button>
+              <button type="button" class="category-chip" onclick="setPosCategory('dental-materials', this)">مواد طب الأسنان</button>
+              <button type="button" class="category-chip" onclick="setPosCategory('fixed-prosthodontics', this)">كراون وتعويضات</button>
+              <button type="button" class="category-chip" onclick="setPosCategory('general', this)">شنط وبوكسات</button>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="pos-products-grid" id="posProductsGrid">
+              <!-- Dynamically populated from ERP_STATE.products -->
+            </div>
+          </div>
+
+          <!-- 3. Left Column: السلة والفاتورة -->
+          <div class="pos-cart-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-card); padding-bottom: 0.5rem;">
+              <span class="pos-section-title" style="border: none; padding: 0;">السلة والفاتورة</span>
+              <button type="button" class="card-link" style="color: var(--status-danger); background: none; border: none; cursor: pointer;" onclick="clearPosCart()">إفراغ السلة</button>
+            </div>
+
+            <!-- Cart Items List -->
+            <div class="pos-cart-items-wrap" id="posCartItemsList">
+              <!-- Rendered items or empty state -->
+            </div>
+
+            <div id="posCartEmptyNotice" class="erp-empty-state" style="padding: 1.5rem 0;">
+              <div class="empty-state-icon-circle" style="width: 42px; height: 42px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+              </div>
+              <div class="empty-state-title" style="font-size: 0.9rem;">السلة فارغة</div>
+              <div class="empty-state-subtitle" style="font-size: 0.75rem;">أضف منتجات لبدء الطلب</div>
+            </div>
+
+            <!-- Financial Totals Box -->
+            <div class="pos-totals-box">
+              <div class="pos-total-row">
+                <span>المجموع الفرعي:</span>
+                <span class="num-mono" id="posSubtotalVal">0 د.ل</span>
+              </div>
+              <div class="pos-total-row">
+                <span>الخصم:</span>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <input type="number" id="posDiscountInput" class="form-input num-mono" style="width: 60px; padding: 2px 4px; height: 24px; font-size: 0.75rem;" value="0" min="0" oninput="recalculatePosTotals()">
+                  <span>د.ل</span>
+                </div>
+              </div>
+              <div class="pos-total-row">
+                <span>التوصيل:</span>
+                <span class="num-mono" id="posShippingVal">0 د.ل</span>
+              </div>
+              <div class="pos-total-row grand-total">
+                <span>الإجمالي:</span>
+                <span class="num-mono" id="posGrandTotalVal">0 د.ل</span>
+              </div>
+            </div>
+
+            <button type="button" class="btn-pos-checkout" onclick="confirmAndIssuePosOrder()">
+              <span>اعتماد الطلب وإصدار الفاتورة</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- =======================================================
+           SCREEN 5: الطلبات (Orders)
+           ======================================================= -->
+      <section id="ordersScreen" class="secondary-screen-view">
         <div class="page-header">
           <div class="page-header-titles">
-            <h1 class="page-greeting">المالية، الخزينة والأرباح</h1>
-            <p class="page-subtitle">فصل محاسبي دقيق بين المبيعات، تكلفة البضاعة، والمصروفات وصافي الأرباح.</p>
+            <h1 class="page-title">الطلبات</h1>
+            <p class="page-subtitle">إدارة ومتابعة طلبات العملاء وحالات التجهيز</p>
           </div>
-          <button class="btn-secondary" onclick="openExpenseModal()">+ تسجيل مصروف جديد</button>
-        </div>
-
-        <!-- Financial Hierarchy Cards -->
-        <div class="kpi-grid kpi-grid-4">
-          <div class="kpi-card">
-            <div class="kpi-label">إجمالي المبيعات (Revenue)</div>
-            <div class="kpi-value num-mono" id="finScreenRevenue">3,818 د.ل</div>
-            <span style="font-size: 0.725rem; color: var(--status-success);">18 طلباً معتمداً</span>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">تكلفة البضاعة المباعة (COGS)</div>
-            <div class="kpi-value num-mono" id="finScreenCogs" style="color: var(--text-muted);">1,680 د.ل</div>
-            <span style="font-size: 0.725rem; color: var(--text-muted);">44% من المبيعات</span>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">المصروفات التشغيلية</div>
-            <div class="kpi-value num-mono" id="finScreenExpenses" style="color: var(--status-danger);">680 د.ل</div>
-            <span style="font-size: 0.725rem; color: var(--status-danger);">شحن، تغليف، تسويق، سيرفر</span>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">صافي الربح القابل للتوزيع</div>
-            <div class="kpi-value num-mono" id="finScreenNetProfit" style="color: var(--status-success);">1,458 د.ل</div>
-            <span style="font-size: 0.725rem; color: var(--status-success);">جاهزة للتوزيع بالتساوي (33.3%)</span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button type="button" class="btn-secondary" onclick="exportOrdersToCsv()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>تصدير</span>
+            </button>
+            <button type="button" class="btn-primary" onclick="navigateToScreen('pos')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>+ طلب جديد</span>
+            </button>
           </div>
         </div>
 
-        
-        <!-- Procurement Capital & Inventory Value Cards -->
-        <div class="kpi-grid kpi-grid-3">
-          <div class="kpi-card">
-            <div class="kpi-label">إجمالي رأس مال المشتريات (16 فاتورة)</div>
-            <div class="kpi-value num-mono" id="finPurchasesCapital" style="color: var(--primary);">9,826.50 د.ل</div>
-            <span style="font-size: 0.725rem; color: var(--text-muted);">16 فاتورة توريد معتمدة من شارع بن عاشور والموردين</span>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">القيمة البيعية المتوقعة للبضاعة</div>
-            <div class="kpi-value num-mono" id="finPurchasesExpectedRev" style="color: var(--status-success);">11,860.00 د.ل</div>
-            <span style="font-size: 0.725rem; color: var(--status-success);">بناءً على أسعار البيع القطاعي المعتمدة</span>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">الأرباح المتوقعة من البضائع</div>
-            <div class="kpi-value num-mono" id="finPurchasesExpectedProfit" style="color: var(--status-success);">+2,033.50 د.ل</div>
-            <span style="font-size: 0.725rem; color: var(--text-muted);">صافي هامش الربح الإجمالي (+20.7%)</span>
-          </div>
-        </div>
-
-        <!-- Procurement Invoices Ledger Table -->
-        <div class="erp-table-card" style="margin-bottom: 1.5rem;" id="purchasesLedgerCard">
-          <div class="table-controls-bar">
-            <div>
-              <div class="card-title">فواتير المشتريات والتوريدات المعتمدة (16 فاتورة)</div>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">توثيق رسمي لكافة فواتير التوريد والأصناف المعتمدة</span>
+        <div class="erp-table-card">
+          <!-- Filter Tabs & Search -->
+          <div class="orders-filter-bar">
+            <div class="orders-filter-pills">
+              <button type="button" class="order-filter-btn active" data-filter="all" onclick="filterOrdersTable('all', this)">
+                الكل <span class="order-filter-count">(<span id="tabCountAll">0</span>)</span>
+              </button>
+              <button type="button" class="order-filter-btn" data-filter="new" onclick="filterOrdersTable('new', this)">
+                جديد <span class="order-filter-count">(<span id="tabCountNew">0</span>)</span>
+              </button>
+              <button type="button" class="order-filter-btn" data-filter="preparing" onclick="filterOrdersTable('preparing', this)">
+                قيد التجهيز <span class="order-filter-count">(<span id="tabCountPrep">0</span>)</span>
+              </button>
+              <button type="button" class="order-filter-btn" data-filter="completed" onclick="filterOrdersTable('completed', this)">
+                مكتمل <span class="order-filter-count">(<span id="tabCountComp">0</span>)</span>
+              </button>
+              <button type="button" class="order-filter-btn" data-filter="archived" onclick="filterOrdersTable('archived', this)" style="border-inline-start: 1px solid var(--border-card); margin-inline-start: 0.5rem; padding-inline-start: 0.75rem;">
+                الأرشيف التاريخي <span class="order-filter-count">(<span id="tabCountArchived">18</span>)</span>
+              </button>
             </div>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <input type="text" class="search-input" id="purchasesSearchInput" placeholder="بحث باسم المورد أو رقم الفاتورة..." oninput="handlePurchasesSearch(this.value)" style="background: var(--bg-subtle); padding: 0.4rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-card); width: 240px;">
+
+            <div style="width: 260px;">
+              <input type="text" id="ordersSearchInput" class="form-input-clean" placeholder="ابحث عن طلب برقم الطلب أو العميل..." oninput="handleOrdersSearch(this.value)" style="width: 100%;">
             </div>
           </div>
-          <div style="overflow-x: auto;">
+
+          <div class="table-responsive">
             <table class="erp-table">
               <thead>
                 <tr>
-                  <th># الفاتورة</th>
-                  <th>المورّد / الشركة</th>
+                  <th>رقم الطلب</th>
+                  <th>العميل</th>
+                  <th>عدد المنتجات</th>
+                  <th>الإجمالي</th>
+                  <th>الحالة</th>
+                  <th>المستخدم</th>
                   <th>التاريخ</th>
-                  <th>المستلم</th>
-                  <th style="text-align: center;">الأصناف</th>
-                  <th>التكلفة (جملة)</th>
-                  <th>البيع المتوقع</th>
-                  <th>صافي الربح</th>
-                  <th>حالة الدفع</th>
-                  <th style="text-align: center;">التفاصيل</th>
+                  <th style="text-align: center;">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+
+            <div id="ordersEmptyState" class="erp-empty-state" style="display: none;">
+              <div class="empty-state-icon-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>
+              </div>
+              <div class="empty-state-title">لا توجد طلبات بعد</div>
+              <div class="empty-state-subtitle">ستظهر هنا الطلبات عند تسجيلها</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- =======================================================
+           SCREEN 6: المشتريات (Purchases)
+           ======================================================= -->
+      <section id="purchasesScreen" class="secondary-screen-view">
+        <div class="page-header">
+          <div class="page-header-titles">
+            <h1 class="page-title">المشتريات</h1>
+            <p class="page-subtitle">تسجيل وإدارة فواتير التوريد من الشركات والموردين</p>
+          </div>
+          <div>
+            <button type="button" class="btn-primary" onclick="openAddPurchaseModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>+ إضافة فاتورة</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="erp-table-card">
+          <div class="table-controls-bar">
+            <div style="flex: 1; max-width: 320px;">
+              <input type="text" id="purchasesSearchInput" class="form-input-clean" placeholder="ابحث في فواتير المشتريات..." oninput="handlePurchasesSearch(this.value)" style="width: 100%;">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>رقم الفاتورة</th>
+                  <th>المورد</th>
+                  <th>عدد الأصناف</th>
+                  <th>الإجمالي</th>
+                  <th>التاريخ</th>
+                  <th style="text-align: center;">الإجراءات</th>
                 </tr>
               </thead>
               <tbody id="purchasesTableBody">
-                <!-- Dynamically populated from ERP_STATE.purchases -->
+                <!-- Dynamically populated -->
               </tbody>
             </table>
+
+            <div id="purchasesEmptyState" class="erp-empty-state">
+              <div class="empty-state-icon-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="empty-state-title">لا توجد مشتريات بعد</div>
+              <div class="empty-state-subtitle">ستظهر هنا فواتير المشتريات عند تسجيلها</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- =======================================================
+           SCREEN 7: المبيعات (Sales)
+           ======================================================= -->
+      <section id="salesScreen" class="secondary-screen-view">
+        <div class="page-header">
+          <div class="page-header-titles">
+            <h1 class="page-title">المبيعات</h1>
+            <p class="page-subtitle">سجل العمليات والمبيعات المحققة</p>
           </div>
         </div>
 
-        <!-- Operating Expenses Ledger -->
         <div class="erp-table-card">
           <div class="table-controls-bar">
-            <div class="card-title">دفتر المصروفات التشغيلية الحالية</div>
-            <button class="btn-secondary btn-sm" onclick="openExpenseModal()">+ إضافة مصروف</button>
+            <div style="flex: 1; max-width: 320px;">
+              <input type="text" id="salesSearchInput" class="form-input-clean" placeholder="ابحث في سجل المبيعات..." oninput="handleSalesSearch(this.value)" style="width: 100%;">
+            </div>
           </div>
-          <div style="overflow-x: auto;">
+
+          <div class="table-responsive">
             <table class="erp-table">
               <thead>
                 <tr>
-                  <th># الكود</th>
-                  <th>التاريخ</th>
-                  <th>البند / الوصف</th>
-                  <th>الفئة</th>
-                  <th>القائم بالصرف</th>
-                  <th>طريقة الدفع</th>
+                  <th>رقم الطلب</th>
+                  <th>العميل</th>
                   <th>المبلغ</th>
+                  <th>التاريخ</th>
+                  <th style="text-align: center;">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="salesTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+
+            <div id="salesEmptyState" class="erp-empty-state">
+              <div class="empty-state-icon-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+              </div>
+              <div class="empty-state-title">لا توجد مبيعات بعد</div>
+              <div class="empty-state-subtitle">ستظهر هنا آخر المبيعات عند تسجيلها</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- =======================================================
+           SCREEN 8: المصروفات (Expenses)
+           ======================================================= -->
+      <section id="expensesScreen" class="secondary-screen-view">
+        <div class="page-header">
+          <div class="page-header-titles">
+            <h1 class="page-title">المصروفات</h1>
+            <p class="page-subtitle">تسجيل ومتابعة كافة المصروفات التشغيلية</p>
+          </div>
+          <div>
+            <button type="button" class="btn-primary" onclick="openAddExpenseModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>+ إضافة مصروف</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="erp-table-card">
+          <div class="table-controls-bar">
+            <div style="flex: 1; max-width: 320px;">
+              <input type="text" id="expensesSearchInput" class="form-input-clean" placeholder="ابحث في المصروفات..." oninput="handleExpensesSearch(this.value)" style="width: 100%;">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>الوصف</th>
+                  <th>المبلغ</th>
+                  <th>التاريخ</th>
+                  <th style="text-align: center;">الإجراءات</th>
                 </tr>
               </thead>
               <tbody id="expensesTableBody">
                 <!-- Dynamically populated -->
               </tbody>
             </table>
+
+            <div id="expensesEmptyState" class="erp-empty-state">
+              <div class="empty-state-icon-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+              <div class="empty-state-title">لا توجد مصروفات بعد</div>
+              <div class="empty-state-subtitle">ستظهر هنا المصروفات عند تسجيلها</div>
+            </div>
           </div>
         </div>
       </section>
 
 
       <!-- =======================================================
-           SECONDARY SCREEN 5: DEDICATED PARTNERS (الشركاء)
+           SCREEN 9: العملاء (Partners / Customers)
            ======================================================= -->
       <section id="partnersScreen" class="secondary-screen-view">
         <div class="page-header">
           <div class="page-header-titles">
-            <h1 class="page-greeting">حسابات الشركاء وتوزيع الأرباح</h1>
-            <p class="page-subtitle">إدارة الحصص ورؤوس الأموال والأرباح المستحقة للشركاء الثلاثة.</p>
-          </div>
-          <button class="btn-primary" onclick="showToast('تم تأكيد توزيع أرباح الشهر بالتساوي (486 د.ل لكل شريك)')">توزيع الأرباح الآن</button>
-        </div>
-
-        <!-- 3 Partner Detailed Cards (طه، عبدالمؤمن، ساسي) -->
-        <div class="partners-cards-grid">
-          <!-- Partner 1: طه -->
-          <div class="partner-card-detailed">
-            <div class="partner-card-header">
-              <div class="partner-big-avatar">طه</div>
-              <div>
-                <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-main);">طه محمد</div>
-                <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600;">شريك مؤسس ومدير العمليات</div>
-              </div>
-            </div>
-            <div class="partner-card-metrics">
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">نسبة الملكية</div>
-                <div class="partner-metric-val num-mono">33.33%</div>
-              </div>
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">رأس المال المساهم</div>
-                <div class="partner-metric-val num-mono">1,000 د.ل</div>
-              </div>
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">الأرباح المستحقة</div>
-                <div class="partner-metric-val num-mono" id="partnerTahaShare" style="color: var(--status-success);">486 د.ل</div>
-              </div>
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">المسحوبات</div>
-                <div class="partner-metric-val num-mono" style="color: var(--status-danger);">0 د.ل</div>
-              </div>
-            </div>
-            <div style="background: var(--bg-subtle); padding: 0.85rem; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 0.8rem; font-weight: 700;">الرصيد الجاري المستحق:</span>
-              <span class="num-mono" id="partnerTahaBalance" style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">1,486 د.ل</span>
-            </div>
-            <button class="btn-secondary btn-sm" style="width: 100%; justify-content: center;" onclick="showToast('تم صرف أرباح طه بقيمة 486 د.ل')">صرف الأرباح</button>
-          </div>
-
-          <!-- Partner 2: عبدالمؤمن -->
-          <div class="partner-card-detailed">
-            <div class="partner-card-header">
-              <div class="partner-big-avatar" style="background-color: #064e3b; color: #34d399;">مؤمن</div>
-              <div>
-                <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-main);">عبدالمؤمن البشير</div>
-                <div style="font-size: 0.75rem; color: var(--status-success); font-weight: 600;">شريك ومدير المشتريات والمخزون</div>
-              </div>
-            </div>
-            <div class="partner-card-metrics">
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">نسبة الملكية</div>
-                <div class="partner-metric-val num-mono">33.33%</div>
-              </div>
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">رأس المال المساهم</div>
-                <div class="partner-metric-val num-mono">1,000 د.ل</div>
-              </div>
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">الأرباح المستحقة</div>
-                <div class="partner-metric-val num-mono" id="partnerMomenShare" style="color: var(--status-success);">486 د.ل</div>
-              </div>
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">المسحوبات</div>
-                <div class="partner-metric-val num-mono" style="color: var(--status-danger);">0 د.ل</div>
-              </div>
-            </div>
-            <div style="background: var(--bg-subtle); padding: 0.85rem; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 0.8rem; font-weight: 700;">الرصيد الجاري المستحق:</span>
-              <span class="num-mono" id="partnerMomenBalance" style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">1,486 د.ل</span>
-            </div>
-            <button class="btn-secondary btn-sm" style="width: 100%; justify-content: center;" onclick="showToast('تم صرف أرباح عبدالمؤمن بقيمة 486 د.ل')">صرف الأرباح</button>
-          </div>
-
-          <!-- Partner 3: ساسي -->
-          <div class="partner-card-detailed">
-            <div class="partner-card-header">
-              <div class="partner-big-avatar" style="background-color: #3b0764; color: #c084fc;">ساسي</div>
-              <div>
-                <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-main);">ساسي الهادي</div>
-                <div style="font-size: 0.75rem; color: var(--status-purple); font-weight: 600;">شريك ومسؤول المالية والتوصيل</div>
-              </div>
-            </div>
-            <div class="partner-card-metrics">
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">نسبة الملكية</div>
-                <div class="partner-metric-val num-mono">33.33%</div>
-              </div>
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">رأس المال المساهم</div>
-                <div class="partner-metric-val num-mono">1,000 د.ل</div>
-              </div>
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">الأرباح المستحقة</div>
-                <div class="partner-metric-val num-mono" id="partnerSasiShare" style="color: var(--status-success);">486 د.ل</div>
-              </div>
-              <div class="partner-metric-box">
-                <div class="partner-metric-label">المسحوبات</div>
-                <div class="partner-metric-val num-mono" style="color: var(--status-danger);">0 د.ل</div>
-              </div>
-            </div>
-            <div style="background: var(--bg-subtle); padding: 0.85rem; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 0.8rem; font-weight: 700;">الرصيد الجاري المستحق:</span>
-              <span class="num-mono" id="partnerSasiBalance" style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">1,486 د.ل</span>
-            </div>
-            <button class="btn-secondary btn-sm" style="width: 100%; justify-content: center;" onclick="showToast('تم صرف أرباح ساسي بقيمة 486 د.ل')">صرف الأرباح</button>
-          </div>
-        </div>
-      </section>
-
-
-      <!-- =======================================================
-           SECONDARY SCREEN 6: DEDICATED REPORTS (التقارير)
-           ======================================================= -->
-      <section id="reportsScreen" class="secondary-screen-view">
-        <div class="page-header">
-          <div class="page-header-titles">
-            <h1 class="page-greeting">التقارير وتحليلات الأداء</h1>
-            <p class="page-subtitle">نظرة شاملة على مؤشرات النمو وحجم الطلبات حسب الكليات.</p>
-          </div>
-          <button class="btn-secondary" onclick="window.print()">🖨️ طباعة التقرير</button>
-        </div>
-
-        <div class="dashboard-main-row" style="margin-bottom: 0;">
-          <div class="card-container">
-            <div class="card-title" style="margin-bottom: 1rem;">حجم المبيعات حسب كليات ومناطق طب الأسنان</div>
-            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-              <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 4px;">
-                  <span>جامعة طرابلس — كلية طب الأسنان</span>
-                  <span class="num-mono" style="color: var(--primary);">3,466 د.ل (91%)</span>
-                </div>
-                <div style="height: 8px; background: var(--bg-subtle); border-radius: 4px; overflow: hidden;">
-                  <div style="width: 91%; height: 100%; background: var(--primary);"></div>
-                </div>
-              </div>
-              <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 4px;">
-                  <span>مناطق أخرى (العزيزية والجفارة والسراج)</span>
-                  <span class="num-mono" style="color: var(--status-success);">352 د.ل (9%)</span>
-                </div>
-                <div style="height: 8px; background: var(--bg-subtle); border-radius: 4px; overflow: hidden;">
-                  <div style="width: 9%; height: 100%; background: var(--status-success);"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card-container">
-            <div class="card-title" style="margin-bottom: 1rem;">معدل سلة الشراء ومؤشرات الجودة الحقيقية</div>
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-              <div style="background: var(--bg-muted); padding: 0.85rem; border-radius: var(--radius-md);">
-                <div style="font-size: 0.75rem; color: var(--text-muted);">متوسط قيمة الطلب الواحد (AOV):</div>
-                <div class="num-mono" id="reportAovDisplay" style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);">212.1 د.ل</div>
-              </div>
-              <div style="background: var(--bg-muted); padding: 0.85rem; border-radius: var(--radius-md);">
-                <div style="font-size: 0.75rem; color: var(--text-muted);">نسبة الطلبات المؤكدة والناجحة:</div>
-                <div class="num-mono" style="font-size: 1.4rem; font-weight: 800; color: var(--status-success);">94.4%</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SALES AND COMMERCIAL DISCOUNTS LEDGER CARD -->
-        <div class="card-container" style="margin-top: 1.25rem;">
-          <div class="card-header-row">
-            <div>
-              <div class="card-title">تقرير المبيعات والخصومات التجارية (Gross vs Net Sales)</div>
-              <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 2px;">
-                📌 تنبيه محاسبي معتمد: الخصم التجاري يُخصم مباشرة من المبيعات الإجمالية ولا يُسجل كمصروف تشغيلي.
-              </div>
-            </div>
-            <span class="kpi-badge positive">المعادلة: صافي المبيعات = المبيعات الإجمالية - إجمالي الخصومات</span>
-          </div>
-
-          <!-- 4 Financial Metric Boxes -->
-          <div class="kpi-grid" style="margin: 1rem 0;">
-            <div style="background: var(--bg-subtle); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 1rem;">
-              <div style="font-size: 0.725rem; color: var(--text-muted); font-weight: 600;">إجمالي المبيعات قبل الخصم (Gross)</div>
-              <div class="num-mono" id="reportGrossSalesVal" style="font-size: 1.4rem; font-weight: 900; color: var(--text-main); margin-top: 4px;">3,818 د.ل</div>
-              <div style="font-size: 0.675rem; color: var(--text-muted); margin-top: 2px;">مجموع أسعار الأدوات والطلبيات</div>
-            </div>
-
-            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-md); padding: 1rem;">
-              <div style="font-size: 0.725rem; color: #166534; font-weight: 600;">إجمالي الخصومات التجارية الممنوحة</div>
-              <div class="num-mono" id="reportTotalDiscountsVal" style="font-size: 1.4rem; font-weight: 900; color: #16a34a; margin-top: 4px;">0 د.ل</div>
-              <div style="font-size: 0.675rem; color: #15803d; margin-top: 2px;">تخفيضات معتمدة لطلبة الأسنان</div>
-            </div>
-
-            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 1rem;">
-              <div style="font-size: 0.725rem; color: #1e40af; font-weight: 600;">صافي المبيعات الفعلي المحصل (Net)</div>
-              <div class="num-mono" id="reportNetSalesVal" style="font-size: 1.4rem; font-weight: 900; color: var(--primary); margin-top: 4px;">3,818 د.ل</div>
-              <div style="font-size: 0.675rem; color: #1d4ed8; margin-top: 2px;">الإيراد الفعلي الداخل للخزينة</div>
-            </div>
-
-            <div style="background: var(--bg-subtle); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 1rem;">
-              <div style="font-size: 0.725rem; color: var(--text-muted); font-weight: 600;">المصروفات التشغيلية (مستقلة)</div>
-              <div class="num-mono" id="reportExpensesVal" style="font-size: 1.4rem; font-weight: 900; color: #dc2626; margin-top: 4px;">680 د.ل</div>
-              <div style="font-size: 0.675rem; color: var(--text-muted); margin-top: 2px;">شحن، تغليف، تسويق، سيرفر</div>
-            </div>
-          </div>
-
-          <!-- Partner Discounts Distribution Table -->
-          <div style="border-top: 1px solid var(--border-card); padding-top: 1rem;">
-            <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.6rem;">
-              توزيع الخصومات التجارية الممنوحة حسب الشريك المعتمد:
-            </div>
-            <div class="responsive-3-grid" id="reportPartnerDiscountsGrid">
-              <!-- Rendered via JS -->
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      <!-- =======================================================
-           SECONDARY SCREEN 7: DEDICATED AUDIT LOG (سجل العمليات)
-           ======================================================= -->
-      <section id="auditScreen" class="secondary-screen-view">
-        <div class="page-header">
-          <div class="page-header-titles">
-            <h1 class="page-greeting">سجل التدقيق والعمليات (Audit Log)</h1>
-            <p class="page-subtitle">سجل رقمي لكافة التعديلات، المبيعات، وتغييرات الأسعار في المنظومة.</p>
+            <h1 class="page-title">العملاء</h1>
+            <p class="page-subtitle">دليل العملاء وسجلات المشتريات والتواصل</p>
           </div>
         </div>
 
         <div class="erp-table-card">
           <div class="table-controls-bar">
-            <div class="table-filter-tabs">
-              <button class="table-filter-tab active" onclick="filterAuditTable('all', this)">كافة العمليات (<span id="auditTabAllCount">0</span>)</button>
-              <button class="table-filter-tab" onclick="filterAuditTable('مؤمن', this)">عمليات مؤمن</button>
-              <button class="table-filter-tab" onclick="filterAuditTable('طه', this)">عمليات طه</button>
-              <button class="table-filter-tab" onclick="filterAuditTable('ياسي', this)">عمليات ياسي</button>
+            <div style="flex: 1; max-width: 320px;">
+              <input type="text" id="customersSearchInput" class="form-input-clean" placeholder="ابحث عن عميل..." oninput="handleCustomersSearch(this.value)" style="width: 100%;">
             </div>
-            <input type="text" class="search-input" id="auditSearchInput" placeholder="بحث بالعملية أو الصنف..." oninput="handleAuditSearch(this.value)" style="background: var(--bg-subtle); padding: 0.4rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-card); width: 220px;">
           </div>
-          <div style="overflow-x: auto;">
+
+          <div class="table-responsive">
             <table class="erp-table">
               <thead>
                 <tr>
-                  <th># الكود</th>
-                  <th>الوقت</th>
-                  <th>التاريخ</th>
-                  <th>من قام بالعملية</th>
-                  <th>نوع العملية</th>
-                  <th>تفاصيل ما حدث</th>
-                  <th>القيمة السابقة / الجديدة</th>
+                  <th>الاسم</th>
+                  <th>رقم الهاتف</th>
+                  <th>الجامعة / الكلية</th>
+                  <th>عدد الطلبات</th>
+                  <th>إجمالي المشتريات</th>
+                  <th style="text-align: center;">الإجراءات</th>
                 </tr>
               </thead>
-              <tbody id="fullAuditTableBody">
+              <tbody id="customersTableBody">
+                <!-- Dynamically populated from orders -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- =======================================================
+           SCREEN 10: التقارير (Reports)
+           ======================================================= -->
+      <section id="reportsScreen" class="secondary-screen-view">
+        <div class="page-header">
+          <div class="page-header-titles">
+            <h1 class="page-title">التقارير</h1>
+            <p class="page-subtitle">ملخص الأداء المالي والتشغيلي لـ Absolute Dental</p>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">إجمالي المبيعات النشطة</div>
+            <div class="kpi-value num-mono" id="repTotalSales">0 د.ل</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">إجمالي الأرباح النشطة</div>
+            <div class="kpi-value num-mono" id="repTotalProfit">0 د.ل</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">إجمالي المصروفات</div>
+            <div class="kpi-value num-mono" id="repTotalExpenses">0 د.ل</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">عدد الطلبات المنفذة</div>
+            <div class="kpi-value num-mono" id="repOrdersCount">0</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- =======================================================
+           SCREEN 11: سجل العمليات (Audit)
+           ======================================================= -->
+      <section id="auditScreen" class="secondary-screen-view">
+        <div class="page-header">
+          <div class="page-header-titles">
+            <h1 class="page-title">سجل العمليات</h1>
+            <p class="page-subtitle">توثيق كافة التعديلات وعمليات البيع والمخزون</p>
+          </div>
+        </div>
+
+        <div class="erp-table-card">
+          <div class="table-responsive">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>المعرف</th>
+                  <th>الوقت والتاريخ</th>
+                  <th>المستخدم</th>
+                  <th>العملية</th>
+                  <th>البيان والتفاصيل</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody">
                 <!-- Dynamically populated -->
               </tbody>
             </table>
@@ -1314,34 +1029,30 @@
 
 
       <!-- =======================================================
-           SECONDARY SCREEN 8: SETTINGS (الإعدادات)
+           SCREEN 12: الإعدادات (Settings)
            ======================================================= -->
       <section id="settingsScreen" class="secondary-screen-view">
         <div class="page-header">
           <div class="page-header-titles">
-            <h1 class="page-greeting">إعدادات المنظومة والسيرفر</h1>
-            <p class="page-subtitle">معلومات الاتصال بسيرفر Supabase (api.kurofangs.id.ly) وأسعار التوصيل.</p>
+            <h1 class="page-title">الإعدادات</h1>
+            <p class="page-subtitle">إعدادات المنظومة وهوية Absolute Dental</p>
           </div>
         </div>
 
-        <div class="card-container" style="max-width: 600px;">
-          <div class="card-title" style="margin-bottom: 1rem;">حالة ربط السيرفر السحابي</div>
-          <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-            <div style="display: flex; justify-content: space-between; padding: 0.65rem 0; border-bottom: 1px solid var(--border-subtle);">
-              <span style="font-size: 0.85rem; color: var(--text-muted);">عنوان السيرفر:</span>
-              <span class="num-mono" style="font-weight: 700; color: var(--primary);">https://api.kurofangs.id.ly</span>
+        <div class="erp-table-card" style="padding: 1.5rem; max-width: 600px;">
+          <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1rem;">معلومات النظام</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-card); padding-bottom: 0.5rem;">
+              <span style="color: var(--text-muted);">إصدار المنظومة:</span>
+              <strong class="num-mono">v4.0 Linear ERP</strong>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.65rem 0; border-bottom: 1px solid var(--border-subtle);">
-              <span style="font-size: 0.85rem; color: var(--text-muted);">توصيل كلية طب الأسنان طرابلس:</span>
-              <span class="num-mono" style="font-weight: 700; color: var(--status-success);">مجاني (0 د.ل)</span>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-card); padding-bottom: 0.5rem;">
+              <span style="color: var(--text-muted);">المستخدم النشط:</span>
+              <strong id="settingsActiveUser">طه</strong>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.65rem 0; border-bottom: 1px solid var(--border-subtle);">
-              <span style="font-size: 0.85rem; color: var(--text-muted);">توصيل مناطق طرابلس:</span>
-              <span class="num-mono" style="font-weight: 700;">10 د.ل</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.65rem 0;">
-              <span style="font-size: 0.85rem; color: var(--text-muted);">المدن المجاورة (الزاوية/مصراتة):</span>
-              <span class="num-mono" style="font-weight: 700;">25 د.ل</span>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-card); padding-bottom: 0.5rem;">
+              <span style="color: var(--text-muted);">حالة التخزين:</span>
+              <span style="color: var(--status-success); font-weight: 700;">متزامن محلياً وسحابياً ✓</span>
             </div>
           </div>
         </div>
@@ -1353,182 +1064,283 @@
 
 
 <!-- =========================================================
-     MODALS & OVERLAYS
+     MODAL: + إضافة منتج جديد (#addProductModal)
      ========================================================= -->
-
-<!-- 1. ORDER DETAILS MODAL -->
-<div id="orderDetailsModal" class="modal-overlay" onclick="if(event.target === this) closeModal('orderDetailsModal')">
+<div id="addProductModal" class="modal-overlay" onclick="if(event.target === this) closeModal('addProductModal')">
   <div class="modal-dialog">
     <div class="modal-header">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="modal-title">تفاصيل الطلب <span id="modalOrderNum" class="num-mono" style="color: var(--primary);">#75735422</span></span>
-        <span id="modalOrderStatus" class="status-pill new">جديد</span>
-      </div>
-      <button class="modal-close-btn" onclick="closeModal('orderDetailsModal')">✕</button>
+      <span class="modal-title">+ إضافة منتج جديد</span>
+      <button type="button" class="modal-close-btn" onclick="closeModal('addProductModal')">✕</button>
     </div>
     <div class="modal-body">
-      <!-- Customer Info Box -->
-      <div style="background: var(--bg-subtle); padding: 1rem; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <div id="modalCustomerName" style="font-weight: 800; font-size: 1rem; color: var(--text-main);">هديل النفاتي</div>
-          <div id="modalCustomerPhone" class="num-mono" style="color: var(--primary); font-size: 0.85rem; margin-top: 2px;">0912801073</div>
-          <div id="modalCustomerCollege" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">جامعة طرابلس — كلية طب الأسنان</div>
-          <div id="modalCustomerAddress" style="font-size: 0.75rem; color: var(--text-body); margin-top: 2px;">طرابلس</div>
+      <div class="form-group">
+        <label class="form-label">اسم المنتج بالعربية *</label>
+        <input type="text" id="newProdNameAr" class="form-input" placeholder="أدخل اسم المنتج" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+        <div class="form-group">
+          <label class="form-label">الرمز (SKU)</label>
+          <input type="text" id="newProdSku" class="form-input num-mono" placeholder="DEN-XXXX">
         </div>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <button class="btn-secondary btn-sm" onclick="openWhatsAppForCurrentModal()">واتساب 💬</button>
-          <button class="btn-secondary btn-sm" onclick="openSlipForCurrentModal()">بوليصة 🖨️</button>
+        <div class="form-group">
+          <label class="form-label">الفئة</label>
+          <select id="newProdCategory" class="form-select">
+            <option value="علاج الأسنان التحفظي (سنة 2)">علاج تحفظي</option>
+            <option value="تشريح الأسنان (سنة 1)">تشريح أسنان</option>
+            <option value="مواد طب الأسنان (سنة 1)">مواد أسنان</option>
+            <option value="أدوات الفحص والعيادة">أدوات فحص</option>
+            <option value="شنط وبوكسات">شنط وبوكسات</option>
+            <option value="عام">عام</option>
+          </select>
         </div>
       </div>
 
-      <!-- Order Items List -->
-      <div style="border: 1px solid var(--border-card); border-radius: var(--radius-md); max-height: 250px; overflow-y: auto;">
-        <table class="erp-table">
-          <thead>
-            <tr>
-              <th>الأداة / المنتج</th>
-              <th style="text-align: center;">الكمية</th>
-              <th>السعر</th>
-              <th>المجموع</th>
-            </tr>
-          </thead>
-          <tbody id="modalOrderItemsBody">
-            <!-- Items populated by JS -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Official Invoice & Discount Summary Card -->
-      <div style="background: var(--bg-subtle); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 0.85rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-        <div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span style="font-size: 0.775rem; color: var(--text-muted);">رقم الفاتورة الرسمية:</span>
-            <strong class="num-mono" id="modalOrderInvoiceNum" style="color: var(--primary); font-weight: 800;">#INV-2026-0001</strong>
-          </div>
-          <div id="modalOrderDiscountInfoWrap" style="font-size: 0.75rem; color: #16a34a; font-weight: 700; margin-top: 3px;">
-            <!-- Render discount if exists -->
-          </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
+        <div class="form-group">
+          <label class="form-label">سعر التكلفة (د.ل)</label>
+          <input type="number" id="newProdCostPrice" class="form-input num-mono" value="0" min="0" step="0.5">
         </div>
-        <div style="display: flex; gap: 6px;">
-          <button type="button" class="btn-primary btn-sm" onclick="openInvoiceForCurrentModal()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            <span>عرض الفاتورة الرسمية 📄</span>
-          </button>
+        <div class="form-group">
+          <label class="form-label">سعر الجملة (د.ل)</label>
+          <input type="number" id="newProdWholesalePrice" class="form-input num-mono" value="0" min="0" step="0.5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">سعر القطاعي (د.ل)</label>
+          <input type="number" id="newProdRetailPrice" class="form-input num-mono" value="0" min="0" step="0.5">
         </div>
       </div>
 
-      <!-- 3-Way Order ➔ Invoice ➔ Inventory Transaction Pipeline -->
-      <div class="recon-pipeline-card">
-        <div class="recon-pipeline-node done" id="pipelineNodeOrder">
-          <span class="recon-pipeline-node-title">1. الطلب</span>
-          <span class="recon-pipeline-node-val num-mono" id="pipelineOrderNum">#75735422</span>
-          <span class="recon-pipeline-node-sub" id="pipelineOrderStatus">جديد</span>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+        <div class="form-group">
+          <label class="form-label">المخزون الأولي</label>
+          <input type="number" id="newProdStock" class="form-input num-mono" value="0" min="0">
         </div>
-        <div class="recon-pipeline-arrow">➔</div>
-        <div class="recon-pipeline-node" id="pipelineNodeInvoice">
-          <span class="recon-pipeline-node-title">2. الفاتورة الرسمية</span>
-          <span class="recon-pipeline-node-val num-mono" id="pipelineInvoiceNum">#INV-2026-0001</span>
-          <span class="recon-pipeline-node-sub">فاتورة بيع</span>
+        <div class="form-group">
+          <label class="form-label">الحد الأدنى</label>
+          <input type="number" id="newProdMinStock" class="form-input num-mono" value="10" min="1">
         </div>
-        <div class="recon-pipeline-arrow">➔</div>
-        <div class="recon-pipeline-node" id="pipelineNodeTx">
-          <span class="recon-pipeline-node-title">3. حركة المخزون</span>
-          <span class="recon-pipeline-node-val num-mono" id="pipelineTxVal">غير مخصوم</span>
-          <span class="recon-pipeline-node-sub" id="pipelineTxSub">محمي حتى الاكتمال</span>
-        </div>
-      </div>
-
-      <!-- Financial Total -->
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
-        <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">إجمالي الفاتورة المطلوب:</span>
-        <span id="modalOrderTotal" class="num-mono" style="font-size: 1.4rem; font-weight: 900; color: var(--primary);">378 د.ل</span>
       </div>
     </div>
     <div class="modal-footer">
-      <div style="display: flex; gap: 6px; margin-inline-end: auto; flex-wrap: wrap;">
-        <button class="btn-secondary btn-sm" onclick="updateOrderStatusFromModal('قيد التجهيز')">قيد التجهيز</button>
-        <button class="btn-secondary btn-sm" onclick="updateOrderStatusFromModal('جاهز للتوصيل')">جاهز للتوصيل</button>
-        <button class="btn-primary btn-sm" onclick="updateOrderStatusFromModal('مكتمل')">مكتمل ومستلم (خصم المخزون) ✅</button>
-        <button class="btn-secondary btn-sm" style="color: var(--status-danger); border-color: rgba(220,38,38,0.25);" onclick="updateOrderStatusFromModal('ملغي')">إلغاء الطلب 🚫</button>
-      </div>
-      <button class="btn-secondary" onclick="closeModal('orderDetailsModal')">إغلاق</button>
+      <button type="button" class="btn-secondary" onclick="closeModal('addProductModal')">إلغاء</button>
+      <button type="button" class="btn-primary" onclick="saveNewProduct()">حفظ المنتج</button>
     </div>
   </div>
 </div>
 
 
 <!-- =========================================================
-     1.5 OFFICIAL ABSOLUTE DENTAL SALES INVOICE MODAL (#invoiceViewModal)
+     MODAL: تعديل المنتج والمخزون (#editProductModal)
+     ========================================================= -->
+<div id="editProductModal" class="modal-overlay" onclick="if(event.target === this) closeModal('editProductModal')">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <span class="modal-title">تعديل بيانات المنتج</span>
+      <button type="button" class="modal-close-btn" onclick="closeModal('editProductModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editProductId">
+
+      <div class="form-group">
+        <label class="form-label">اسم المنتج *</label>
+        <input type="text" id="editProdNameAr" class="form-input" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+        <div class="form-group">
+          <label class="form-label">الرمز (SKU)</label>
+          <input type="text" id="editProdSku" class="form-input num-mono">
+        </div>
+        <div class="form-group">
+          <label class="form-label">الفئة</label>
+          <select id="editProdCategory" class="form-select">
+            <option value="علاج الأسنان التحفظي (سنة 2)">علاج تحفظي</option>
+            <option value="تشريح الأسنان (سنة 1)">تشريح أسنان</option>
+            <option value="مواد طب الأسنان (سنة 1)">مواد أسنان</option>
+            <option value="أدوات الفحص والعيادة">أدوات فحص</option>
+            <option value="شنط وبوكسات">شنط وبوكسات</option>
+            <option value="عام">عام</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
+        <div class="form-group">
+          <label class="form-label">سعر التكلفة (د.ل)</label>
+          <input type="number" id="editProdCostPrice" class="form-input num-mono" step="0.5" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">سعر الجملة (د.ل)</label>
+          <input type="number" id="editProdWholesalePrice" class="form-input num-mono" step="0.5" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">سعر القطاعي (د.ل)</label>
+          <input type="number" id="editProdRetailPrice" class="form-input num-mono" step="0.5" min="0">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+        <div class="form-group">
+          <label class="form-label">المخزون الحالي</label>
+          <input type="number" id="editProdStock" class="form-input num-mono" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">الحد الأدنى</label>
+          <input type="number" id="editProdMinStock" class="form-input num-mono" min="1">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" onclick="closeModal('editProductModal')">إلغاء</button>
+      <button type="button" class="btn-primary" onclick="saveProductChanges()">حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =========================================================
+     MODAL: + إضافة فاتورة شراء (#addPurchaseModal)
+     ========================================================= -->
+<div id="addPurchaseModal" class="modal-overlay" onclick="if(event.target === this) closeModal('addPurchaseModal')">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <span class="modal-title">+ إضافة فاتورة شراء جديدة</span>
+      <button type="button" class="modal-close-btn" onclick="closeModal('addPurchaseModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">اسم المورّد / الشركة *</label>
+        <input type="text" id="newPurSupplier" class="form-input" placeholder="مثال: شركة باب الشفاء لاستيراد المعدات" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+        <div class="form-group">
+          <label class="form-label">رقم الفاتورة</label>
+          <input type="text" id="newPurInvoiceNum" class="form-input num-mono" placeholder="INV-PUR-001">
+        </div>
+        <div class="form-group">
+          <label class="form-label">المبلغ الإجمالي (د.ل) *</label>
+          <input type="number" id="newPurTotalAmount" class="form-input num-mono" placeholder="0" min="0" step="0.5" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ملاحظات / الأصناف</label>
+        <textarea id="newPurNotes" class="form-textarea" rows="2" placeholder="بيان المواد المشتراة"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" onclick="closeModal('addPurchaseModal')">إلغاء</button>
+      <button type="button" class="btn-primary" onclick="saveNewPurchaseInvoice()">تسجيل الفاتورة</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =========================================================
+     MODAL: + إضافة مصروف (#addExpenseModal)
+     ========================================================= -->
+<div id="addExpenseModal" class="modal-overlay" onclick="if(event.target === this) closeModal('addExpenseModal')">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <span class="modal-title">+ تسجيل مصروف جديد</span>
+      <button type="button" class="modal-close-btn" onclick="closeModal('addExpenseModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">وصف المصروف *</label>
+        <input type="text" id="newExpDesc" class="form-input" placeholder="مثال: شحن وتوصيل طلبيات، أكياس وتغليف..." required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+        <div class="form-group">
+          <label class="form-label">المبلغ (د.ل) *</label>
+          <input type="number" id="newExpAmount" class="form-input num-mono" placeholder="0" min="0" step="0.5" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">التصنيف</label>
+          <select id="newExpCategory" class="form-select">
+            <option value="شحن وتوصيل">شحن وتوصيل</option>
+            <option value="تغليف ودعاية">تغليف ودعاية</option>
+            <option value="تسويق">تسويق</option>
+            <option value="سيرفر وتقنية">سيرفر وتقنية</option>
+            <option value="مصاريف عامة">مصاريف عامة</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" onclick="closeModal('addExpenseModal')">إلغاء</button>
+      <button type="button" class="btn-primary" onclick="saveNewExpense()">تسجيل المصروف</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =========================================================
+     MODAL: تفاصيل الطلب والفاتورة الرسمية (#invoiceViewModal)
      ========================================================= -->
 <div id="invoiceViewModal" class="modal-overlay" onclick="if(event.target === this) closeModal('invoiceViewModal')">
-  <div class="modal-dialog modal-dialog-xl" style="max-width: 820px !important;">
+  <div class="modal-dialog modal-dialog-xl">
     <div class="modal-header no-print">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="modal-title">فاتورة مبيعات <span id="invHeaderNumber" class="num-mono" style="color: #0a335c;">#INV-1068</span></span>
+        <span class="modal-title">فاتورة مبيعات <span id="invHeaderNumber" class="num-mono" style="color: #0a335c;">#INV-0000</span></span>
         <span class="status-pill completed" id="invHeaderStatusPill">مكتمل</span>
       </div>
-      <button class="modal-close-btn" onclick="closeModal('invoiceViewModal')">✕</button>
+      <button type="button" class="modal-close-btn" onclick="closeModal('invoiceViewModal')">✕</button>
     </div>
 
     <div class="modal-body" style="background: #f8fafc; padding: 1.5rem;">
-      <!-- PRINTABLE A4 INVOICE SHEET (Identical to Storefront InvoiceView.jsx & Screen 5) -->
+      <!-- PRINTABLE A4 INVOICE SHEET -->
       <div class="invoice-paper-printable storefront-invoice" id="printableInvoiceDocument">
-        
-        <!-- Top Logo & Brand Name (Centered) -->
+        <!-- Top Logo & Brand Name -->
         <div class="invoice-brand-center-header">
           <img src="assets/brand-logo-trimmed.png" alt="Absolute Dental" class="inv-logo-img" onerror="this.onerror=null; this.src='assets/brand-logo.png';">
           <h1 class="inv-brand-title">Absolute Dental</h1>
         </div>
 
-        <!-- Subheader Row (Company details & Invoice meta) -->
+        <!-- Subheader Row -->
         <div class="invoice-header-row" style="border-bottom: 2px solid #00a896; padding-bottom: 1.25rem; margin-bottom: 1.25rem;">
-          <!-- Company Info (Right in RTL) -->
           <div class="inv-company-details">
-            <div class="inv-comp-name" style="font-size: 1.35rem; font-weight: 900; color: #0a335c;">Absolute Dental</div>
-            <div class="inv-comp-line" style="font-size: 0.8rem; color: #64748b;">معدات ومستلزمات طب الأسنان</div>
-            <div class="inv-comp-line" style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #475569; margin-top: 4px;">
-              <span>📍 طرابلس، ليبيا / Tripoli, Libya</span>
-            </div>
-            <div class="inv-comp-line num-mono" style="display: flex; align-items: center; gap: 4px; font-weight: 700; color: #0a335c; font-size: 0.85rem; margin-top: 2px;">
-              <span>📞 0946859163</span>
-            </div>
+            <div style="font-size: 1.35rem; font-weight: 900; color: #0a335c;">Absolute Dental</div>
+            <div style="font-size: 0.8rem; color: #64748b;">معدات ومستلزمات طب الأسنان</div>
+            <div style="font-size: 0.8rem; color: #475569; margin-top: 4px;">📍 طرابلس، ليبيا / Tripoli, Libya</div>
+            <div class="num-mono" style="font-weight: 700; color: #0a335c; font-size: 0.85rem; margin-top: 2px;">📞 0946859163</div>
           </div>
 
-          <!-- Invoice Meta (Left in RTL) -->
-          <div class="inv-meta-details" style="text-align: left;">
-            <div class="inv-status-pill-wrap" style="margin-bottom: 0.4rem;">
-              <span class="inv-status-pill" id="invDocStatusPill" style="background: #e6f6f4; color: #00a896; padding: 0.35rem 0.8rem; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">مكتمل</span>
+          <div style="text-align: left;">
+            <div style="margin-bottom: 0.4rem;">
+              <span id="invDocStatusPill" style="background: #e6f6f4; color: #00a896; padding: 0.35rem 0.8rem; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">مكتمل</span>
             </div>
-            <div class="inv-number num-mono" id="invDocNumber" style="font-size: 1rem; font-weight: 800; color: #0a335c;">#INV-1068</div>
-            <div class="inv-datetime" id="invDocDate" style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">02 أكتوبر 2026</div>
+            <div class="num-mono" id="invDocNumber" style="font-size: 1rem; font-weight: 800; color: #0a335c;">#INV-0000</div>
+            <div id="invDocDate" style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">07 أكتوبر 2026</div>
           </div>
         </div>
 
-        <!-- Customer & Company Info Grid (Matching Storefront 2-col) -->
-        <div class="invoice-customer-box" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
-          <!-- Customer info -->
+        <!-- Customer Box -->
+        <div class="invoice-customer-box">
           <div>
-            <h4 style="color: #0a335c; font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem;">معلومات الطالب / العميل</h4>
+            <h4 style="color: #0a335c; font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem;">معلومات العميل / الطالب</h4>
             <div style="display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.82rem; color: #334155;">
-              <div><strong>الاسم:</strong> <span id="invDocCustomerName">طالب كلية الأسنان</span></div>
-              <div><strong>الهاتف:</strong> <span class="num-mono" id="invDocCustomerPhone" style="font-weight: 600; color: #00a896;">0912345678</span></div>
-              <div><strong>الكلية:</strong> <span id="invDocCollege">كلية طب الأسنان - جامعة طرابلس</span></div>
+              <div><strong>الاسم:</strong> <span id="invDocCustomerName">-</span></div>
+              <div><strong>الهاتف:</strong> <span class="num-mono" id="invDocCustomerPhone" style="font-weight: 600; color: #00a896;">-</span></div>
+              <div><strong>الكلية:</strong> <span id="invDocCollege">كلية طب الأسنان</span></div>
               <div id="invDocAddressWrap"><strong>العنوان:</strong> <span id="invDocAddress">طرابلس</span></div>
             </div>
           </div>
 
-          <!-- Store Info -->
           <div>
             <h4 style="color: #0a335c; font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem;">Absolute Dental</h4>
             <div style="display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.82rem; color: #475569;">
-              <div>📍 المقر: طرابلس، ليبيا (جامعة طرابلس)</div>
+              <div>📍 المقر: طرابلس، ليبيا</div>
               <div>📞 خدمة العملاء: <span class="num-mono" style="font-weight: 700; color: #0a335c;">0946859163</span></div>
-              <div>🌐 المنصة: المتجر الرسمي لطلبة طب الأسنان</div>
+              <div>🌐 المتجر الرسمي لطلبة وأطباء الأسنان</div>
             </div>
           </div>
         </div>
 
-        <!-- Invoice Items Table -->
+        <!-- Items Table -->
         <div class="invoice-table-wrapper">
           <table class="invoice-items-table">
             <thead>
@@ -1541,59 +1353,50 @@
               </tr>
             </thead>
             <tbody id="invDocItemsBody">
-              <!-- Dynamically rendered via JS with 48x48 thumbnails -->
+              <!-- Dynamically populated -->
             </tbody>
           </table>
         </div>
 
-        <!-- Financial Totals Section -->
+        <!-- Totals -->
         <div class="invoice-totals-section">
           <div class="invoice-totals-box">
             <div class="inv-totals-row">
               <span>المجموع الفرعي:</span>
-              <span class="num-mono" id="invDocSubtotal">37 د.ل</span>
+              <span class="num-mono" id="invDocSubtotal">0 د.ل</span>
             </div>
-            <div class="inv-totals-row discount" id="invDocDiscountRow" style="display: none;">
+            <div class="inv-totals-row" id="invDocDiscountRow" style="display: none;">
               <span>الخصم:</span>
-              <span class="num-mono" id="invDocDiscountVal">-2 د.ل</span>
+              <span class="num-mono" id="invDocDiscountVal">0 د.ل</span>
             </div>
             <div class="inv-totals-row">
               <span>التوصيل:</span>
-              <span class="num-mono" id="invDocShippingVal" style="color: #00a896;">مجاني بالكلية</span>
+              <span class="num-mono" id="invDocShippingVal">مجاني</span>
             </div>
             <div class="inv-totals-row total">
               <span>الإجمالي:</span>
-              <span class="num-mono" id="invDocNetTotal">35 د.ل</span>
-            </div>
-            <div class="inv-totals-note">
-              *(ملاحظة: تكلفة التوصيل تُضاف وتُحدد عبر الواتساب عند تأكيد الطلب)*
+              <span class="num-mono" id="invDocNetTotal">0 د.ل</span>
             </div>
           </div>
         </div>
 
-        <!-- Thank You Footer -->
+        <!-- Footer -->
         <div class="invoice-footer-thanks">
-          <div class="inv-thanks-main">شكراً لتسوقكم مع Absolute Dental ❤️</div>
-          <div class="inv-thanks-sub">دائماً معكم في رحلتكم نحو ابتسامة أفضل</div>
+          <div class="inv-thanks-main">شكراً لتعاملكم مع Absolute Dental ❤️</div>
+          <div class="inv-thanks-sub">دائماً معكم في رحلتكم نحو التميز المهني</div>
         </div>
-
       </div>
     </div>
 
-    <!-- Modal Footer Actions (no-print) -->
     <div class="modal-footer no-print" style="justify-content: space-between;">
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button type="button" class="btn-storefront-print" onclick="printInvoiceFromModal()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
-          <span>طباعة</span>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="btn-primary" onclick="printInvoiceFromModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+          <span>طباعة الفاتورة</span>
         </button>
-        <button type="button" class="btn-storefront-pdf" id="btnDownloadInvoicePdf" onclick="downloadInvoicePDFFromModal()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <button type="button" class="btn-secondary" onclick="downloadInvoicePDFFromModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span>تحميل PDF</span>
-        </button>
-        <button type="button" class="btn-storefront-share" onclick="shareInvoiceWhatsAppFromModal()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.301-.15-1.78-.879-2.056-.98-.276-.1-.477-.15-.678.15-.2.3-.778.98-.954 1.18-.176.2-.351.226-.653.075-.301-.15-1.272-.469-2.423-1.496-.896-.799-1.5-1.786-1.677-2.087-.176-.3-.019-.462.132-.612.136-.135.301-.351.452-.527.15-.176.2-.3.301-.502.101-.2.05-.376-.025-.527-.075-.15-.678-1.632-.929-2.235-.244-.588-.492-.508-.678-.518-.176-.01-.377-.01-.578-.01-.2 0-.527.075-.803.376-.276.3-1.055 1.03-1.055 2.511 0 1.482 1.08 2.912 1.231 3.113.15.2 2.124 3.245 5.148 4.551.719.311 1.281.497 1.719.636.722.229 1.378.197 1.898.119.579-.088 1.78-.728 2.03-1.431.251-.703.251-1.306.176-1.431-.076-.125-.276-.2-.577-.35z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.174L2 22l4.982-1.408A9.957 9.957 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.61 0-3.11-.47-4.38-1.28l-.31-.2-2.96.84.83-2.88-.2-.33A8.163 8.163 0 0 1 3.8 12c0-4.52 3.68-8.2 8.2-8.2s8.2 3.68 8.2 8.2c0 4.52-3.68 8.2-8.2 8.2z"/></svg>
-          <span>مشاركة</span>
         </button>
       </div>
       <button type="button" class="btn-secondary" onclick="closeModal('invoiceViewModal')">إغلاق</button>
@@ -1601,613 +1404,12 @@
   </div>
 </div>
 
-
-<!-- 2. HIGH-SPEED POS MODAL (+ طلب سريع) -->
-<div id="posModal" class="modal-overlay" onclick="if(event.target === this) closeModal('posModal')">
-  <div class="modal-dialog" style="max-width: 680px;">
-    <div class="modal-header">
-      <span class="modal-title">+ تسجيل طلب فوري وسريع (POS)</span>
-      <button class="modal-close-btn" onclick="closeModal('posModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <!-- Quick Student Info -->
-      <div class="modal-grid-2">
-        <div>
-          <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">اسم الطالب / العميل</label>
-          <input type="text" id="posInputName" class="search-input" value="طالب كلية الأسنان" style="background: var(--bg-subtle); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-card); width: 100%;">
-        </div>
-        <div>
-          <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">رقم الهاتف</label>
-          <input type="text" id="posInputPhone" class="search-input" value="091-0000000" style="background: var(--bg-subtle); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-card); width: 100%;">
-        </div>
-      </div>
-
-      <!-- Quick Item Selector -->
-      <div>
-        <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px;">اختر الأداة للإضافة السريعة:</label>
-        <div class="quick-items-grid" id="posProductsButtonsGrid">
-          <!-- Populated from products -->
-        </div>
-      </div>
-
-      <!-- POS Selected Cart -->
-      <div style="background: var(--bg-subtle); border-radius: var(--radius-md); padding: 0.75rem;">
-        <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">محتويات السلة الحالية:</div>
-        <div id="posCartItemsList" style="display: flex; flex-direction: column; gap: 4px; max-height: 120px; overflow-y: auto;">
-          <!-- Items in cart -->
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-card); padding-top: 6px; margin-top: 6px;">
-          <span style="font-weight: 700;">المجموع الكلي:</span>
-          <span class="num-mono" id="posCartTotalDisplay" style="font-size: 1.3rem; font-weight: 900; color: var(--primary);">0 د.ل</span>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeModal('posModal')">إلغاء</button>
-      <button class="btn-primary" onclick="confirmPosSale()">✓ تأكيد البيع واستلام الكاش</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- 3. DELIVERY THERMAL SLIP MODAL -->
-<div id="deliverySlipModal" class="modal-overlay" onclick="if(event.target === this) closeModal('deliverySlipModal')">
-  <div class="modal-dialog" style="max-width: 480px;">
-    <div class="modal-header">
-      <span class="modal-title">بوليصة الشحن والتسليم الرسمية</span>
-      <button class="modal-close-btn" onclick="closeModal('deliverySlipModal')">✕</button>
-    </div>
-    <div class="modal-body" style="background: #f1f5f9;">
-      <div class="receipt-paper" id="printableReceiptArea">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2563eb; padding-bottom: 8px;">
-          <div>
-            <h2 style="font-size: 1.1rem; font-weight: 900; color: #2563eb; margin: 0;">ABSOLUTE DENTAL</h2>
-            <p style="font-size: 0.65rem; color: #64748b; margin: 0;">مستلزمات وأدوات أطباء وطلبة الأسنان — ليبيا</p>
-          </div>
-          <div style="text-align: left;">
-            <div class="num-mono" style="font-weight: 800; font-size: 0.95rem; color: #111;" id="slipOrderNum">#75735422</div>
-            <div style="font-size: 0.65rem; color: #64748b;">2026-09-30 10:04</div>
-          </div>
-        </div>
-
-        <div style="margin: 10px 0; padding: 8px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
-          <div style="font-weight: 800; font-size: 0.85rem;" id="slipCustomerName">هديل النفاتي</div>
-          <div style="font-size: 0.75rem; color: #334155;" id="slipCustomerPhone">0912801073</div>
-          <div style="font-size: 0.725rem; color: #64748b;" id="slipCollege">جامعة طرابلس — كلية طب الأسنان</div>
-          <div style="font-size: 0.725rem; color: #64748b;" id="slipAddress">طرابلس</div>
-        </div>
-
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 0.75rem;">
-          <thead>
-            <tr style="background: #f1f5f9; color: #334155;">
-              <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: right;">الأداة</th>
-              <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">الكمية</th>
-              <th style="border: 1px solid #e2e8f0; padding: 6px; text-align: left;">السعر</th>
-            </tr>
-          </thead>
-          <tbody id="slipItemsBody">
-            <tr>
-              <td style="border: 1px solid #e2e8f0; padding: 6px;">Study cast + high-speed NSK hand piece</td>
-              <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">1</td>
-              <td style="border: 1px solid #e2e8f0; padding: 6px;">250 د.ل</td>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #e2e8f0; padding: 6px;">Torch 261 Jet Lighter</td>
-              <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">1</td>
-              <td style="border: 1px solid #e2e8f0; padding: 6px;">60 د.ل</td>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #e2e8f0; padding: 6px;">Dental Mouth Mirror</td>
-              <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">1</td>
-              <td style="border: 1px solid #e2e8f0; padding: 6px;">15 د.ل</td>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #e2e8f0; padding: 6px;">Periodontal Probe</td>
-              <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">1</td>
-              <td style="border: 1px solid #e2e8f0; padding: 6px;">15 د.ل</td>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #e2e8f0; padding: 6px;">أدوات وحشوات حفر متنوعة (19 قطعة)</td>
-              <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">19</td>
-              <td style="border: 1px solid #e2e8f0; padding: 6px;">38 د.ل</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px dashed #94a3b8; padding-top: 8px;">
-          <div>
-            <div style="font-size: 0.7rem; color: #64748b;">طريقة الدفع: كاش عند الاستلام</div>
-            <div style="font-size: 0.65rem; color: #2563eb; font-weight: bold;">شكراً لتعاملكم مع Absolute Dental 🦷</div>
-          </div>
-          <div style="text-align: left;">
-            <div style="font-size: 0.7rem; color: #64748b;">المجموع المطلوب:</div>
-            <div class="num-mono" style="font-size: 1.3rem; font-weight: 900; color: #2563eb;" id="slipTotal">378 د.ل</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="window.print()">🖨️ طباعة الفاتورة</button>
-      <button class="btn-primary" onclick="closeModal('deliverySlipModal')">تم</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- 4. COMMAND PALETTE SEARCH MODAL (Ctrl + K) -->
-<div id="commandPaletteModal" class="modal-overlay" onclick="if(event.target === this) closeModal('commandPaletteModal')">
-  <div class="modal-dialog" style="max-width: 500px; padding: 0;">
-    <div style="padding: 1rem; border-bottom: 1px solid var(--border-card); display: flex; align-items: center; gap: 0.5rem;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <input type="text" id="commandPaletteInput" placeholder="اكتب للبحث عن طلب، أداة، أو شريك..." oninput="handleCommandPaletteSearch(this.value)" style="border: none; outline: none; width: 100%; font-size: 0.95rem;" autofocus>
-      <span class="search-kbd">ESC</span>
-    </div>
-    <div id="commandPaletteResults" style="max-height: 280px; overflow-y: auto; padding: 0.5rem;">
-      <!-- Results populated by JS -->
-    </div>
-  </div>
-</div>
-
-<!-- 5. ASSISTED STUDENT ORDER MODAL (+ طلب لطالب بالنيابة) -->
-<div id="studentOrderModal" class="modal-overlay" onclick="if(event.target === this) closeModal('studentOrderModal')">
-  <div class="modal-dialog modal-dialog-xl">
-    <div class="modal-header">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="modal-title">🦷 إنشاء طلب لطالب (بالنيابة)</span>
-        <span class="status-pill new">ربط مباشر بالسيرفر والمخزون</span>
-      </div>
-      <button class="modal-close-btn" onclick="closeModal('studentOrderModal')">✕</button>
-    </div>
-
-    <div class="modal-body">
-      <div class="student-order-grid">
-        
-        <!-- RIGHT PANEL: STUDENT DETAILS & DELIVERY -->
-        <div class="student-form-section">
-          <div class="section-badge-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>بيانات الطالب والتسليم</span>
-          </div>
-
-          <div class="form-group-custom">
-            <label class="form-label-custom">اسم الطالب / الطالبة <span style="color:#ef4444;">*</span></label>
-            <input type="text" id="studentOrderName" class="form-input-custom" placeholder="مثال: أحمد عبدالسلام الورفلي" required>
-          </div>
-
-          <div class="form-row-2col">
-            <div class="form-group-custom">
-              <label class="form-label-custom">رقم الهاتف (واتساب) <span style="color:#ef4444;">*</span></label>
-              <input type="tel" id="studentOrderPhone" class="form-input-custom num-mono" placeholder="091xxxxxxx" required>
-            </div>
-            <div class="form-group-custom">
-              <label class="form-label-custom">السنة الدراسية / المرحلة</label>
-              <select id="studentOrderYear" class="form-select-custom">
-                <option value="سنة ثالثة (طب أسنان)" selected>سنة ثالثة (3rd Year)</option>
-                <option value="سنة ثانية (طب أسنان)">سنة ثانية (2nd Year)</option>
-                <option value="سنة رابعة (طب أسنان)">سنة رابعة (4th Year)</option>
-                <option value="سنة أولى (إعدادي/أسنان)">سنة أولى (1st Year)</option>
-                <option value="طبيب امتياز">سنة امتياز (Intern)</option>
-                <option value="طبيب أسنان ممارس">طبيب أسنان ممارس</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group-custom">
-            <label class="form-label-custom">الكلية / الجامعة</label>
-            <select id="studentOrderCollege" class="form-select-custom" onchange="handleCollegePresetChange(this.value)">
-              <option value="جامعة طرابلس — كلية طب الأسنان" selected>جامعة طرابلس — كلية طب الأسنان</option>
-              <option value="جامعة بنغازي — كلية طب الأسنان">جامعة بنغازي — كلية طب الأسنان</option>
-              <option value="جامعة مصراتة — كلية طب الأسنان">جامعة مصراتة — كلية طب الأسنان</option>
-              <option value="جامعة الزاوية — كلية طب الأسنان">جامعة الزاوية — كلية طب الأسنان</option>
-              <option value="الجامعة الدولية للعلوم الطبية (LIMU)">الجامعة الدولية للعلوم الطبية (LIMU)</option>
-              <option value="الجامعة الليبية الأهلية — طب أسنان">الجامعة الليبية الأهلية — طب أسنان</option>
-              <option value="كلية أخرى">كلية أو جهة أخرى...</option>
-            </select>
-          </div>
-
-          <div class="form-group-custom" id="studentCustomCollegeWrap" style="display: none;">
-            <input type="text" id="studentOrderCustomCollege" class="form-input-custom" placeholder="اكتب اسم الجامعة أو الكلية بالتفصيل">
-          </div>
-
-          <div class="form-row-2col">
-            <div class="form-group-custom">
-              <label class="form-label-custom">مكان وطريقة الاستلام</label>
-              <select id="studentOrderDeliveryType" class="form-select-custom" onchange="handleDeliveryFeeChange(this.value)">
-                <option value="faculty" data-fee="0" selected>استلام مباشر بالكلية / المدرج (مجاني)</option>
-                <option value="tripoli_home" data-fee="10">توصيل للمنزل داخل طرابلس (+10 د.ل)</option>
-                <option value="outside_tripoli" data-fee="15">شحن وتوصيل خارج طرابلس (+15 د.ل)</option>
-                <option value="office" data-fee="0">استلام من مقر Absolute Dental (مجاني)</option>
-              </select>
-            </div>
-            <div class="form-group-custom">
-              <label class="form-label-custom">طريقة الدفع</label>
-              <select id="studentOrderPayment" class="form-select-custom">
-                <option value="cash_on_delivery" selected>كاش عند الاستلام</option>
-                <option value="bank_transfer">تحويل مصرفي (سداد / وان كاش / تداول)</option>
-                <option value="prepaid">مدفوع مسبقاً</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group-custom">
-            <label class="form-label-custom">ملاحظات وموعد التسليم</label>
-            <textarea id="studentOrderNotes" class="form-input-custom" rows="2" placeholder="مثال: الاستلام يوم الأحد عند مدرج 2 الساعة 11 ص، أو رقم المجموعة A/B"></textarea>
-          </div>
-
-          <div class="form-group-custom">
-            <label class="form-label-custom">المسؤول المنفّذ للطلب (المستخدم المعتمد بالجلسة):</label>
-            <div class="locked-user-badge">
-              <span class="user-pulse-dot"></span>
-              <strong id="studentOrderActiveUserBadgeName">مؤمن</strong>
-              <span style="font-size: 0.7rem; color: #166534; margin-inline-start: auto;">(موثّق تلقائياً بجلسة العمل)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- LEFT PANEL: CATALOG SEARCH & CART -->
-        <div class="student-catalog-section">
-          
-          <!-- Catalog Quick Picker -->
-          <div class="catalog-picker-card">
-            <div class="section-badge-title" style="justify-content: space-between;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
-                <span>اختيار الأدوات من المتجر</span>
-              </div>
-              <span class="num-mono" style="font-size: 0.7rem; color: var(--text-muted);" id="studentCatalogCount">28 منتج</span>
-            </div>
-
-            <!-- Search Bar & Category Filters -->
-            <div style="display: flex; flex-direction: column; gap: 6px; margin: 8px 0;">
-              <input type="text" id="studentCatalogSearch" class="form-input-custom" placeholder="🔍 ابحث بالاسم (بور، كاست، هاندبيس، شمع...)" oninput="filterStudentOrderProducts(this.value)">
-              
-              <div class="student-filter-chips">
-                <button type="button" class="filter-chip active" onclick="setStudentProductCategory('all', this)">الكل</button>
-                <button type="button" class="filter-chip" onclick="setStudentProductCategory('burs', this)">أدوات حفر (Burs)</button>
-                <button type="button" class="filter-chip" onclick="setStudentProductCategory('sets', this)">كاست وهاندبيس</button>
-                <button type="button" class="filter-chip" onclick="setStudentProductCategory('teeth', this)">أسنان وشمع</button>
-                <button type="button" class="filter-chip" onclick="setStudentProductCategory('exam', this)">أدوات فحص</button>
-              </div>
-            </div>
-
-            <!-- Scrollable Products List -->
-            <div class="student-catalog-list" id="studentCatalogList">
-              <!-- Dynamically populated from ERP_STATE.products -->
-            </div>
-          </div>
-
-          <!-- Current Student Order Cart -->
-          <div class="student-cart-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-main);">🛒 محتويات طلب الطالب (<span id="studentCartCount">0</span> صنف)</span>
-              <button type="button" class="text-btn-danger" onclick="clearStudentCart()">تفريغ السلة</button>
-            </div>
-
-            <div class="student-cart-table-wrap">
-              <table class="student-cart-table">
-                <thead>
-                  <tr>
-                    <th>الأداة</th>
-                    <th style="text-align: center; width: 95px;">الكمية</th>
-                    <th style="text-align: left; width: 65px;">السعر</th>
-                    <th style="width: 25px;"></th>
-                  </tr>
-                </thead>
-                <tbody id="studentCartBody">
-                  <!-- Populated by JS -->
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Financial Summary Box -->
-            <div class="student-total-box">
-              <div class="summary-line">
-                <span>مجموع الأصناف:</span>
-                <span class="num-mono" id="studentSubtotalDisplay">0 د.ل</span>
-              </div>
-              <div class="summary-line">
-                <span>رسوم التوصيل:</span>
-                <span class="num-mono" id="studentShippingDisplay">مجاني (0 د.ل)</span>
-              </div>
-              <div class="summary-line total">
-                <span>الإجمالي المطلوب من الطالب:</span>
-                <span class="num-mono total-amount" id="studentTotalDisplay">0 د.ل</span>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button type="button" class="btn-secondary" onclick="closeModal('studentOrderModal')">إلغاء</button>
-      <button type="button" class="btn-primary" id="btnSubmitStudentOrder" onclick="submitStudentOrder()">
-        <span>✓ حفظ وتأكيد الطلب في السيرفر</span>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- 6. STUDENT ORDER SUCCESS MODAL -->
-<div id="studentOrderSuccessModal" class="modal-overlay" onclick="if(event.target === this) closeModal('studentOrderSuccessModal')">
-  <div class="modal-dialog" style="max-width: 480px; text-align: center;">
-    <div class="modal-body" style="padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-      <div class="success-icon-badge">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-      </div>
-
-      <div>
-        <h3 style="font-size: 1.25rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px;">تم تسجيل طلب الطالب بنجاح! 🎉</h3>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">تم حفظ الطلب مباشرة في قاعدة البيانات وتحديث المخزون ومؤشرات المبيعات.</p>
-      </div>
-
-      <!-- Quick Receipt Summary Box -->
-      <div style="background: var(--bg-subtle); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 1rem; width: 100%; text-align: right;">
-        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-card); padding-bottom: 6px; margin-bottom: 6px;">
-          <span style="font-size: 0.775rem; color: var(--text-muted);">رقم الطلب الرسمي:</span>
-          <span class="num-mono" style="font-weight: 800; color: var(--primary);" id="successModalOrderNum">#00000000</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-          <span style="font-size: 0.775rem; color: var(--text-muted);">الطالب:</span>
-          <span style="font-weight: 700; color: var(--text-main);" id="successModalStudentName">-</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-          <span style="font-size: 0.775rem; color: var(--text-muted);">رقم الهاتف:</span>
-          <span class="num-mono" style="color: var(--text-body);" id="successModalStudentPhone">-</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-card); padding-top: 6px; margin-top: 6px;">
-          <span style="font-size: 0.85rem; font-weight: 800;">المبلغ المطلوب كاش:</span>
-          <span class="num-mono" style="font-size: 1.15rem; font-weight: 900; color: var(--primary);" id="successModalOrderTotal">0 د.ل</span>
-        </div>
-      </div>
-
-      <!-- WhatsApp Direct CTA Button -->
-      <button type="button" class="btn-whatsapp-full" id="successModalWhatsAppBtn" onclick="dispatchStudentOrderWhatsApp()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.301-.15-1.78-.879-2.056-.98-.276-.1-.477-.15-.678.15-.2.3-.778.98-.954 1.18-.176.2-.351.226-.653.075-.301-.15-1.272-.469-2.423-1.496-.896-.799-1.5-1.786-1.677-2.087-.176-.3-.019-.462.132-.612.136-.135.301-.351.452-.527.15-.176.2-.3.301-.502.101-.2.05-.376-.025-.527-.075-.15-.678-1.632-.929-2.235-.244-.588-.492-.508-.678-.518-.176-.01-.377-.01-.578-.01-.2 0-.527.075-.803.376-.276.3-1.055 1.03-1.055 2.511 0 1.482 1.08 2.912 1.231 3.113.15.2 2.124 3.245 5.148 4.551.719.311 1.281.497 1.719.636.722.229 1.378.197 1.898.119.579-.088 1.78-.728 2.03-1.431.251-.703.251-1.306.176-1.431-.076-.125-.276-.2-.577-.35z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.174L2 22l4.982-1.408A9.957 9.957 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.61 0-3.11-.47-4.38-1.28l-.31-.2-2.96.84.83-2.88-.2-.33A8.163 8.163 0 0 1 3.8 12c0-4.52 3.68-8.2 8.2-8.2s8.2 3.68 8.2 8.2c0 4.52-3.68 8.2-8.2 8.2z"/></svg>
-        <span>📲 إرسال الفاتورة للطالب عبر الواتساب بنقرة واحدة</span>
-      </button>
-
-      <!-- Thermal Print Slip Button -->
-      <button type="button" class="btn-secondary" style="width: 100%; justify-content: center;" onclick="printSlipFromSuccessModal()">
-        <span>🖨️ طباعة بوليصة التوصيل الرسمية</span>
-      </button>
-    </div>
-
-    <div class="modal-footer" style="justify-content: center;">
-      <button type="button" class="btn-secondary" onclick="closeModal('studentOrderSuccessModal')">إغلاق ومتابعة المنظومة</button>
-    </div>
-  </div>
-</div>
-
-<!-- 7. EDIT PRODUCT MODAL (تعديل بيانات الصنف والأسعار) -->
-<div id="editProductModal" class="modal-overlay" onclick="if(event.target === this) closeModal('editProductModal')">
-  <div class="modal-dialog" style="max-width: 580px;">
-    <div class="modal-header">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="modal-title">✏️ تعديل بيانات الصنف والتسعير والمخزون</span>
-      </div>
-      <button class="modal-close-btn" onclick="closeModal('editProductModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <!-- Active Session User Notice -->
-      <div class="locked-user-badge">
-        <span class="user-pulse-dot"></span>
-        <span>المستخدم المنفّذ للتعديل:</span>
-        <strong id="editProductAuthor">مؤمن</strong>
-        <span style="font-size: 0.7rem; color: #166534; margin-inline-start: auto;">(موثّق تلقائياً بسجل العمليات)</span>
-      </div>
-
-      <input type="hidden" id="editProductId">
-
-      <div class="form-group-custom">
-        <label class="form-label-custom">اسم الأداة / الصنف بالعربية <span style="color:#ef4444;">*</span></label>
-        <input type="text" id="editProductNameAr" class="form-input-custom" required>
-      </div>
-
-      <div class="form-row-2col">
-        <div class="form-group-custom">
-          <label class="form-label-custom">الرمز (SKU)</label>
-          <input type="text" id="editProductSku" class="form-input-custom num-mono">
-        </div>
-        <div class="form-group-custom">
-          <label class="form-label-custom">الفئة / القسم</label>
-          <select id="editProductCategory" class="form-select-custom">
-            <option value="أدوات ومستلزمات">أدوات ومستلزمات</option>
-            <option value="أدوات حفر وبورات">أدوات حفر وبورات (Burs)</option>
-            <option value="كاستات وهاندبيس">كاستات وهاندبيس</option>
-            <option value="أسنان وشمع">أسنان وشمع (Wax & Teeth)</option>
-            <option value="أدوات فحص ومعاينة">أدوات فحص ومعاينة</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row-2col" style="background: var(--bg-subtle); padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-card);">
-        <div class="form-group-custom">
-          <label class="form-label-custom" style="color: var(--primary); font-weight: 800;">سعر البيع للطالب (د.ل) <span style="color:#ef4444;">*</span></label>
-          <input type="number" id="editProductSellingPrice" class="form-input-custom num-mono" step="0.5" min="0" style="font-weight: 800; font-size: 1rem; color: var(--primary);" required>
-        </div>
-        <div class="form-group-custom">
-          <label class="form-label-custom">سعر التكلفة بالجملة (د.ل) <span style="color:#ef4444;">*</span></label>
-          <input type="number" id="editProductCostPrice" class="form-input-custom num-mono" step="0.5" min="0" required>
-        </div>
-      </div>
-
-      <div id="editProductBatchNotice" style="display: none; margin-bottom: 0.75rem; padding: 0.65rem 0.85rem; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-md); font-size: 0.8rem; line-height: 1.6; color: var(--text-main);"></div>
-
-      <div class="form-row-2col">
-        <div class="form-group-custom">
-          <label class="form-label-custom">المخزون الحالي (قطعة) <span style="color:#ef4444;">*</span></label>
-          <input type="number" id="editProductStock" class="form-input-custom num-mono" min="0" required>
-        </div>
-        <div class="form-group-custom">
-          <label class="form-label-custom">حد التنبيه الأدنى (Min Stock)</label>
-          <input type="number" id="editProductMinStock" class="form-input-custom num-mono" min="1" value="10">
-        </div>
-      </div>
-
-      <div class="form-group-custom">
-        <label class="form-label-custom">المورد / المصدر</label>
-        <input type="text" id="editProductSupplier" class="form-input-custom" value="أوراكير للتوريدات الطبية">
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn-secondary" onclick="closeModal('editProductModal')">إلغاء</button>
-      <button type="button" class="btn-primary" onclick="saveProductChanges()">✓ حفظ التعديلات وتوثيقها</button>
-    </div>
-  </div>
-</div>
-
-<!-- 8. ADD PRODUCT MODAL (إضافة صنف جديد) -->
-<div id="addProductModal" class="modal-overlay" onclick="if(event.target === this) closeModal('addProductModal')">
-  <div class="modal-dialog" style="max-width: 580px;">
-    <div class="modal-header">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="modal-title">+ إضافة صنف جديد للمنظومة</span>
-      </div>
-      <button class="modal-close-btn" onclick="closeModal('addProductModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <!-- Active Session User Notice -->
-      <div class="locked-user-badge">
-        <span class="user-pulse-dot"></span>
-        <span>المستخدم المنفّذ للإضافة:</span>
-        <strong id="addProductAuthor">مؤمن</strong>
-        <span style="font-size: 0.7rem; color: #166534; margin-inline-start: auto;">(موثّق تلقائياً بسجل العمليات)</span>
-      </div>
-
-      <div class="form-group-custom">
-        <label class="form-label-custom">اسم الأداة / الصنف بالعربية <span style="color:#ef4444;">*</span></label>
-        <input type="text" id="addProductNameAr" class="form-input-custom" placeholder="مثال: Endo Explorer DG16" required>
-      </div>
-
-      <div class="form-row-2col">
-        <div class="form-group-custom">
-          <label class="form-label-custom">الرمز (SKU)</label>
-          <input type="text" id="addProductSku" class="form-input-custom num-mono" placeholder="DEN-XXXX">
-        </div>
-        <div class="form-group-custom">
-          <label class="form-label-custom">الفئة / القسم</label>
-          <select id="addProductCategory" class="form-select-custom">
-            <option value="أدوات ومستلزمات" selected>أدوات ومستلزمات</option>
-            <option value="أدوات حفر وبورات">أدوات حفر وبورات (Burs)</option>
-            <option value="كاستات وهاندبيس">كاستات وهاندبيس</option>
-            <option value="أسنان وشمع">أسنان وشمع (Wax & Teeth)</option>
-            <option value="أدوات فحص ومعاينة">أدوات فحص ومعاينة</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row-2col" style="background: var(--bg-subtle); padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-card);">
-        <div class="form-group-custom">
-          <label class="form-label-custom" style="color: var(--primary); font-weight: 800;">سعر البيع للطالب (د.ل) <span style="color:#ef4444;">*</span></label>
-          <input type="number" id="addProductSellingPrice" class="form-input-custom num-mono" step="0.5" min="0" placeholder="0" style="font-weight: 800; font-size: 1rem; color: var(--primary);" required>
-        </div>
-        <div class="form-group-custom">
-          <label class="form-label-custom">سعر التكلفة بالجملة (د.ل) <span style="color:#ef4444;">*</span></label>
-          <input type="number" id="addProductCostPrice" class="form-input-custom num-mono" step="0.5" min="0" placeholder="0" required>
-        </div>
-      </div>
-
-      <div class="form-row-2col">
-        <div class="form-group-custom">
-          <label class="form-label-custom">المخزون الأولي (قطعة) <span style="color:#ef4444;">*</span></label>
-          <input type="number" id="addProductStock" class="form-input-custom num-mono" min="0" placeholder="10" required>
-        </div>
-        <div class="form-group-custom">
-          <label class="form-label-custom">حد التنبيه الأدنى</label>
-          <input type="number" id="addProductMinStock" class="form-input-custom num-mono" min="1" value="10">
-        </div>
-      </div>
-
-      <div class="form-group-custom">
-        <label class="form-label-custom">المورد</label>
-        <input type="text" id="addProductSupplier" class="form-input-custom" value="أوراكير للتوريدات الطبية">
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn-secondary" onclick="closeModal('addProductModal')">إلغاء</button>
-      <button type="button" class="btn-primary" onclick="saveNewProduct()">✓ إضافة الصنف وتوثيقه</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- 9. PROCUREMENT INVOICE DETAILS MODAL -->
-<div id="purchaseInvoiceModal" class="modal-overlay" onclick="if(event.target === this) closeModal('purchaseInvoiceModal')">
-  <div class="modal-dialog" style="max-width: 780px;">
-    <div class="modal-header">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="modal-title">تفاصيل فاتورة التوريد: <span id="purModalInvNumber" class="num-mono" style="color: var(--primary);"></span></span>
-      </div>
-      <button class="modal-close-btn" onclick="closeModal('purchaseInvoiceModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-detail-grid">
-        <div>
-          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">المورّد / الشركة</span>
-          <strong id="purModalSupplier" style="font-size: 0.9rem;">-</strong>
-        </div>
-        <div>
-          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">التاريخ والوقت</span>
-          <span id="purModalDate" class="num-mono" style="font-size: 0.85rem; font-weight: 600;">-</span>
-        </div>
-        <div>
-          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">المستلم / الحساب</span>
-          <span id="purModalRecipient" style="font-size: 0.85rem; font-weight: 600;">-</span>
-        </div>
-        <div>
-          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">حالة الدفع</span>
-          <span id="purModalStatus" style="font-size: 0.85rem; font-weight: 700;">-</span>
-        </div>
-        <div style="grid-column: span 2;">
-          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">ملاحظات الفاتورة</span>
-          <span id="purModalNotes" style="font-size: 0.85rem; color: var(--text-muted);">-</span>
-        </div>
-      </div>
-
-      <div style="overflow-x: auto; margin-bottom: 1rem;">
-        <table class="erp-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>بيان الصنف</th>
-              <th style="text-align: center;">الكمية</th>
-              <th>سعر الجملة</th>
-              <th>سعر البيع</th>
-              <th>إجمالي التكلفة</th>
-              <th>صافي الربح</th>
-            </tr>
-          </thead>
-          <tbody id="purModalItemsBody">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
-      </div>
-
-      <div style="display: flex; justify-content: space-between; background: var(--bg-card); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-card); font-size: 0.9rem;">
-        <div>إجمالي التكلفة: <strong id="purModalTotalCost" class="num-mono" style="color: var(--primary);">0 د.ل</strong></div>
-        <div>المبيعات المتوقعة: <strong id="purModalExpectedRev" class="num-mono" style="color: var(--text-main);">0 د.ل</strong></div>
-        <div>صافي الربح المتوقع: <strong id="purModalProfit" class="num-mono" style="color: var(--status-success);">0 د.ل</strong></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn-secondary" onclick="closeModal('purchaseInvoiceModal')">إغلاق</button>
-    </div>
-  </div>
-</div>
-
 <!-- Toast Container -->
 <div id="toastContainer" class="toast-container"></div>
 
-<!-- Supabase Client for Realtime Storefront Sync -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <!-- Data & Engine Scripts -->
-<script src="seed.js?v=20261002-v6"></script>
-<script src="app.js?v=20261002-v6"></script>
+<script src="seed.js?v=20261007-v1"></script>
+<script src="app.js?v=20261007-v1"></script>
 
 </body>
 </html>
