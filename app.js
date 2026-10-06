@@ -1,3 +1,20 @@
+// -------------------------------------------------------------
+// 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
+// -------------------------------------------------------------
+const ERP_DATABASE_VERSION = '2026.10.07_CLEAN_SLATE_RESET_V5';
+if (typeof localStorage !== 'undefined') {
+  if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
+    localStorage.removeItem('abs_erp_products');
+    localStorage.removeItem('abs_erp_orders');
+    localStorage.removeItem('abs_erp_purchases');
+    localStorage.removeItem('abs_erp_expenses');
+    localStorage.removeItem('abs_erp_inventory_transactions');
+    localStorage.removeItem('abs_erp_audit');
+    localStorage.removeItem('abs_erp_invoices');
+    localStorage.setItem('abs_erp_data_version', ERP_DATABASE_VERSION);
+  }
+}
+
 /**
  * ABSOLUTE DENTAL — ENTERPRISE OPERATIONS SYSTEM (ERP)
  * Production JavaScript Engine — Minimalist SaaS Architecture
@@ -17,35 +34,35 @@ const SUPABASE_CONFIG = {
 // 100% Matching 16 Real Procurement Invoices & Storefront Subjects
 // -------------------------------------------------------------
 const VERIFIED_PRODUCT_CATALOG_DATA = {
-  "d02e821e-91e3-4ed4-869e-f636142d8247": { cost: 1.15, sellingPrice: 2, supplier: "شركة السند المتين للمعدات الطبية", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "5528000b-cde4-4b27-8745-7956dc0e4b78": { cost: 1.15, sellingPrice: 2, supplier: "شركة السند المتين للمعدات الطبية", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "6c359465-a522-4654-933f-a64c627c6b38": { cost: 4.00, sellingPrice: 5, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
-  "106ad65c-3074-4cfb-8643-840f36f833f5": { cost: 1.33, sellingPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
-  "5b7d387c-f150-4e64-90fe-b21ac1249ebc": { cost: 11.00, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "أدوات الفحص والعيادة", subject: "fixed-prosthodontics" },
-  "ba48f5b5-38c2-4571-94f5-67be7d38aab3": { cost: 15.00, sellingPrice: 17, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
-  "8a2c351d-359c-4f5e-8c37-3d4ecb1eba19": { cost: 1.20, sellingPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "e625888c-c1b0-4479-9117-76a1215a75f4": { cost: 1.15, sellingPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "2ebc663e-0967-4d6a-b8be-b07b9e84659c": { cost: 1.20, sellingPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "7eaed4a6-5d82-480e-b35e-0ca2d15c90dc": { cost: 2.00, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "صناعة الأسنان المتحركة (سنة 2)", subject: "removable-prosthodontics" },
-  "c78f57a0-54d0-4602-aa05-d92a82398a2f": { cost: 1.20, sellingPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "36e0d204-3613-44b0-b74e-0ba7869420c4": { cost: 1.20, sellingPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "ad31f7c7-d710-4622-8e3f-377b9c657818": { cost: 85.00, sellingPrice: 135, supplier: "مورد معدات طبية", category: "كونس وكراون (سنة 2)", subject: "restorative-dentistry" },
-  "af6c097d-6f53-4ce3-8d52-f9b9fc095295": { cost: 12.00, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "أدوات الفحص واللثة", subject: "periodontics" },
-  "76f62cd7-df40-4e85-97d1-6fb63b09e2f1": { cost: 1.20, sellingPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "4caab5ef-1c9c-411e-8b6e-76781a07fd97": { cost: 1.15, sellingPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "75fb4e12-d06f-4a0e-b7ac-d571b9e996ab": { cost: 12.00, sellingPrice: 15, supplier: "شركة اللامعة للأدوية والمعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
-  "0c18deeb-a571-419b-adf2-8060db42d8cf": { cost: 1.80, sellingPrice: 3, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
-  "fa042791-6d8d-48c1-8f60-f1a103162a1e": { cost: 180.00, sellingPrice: 250, supplier: "شركة باب الشفاء ومورد معتمد", category: "كاستات وقبضات (سنة 2)", subject: "fixed-prosthodontics" },
-  "c9442057-a22f-4ce8-a237-d37f2024146f": { cost: 55.00, sellingPrice: 60, supplier: "شركة سندس لمعدات طب الأسنان", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
-  "e009eaf4-f041-4706-b27d-daa394e512d3": { cost: 12.00, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
-  "c554e6ff-3a55-4e36-aed6-562f70601342": { cost: 12.00, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
-  "72e1069c-4319-42ff-a38c-2af8f8e4e546": { cost: 2.00, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
-  "d2a56c58-bf46-47aa-b803-6546aa7491c5": { cost: 1.20, sellingPrice: 2, supplier: "شركة كراون / باب الشفاء", category: "صناعة الأسنان الثابتة (سنة 2)", subject: "fixed-prosthodontics" },
-  "2a8f9bde-fb3f-485d-a1bd-d62aa0b83556": { cost: 2.00, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
-  "8f344bd9-91ec-4787-8371-f489cccf635e": { cost: 100.00, sellingPrice: 125, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "كاستات تعليمية (سنة 2)", subject: "fixed-prosthodontics" },
-  "187f6429-fee1-4f50-8edc-2a18bac1de35": { cost: 1.20, sellingPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "627bdb62-3364-497b-8aa6-3b911ad78f26": { cost: 1.20, sellingPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
-  "8806943f-d3bf-443b-b623-7002b354a355": { cost: 215.00, sellingPrice: 225, supplier: "شركة المسار الطبي للمعدات", category: "كونس وكراون (سنة 2)", subject: "restorative-dentistry" },
+  "d02e821e-91e3-4ed4-869e-f636142d8247": { cost: 0, sellingPrice: 0, supplier: "شركة السند المتين للمعدات الطبية", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "5528000b-cde4-4b27-8745-7956dc0e4b78": { cost: 0, sellingPrice: 0, supplier: "شركة السند المتين للمعدات الطبية", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "6c359465-a522-4654-933f-a64c627c6b38": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "106ad65c-3074-4cfb-8643-840f36f833f5": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "5b7d387c-f150-4e64-90fe-b21ac1249ebc": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "أدوات الفحص والعيادة", subject: "fixed-prosthodontics" },
+  "ba48f5b5-38c2-4571-94f5-67be7d38aab3": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
+  "8a2c351d-359c-4f5e-8c37-3d4ecb1eba19": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "e625888c-c1b0-4479-9117-76a1215a75f4": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "2ebc663e-0967-4d6a-b8be-b07b9e84659c": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "7eaed4a6-5d82-480e-b35e-0ca2d15c90dc": { cost: 0, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "صناعة الأسنان المتحركة (سنة 2)", subject: "removable-prosthodontics" },
+  "c78f57a0-54d0-4602-aa05-d92a82398a2f": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "36e0d204-3613-44b0-b74e-0ba7869420c4": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "ad31f7c7-d710-4622-8e3f-377b9c657818": { cost: 0, sellingPrice: 0, supplier: "مورد معدات طبية", category: "كونس وكراون (سنة 2)", subject: "restorative-dentistry" },
+  "af6c097d-6f53-4ce3-8d52-f9b9fc095295": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "أدوات الفحص واللثة", subject: "periodontics" },
+  "76f62cd7-df40-4e85-97d1-6fb63b09e2f1": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "4caab5ef-1c9c-411e-8b6e-76781a07fd97": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "75fb4e12-d06f-4a0e-b7ac-d571b9e996ab": { cost: 0, sellingPrice: 0, supplier: "شركة اللامعة للأدوية والمعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
+  "0c18deeb-a571-419b-adf2-8060db42d8cf": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
+  "fa042791-6d8d-48c1-8f60-f1a103162a1e": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء ومورد معتمد", category: "كاستات وقبضات (سنة 2)", subject: "fixed-prosthodontics" },
+  "c9442057-a22f-4ce8-a237-d37f2024146f": { cost: 0, sellingPrice: 0, supplier: "شركة سندس لمعدات طب الأسنان", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "e009eaf4-f041-4706-b27d-daa394e512d3": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "c554e6ff-3a55-4e36-aed6-562f70601342": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "72e1069c-4319-42ff-a38c-2af8f8e4e546": { cost: 0, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "d2a56c58-bf46-47aa-b803-6546aa7491c5": { cost: 0, sellingPrice: 0, supplier: "شركة كراون / باب الشفاء", category: "صناعة الأسنان الثابتة (سنة 2)", subject: "fixed-prosthodontics" },
+  "2a8f9bde-fb3f-485d-a1bd-d62aa0b83556": { cost: 0, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
+  "8f344bd9-91ec-4787-8371-f489cccf635e": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "كاستات تعليمية (سنة 2)", subject: "fixed-prosthodontics" },
+  "187f6429-fee1-4f50-8edc-2a18bac1de35": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "627bdb62-3364-497b-8aa6-3b911ad78f26": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
+  "8806943f-d3bf-443b-b623-7002b354a355": { cost: 0, sellingPrice: 0, supplier: "شركة المسار الطبي للمعدات", category: "كونس وكراون (سنة 2)", subject: "restorative-dentistry" },
 };
 
 let supabaseClient = null;
@@ -223,7 +240,7 @@ const ERP_STATE = {
 
   // Products from Seed (39 Real Items - Fully Synced)
   products: (() => {
-    let list = (typeof INITIAL_PRODUCTS !== 'undefined' && Array.isArray(INITIAL_PRODUCTS)) ? JSON.parse(JSON.stringify(INITIAL_PRODUCTS)) : [];
+    let list = (typeof INITIAL_PRODUCTS !== 'undefined' && Array.isArray(INITIAL_PRODUCTS)) ? JSON.parse(JSON.stringify(INITIAL_PRODUCTS)) : ((typeof window !== 'undefined' && Array.isArray(window.ERP_SEEDED_PRODUCTS)) ? JSON.parse(JSON.stringify(window.ERP_SEEDED_PRODUCTS)) : []);
     const cached = localStorage.getItem('abs_erp_products');
     if (cached) {
       try {
@@ -265,39 +282,10 @@ const ERP_STATE = {
   })(),
 
   // Procurement Invoices (16 Invoices)
-  purchases: (typeof INITIAL_PURCHASES !== 'undefined' && Array.isArray(INITIAL_PURCHASES))
-    ? [...INITIAL_PURCHASES]
-    : [],
+  purchases: (typeof localStorage !== 'undefined' && JSON.parse(localStorage.getItem('abs_erp_purchases'))) || [],
 
   // Orders from Seed (18 Real Orders) with LocalStorage fallback & safe property harmonization
-  orders: (() => {
-    let list = (typeof INITIAL_ORDERS !== 'undefined' && Array.isArray(INITIAL_ORDERS))
-      ? JSON.parse(JSON.stringify(INITIAL_ORDERS))
-      : [];
-
-    const cached = localStorage.getItem('abs_erp_orders');
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length >= list.length) {
-          const cachedMap = {};
-          parsed.forEach(co => { cachedMap[co.id || co.orderNumber] = co; });
-          list = list.map(so => {
-            const co = cachedMap[so.id || so.orderNumber];
-            return co ? { ...so, ...co } : so;
-          });
-          parsed.forEach(co => {
-            if (!list.some(so => so.id === co.id || so.orderNumber === co.orderNumber)) {
-              list.push(co);
-            }
-          });
-        }
-      } catch (_) {}
-    }
-
-    try { localStorage.setItem('abs_erp_orders', JSON.stringify(list)); } catch (_) {}
-    return list;
-  })(),
+  orders: (typeof localStorage !== 'undefined' && JSON.parse(localStorage.getItem('abs_erp_orders'))) || [],
 
   // Integrated Inventory Deduction Ledger (3-Way Reconciliation Store)
   inventoryTransactions: (() => {
@@ -319,13 +307,7 @@ const ERP_STATE = {
   posCart: [],
 
   // Operating Expenses Ledger (Total: 680 LYD matching store scale)
-  expenses: JSON.parse(localStorage.getItem('abs_erp_expenses')) || [
-    { id: 'EXP-101', date: '2026-09-30', desc: 'توصيل وشحن طلبيات كلية الأسنان طرابلس', category: 'شحن وتوصيل', user: 'ساسي', method: 'كاش', amount: 250 },
-    { id: 'EXP-102', date: '2026-09-28', desc: 'أكياس وتغليف وعلب Absolute Dental الواقية', category: 'تغليف', user: 'عبدالمؤمن', method: 'كاش', amount: 180 },
-    { id: 'EXP-103', date: '2026-09-25', desc: 'تمويل منشورات وحملات كليات طب الأسنان', category: 'تسويق', user: 'طه', method: 'كاش', amount: 150 },
-    { id: 'EXP-104', date: '2026-09-20', desc: 'استضافة وسيرفر المنظومة السحابي والدومين', category: 'سيرفر وتقنية', user: 'طه', method: 'بطاقة مصرفية', amount: 100 },
-    { id: 'EXP-105', date: '2026-09-28', desc: 'أكياس شحن وتغليف للطلبيات + بطاقات هوية Absolute Dental', category: 'تغليف ودعاية', user: 'طه', method: 'كاش', amount: 80 }
-  ],
+  expenses: (typeof localStorage !== 'undefined' && JSON.parse(localStorage.getItem('abs_erp_expenses'))) || [],
 
   // Audit Logs (Operations Ledger with 100% Real Customer & Product References)
   auditLogs: (() => {
@@ -1186,39 +1168,41 @@ function renderProductsTable(searchQuery = '') {
   const tbody = document.getElementById('fullProductsTableBody');
   if (!tbody) return;
 
-  let list = [...ERP_STATE.products];
+  let list = (ERP_STATE.products || []).filter(p => !String(p.id).startsWith('prod-'));
   if (searchQuery) {
     const q = searchQuery.toLowerCase().trim();
-    list = list.filter(p => p.nameAr.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+    list = list.filter(p => (p.nameAr || '').toLowerCase().includes(q) || (p.nameEn || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q));
   }
 
   tbody.innerHTML = list.map(p => {
     const cost = Number(p.costPrice) || 0;
-    const price = Number(p.sellingPrice) || 0;
-    const margin = price > 0 ? Math.round(((price - cost) / price) * 100) : 0;
+    const wholesale = Number(p.wholesalePrice || p.sellingPrice) || 0;
+    const retail = Number(p.retailPrice) || 0;
+    const stock = Number(p.stock) || 0;
+    const imgSrc = p.image || resolveProductImage(p);
+
+    let statusPill = '<span class="status-pill new">نافد</span>';
+    if (stock > 10) statusPill = '<span class="status-pill completed">متوفر</span>';
+    else if (stock > 0) statusPill = '<span class="status-pill preparing">منخفض</span>';
+
     return `
       <tr>
-        <td style="font-weight: 700; color: var(--text-main);">${p.nameAr}</td>
-        <td class="num-mono" style="color: var(--text-muted); font-size: 0.75rem;">${p.sku}</td>
-        <td style="color: var(--text-muted); font-size: 0.75rem;">${p.category}</td>
         <td>
-          ${p.id === 'c9442057-a22f-4ce8-a237-d37f2024146f' ? `
-            <div style="display:flex; flex-direction:column; gap:2px;">
-              <span class="num-mono" style="font-weight:700;">${p.costPrice} د.ل</span>
-              <span class="badge" title="سجل دفعات الشراء: دفعة 1 بـ 50 د.ل (5 قطع) | دفعة 2 بـ 60 د.ل (رأس مال) | دفعة 3 بـ 55 د.ل (الدفعة الحالية 20 قطعة بالمخزن)" style="font-size:0.65rem; background:rgba(56,189,248,0.12); color:#38bdf8; border:1px solid rgba(56,189,248,0.25); cursor:help; border-radius:4px; padding:1px 5px; width:fit-content;">
-                3 دفعات (50 / 60 / 55)
-              </span>
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <img src="${imgSrc}" alt="" style="width: 34px; height: 34px; object-fit: contain; border-radius: var(--radius-sm); background: #f8fafc; border: 1px solid rgba(0,0,0,0.06); flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=80&q=80'">
+            <div>
+              <div style="font-weight: 700; color: var(--text-main); line-height: 1.3;">${p.nameAr}</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">${p.nameEn || ''}</div>
             </div>
-          ` : `<span class="num-mono">${p.costPrice} د.ل</span>`}
+          </div>
         </td>
-        <td class="num-mono" style="font-weight: 800; color: var(--primary);">${p.sellingPrice} د.ل</td>
-        <td class="num-mono" style="color: var(--status-success); font-weight: 700;">+${margin}%</td>
-        <td class="num-mono" style="font-weight: 800;">${p.stock}</td>
-        <td>
-          <span class="status-pill ${p.stock > 10 ? 'completed' : (p.stock > 0 ? 'preparing' : 'new')}">
-            ${p.stock > 10 ? 'متوفر' : (p.stock > 0 ? 'منخفض' : 'نافد')}
-          </span>
-        </td>
+        <td class="num-mono" style="color: var(--text-muted); font-size: 0.75rem; font-weight: 600;">${p.sku || '-'}</td>
+        <td style="color: var(--text-muted); font-size: 0.75rem;">${p.category || '-'}</td>
+        <td class="num-mono">${cost > 0 ? `${cost.toFixed(2)} د.ل` : '-'}</td>
+        <td class="num-mono" style="font-weight: 700; color: var(--primary);">${wholesale > 0 ? `${wholesale} د.ل` : '-'}</td>
+        <td class="num-mono" style="font-weight: 700; color: var(--text-body);">${retail > 0 ? `${retail} د.ل` : '-'}</td>
+        <td class="num-mono" style="font-weight: 800; text-align: center; color: ${stock <= 0 ? '#dc2626' : 'var(--text-main)'};">${stock}</td>
+        <td>${statusPill}</td>
         <td style="text-align: center;">
           <div style="display: inline-flex; gap: 4px;">
             <button class="btn-action-edit" onclick="openEditProductModal('${p.id}')">تعديل ✏️</button>
@@ -1230,7 +1214,12 @@ function renderProductsTable(searchQuery = '') {
   }).join('');
 
   const countEl = document.getElementById('productsTotalCount');
-  if (countEl) countEl.textContent = ERP_STATE.products.length;
+  if (countEl) countEl.textContent = list.length;
+
+  const paginationInfo = document.getElementById('productsPaginationInfo');
+  if (paginationInfo) {
+    paginationInfo.textContent = `عرض 1 - ${list.length} من ${list.length} منتج`;
+  }
 }
 
 function handleProductsSearch(val) {
@@ -1247,42 +1236,25 @@ function openEditProductModal(productId) {
   const prod = ERP_STATE.products.find(p => p.id === productId);
   if (!prod) return;
 
-  document.getElementById('editProductId').value = prod.id;
-  document.getElementById('editProductNameAr').value = prod.nameAr;
-  document.getElementById('editProductSku').value = prod.sku;
-  document.getElementById('editProductCategory').value = prod.category || 'أدوات ومستلزمات';
-  document.getElementById('editProductSellingPrice').value = prod.sellingPrice;
-  document.getElementById('editProductCostPrice').value = prod.costPrice;
-  document.getElementById('editProductStock').value = prod.stock;
-  document.getElementById('editProductMinStock').value = prod.minStock || 10;
-  document.getElementById('editProductSupplier').value = prod.supplier || 'أوراكير للتوريدات الطبية';
+  const setVal = (ids, val) => {
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el) { el.value = (val !== undefined && val !== null) ? val : ''; return; }
+    }
+  };
+
+  setVal(['editProductId'], prod.id);
+  setVal(['editProdNameAr', 'editProductNameAr'], prod.nameAr);
+  setVal(['editProdSku', 'editProductSku'], prod.sku || '');
+  setVal(['editProdCategory', 'editProductCategory'], prod.category || 'عام');
+  setVal(['editProdCostPrice', 'editProductCostPrice'], Number(prod.costPrice) || 0);
+  setVal(['editProdWholesalePrice', 'editProductWholesalePrice', 'editProductSellingPrice'], Number(prod.wholesalePrice || prod.sellingPrice) || 0);
+  setVal(['editProdRetailPrice', 'editProductRetailPrice'], Number(prod.retailPrice) || 0);
+  setVal(['editProdStock', 'editProductStock'], Number(prod.stock) || 0);
+  setVal(['editProdMinStock', 'editProductMinStock'], Number(prod.minStock) || 0);
 
   const authorBadge = document.getElementById('editProductAuthor');
   if (authorBadge) authorBadge.textContent = user;
-
-  const batchNotice = document.getElementById('editProductBatchNotice');
-  if (batchNotice) {
-    if (prod.id === 'c9442057-a22f-4ce8-a237-d37f2024146f') {
-      batchNotice.style.display = 'block';
-      batchNotice.innerHTML = `
-        <div style="font-weight: 700; color: #38bdf8; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-          <span>📦</span>
-          <span>سجل دفعات الشراء الفعلية (3 دفعات بأسعار متغيرة):</span>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.78rem;">
-          <div>• <b>23/07/2026 (فاتورة A5338 - سندس):</b> 5 قطع × 50.00 د.ل (تم تصريفها بالكامل)</div>
-          <div>• <b>18/09/2026 (فاتورة خارجية - رأس مال):</b> 1 قطعة × 60.00 د.ل (بيعت مباشرة برأس مالها بدون ربح)</div>
-          <div>• <b>29/09/2026 (فاتورة A5671 - سندس):</b> 20 قطعة × 55.00 د.ل (رصيد المخزن الحالي)</div>
-        </div>
-        <div style="margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(56, 189, 248, 0.25); font-weight: 700; color: var(--primary);">
-          المتوسط المرجح التراكمي: 54.23 د.ل | تكلفة الدفعة الحالية في الرف: 55.00 د.ل
-        </div>
-      `;
-    } else {
-      batchNotice.style.display = 'none';
-      batchNotice.innerHTML = '';
-    }
-  }
 
   openModal('editProductModal');
 }
@@ -1294,18 +1266,27 @@ function saveProductChanges() {
     return;
   }
 
-  const prodId = document.getElementById('editProductId').value;
+  const prodId = document.getElementById('editProductId')?.value;
   const prod = ERP_STATE.products.find(p => p.id === prodId);
   if (!prod) return;
 
-  const newNameAr = document.getElementById('editProductNameAr').value.trim();
-  const newSku = document.getElementById('editProductSku').value.trim();
-  const newCategory = document.getElementById('editProductCategory').value;
-  const newSellingPrice = Number(document.getElementById('editProductSellingPrice').value) || 0;
-  const newCostPrice = Number(document.getElementById('editProductCostPrice').value) || 0;
-  const newStock = Number(document.getElementById('editProductStock').value) || 0;
-  const newMinStock = Number(document.getElementById('editProductMinStock').value) || 10;
-  const newSupplier = document.getElementById('editProductSupplier').value.trim();
+  const getVal = (ids) => {
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el) return el.value;
+    }
+    return '';
+  };
+
+  const newNameAr = getVal(['editProdNameAr', 'editProductNameAr']).trim();
+  const newSku = getVal(['editProdSku', 'editProductSku']).trim();
+  const newCategory = getVal(['editProdCategory', 'editProductCategory']);
+  const newCostPrice = Number(getVal(['editProdCostPrice', 'editProductCostPrice'])) || 0;
+  const newWholesalePrice = Number(getVal(['editProdWholesalePrice', 'editProductWholesalePrice', 'editProductSellingPrice'])) || 0;
+  const newRetailPrice = Number(getVal(['editProdRetailPrice', 'editProductRetailPrice'])) || 0;
+  const newStock = Number(getVal(['editProdStock', 'editProductStock'])) || 0;
+  const newMinStock = Number(getVal(['editProdMinStock', 'editProductMinStock'])) || 0;
+  const newSupplier = getVal(['editProdSupplier', 'editProductSupplier']).trim();
 
   if (!newNameAr) {
     showToast('يرجى إدخال اسم الصنف', 'warning');
@@ -1313,14 +1294,14 @@ function saveProductChanges() {
   }
 
   // Audit specific modifications directly stamped with active user
-  if (Number(prod.sellingPrice) !== newSellingPrice) {
+  if (Number(prod.sellingPrice) !== newWholesalePrice) {
     logOperation({
       user: user,
-      action: 'تعديل سعر البيع',
+      action: 'تعديل سعر الجملة',
       target: prod.nameAr,
       oldVal: `${prod.sellingPrice} د.ل`,
-      newVal: `${newSellingPrice} د.ل`,
-      details: `«${user} قام بتعديل سعر بيع الصنف "${prod.nameAr}" من ${prod.sellingPrice} د.ل إلى ${newSellingPrice} د.ل»`
+      newVal: `${newWholesalePrice} د.ل`,
+      details: `«${user} قام بتعديل سعر بيع/جملة الصنف "${prod.nameAr}" من ${prod.sellingPrice} د.ل إلى ${newWholesalePrice} د.ل»`
     });
   }
 
@@ -1346,34 +1327,29 @@ function saveProductChanges() {
     });
   }
 
-  if (prod.nameAr !== newNameAr || prod.category !== newCategory || prod.sku !== newSku) {
-    logOperation({
-      user: user,
-      action: 'تعديل بيانات الصنف',
-      target: prod.nameAr,
-      oldVal: prod.nameAr,
-      newVal: newNameAr,
-      details: `«${user} قام بتحديث البيانات الأساسية للصنف "${newNameAr}"»`
-    });
-  }
-
   // Apply changes to product
   prod.nameAr = newNameAr;
   prod.sku = newSku;
   prod.category = newCategory;
-  prod.sellingPrice = newSellingPrice;
-  prod.costPrice = newCostPrice.toFixed(1);
+  prod.costPrice = newCostPrice;
+  prod.sellingPrice = newWholesalePrice;
+  prod.wholesalePrice = newWholesalePrice;
+  prod.retailPrice = newRetailPrice;
   prod.stock = newStock;
   prod.minStock = newMinStock;
   prod.supplier = newSupplier;
   prod.status = (newStock > 10) ? 'متوفر' : (newStock > 0 ? 'منخفض' : 'نافد');
+
+  try {
+    localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
+  } catch (_) {}
 
   closeModal('editProductModal');
   renderProductsTable();
   renderInventoryTable();
   updateDashboardRealUI();
 
-  showToast(`تم حفظ وتوثيق تعديلات الصنف "${newNameAr}" باسم ${user} بنجاح 🟢`);
+  showToast('تم حفظ تعديل الصنف بنجاح', 'success');
 }
 
 function openAddProductModal() {
@@ -1383,13 +1359,21 @@ function openAddProductModal() {
     return;
   }
 
-  document.getElementById('addProductNameAr').value = '';
-  document.getElementById('addProductSku').value = `DEN-${Math.floor(1000 + Math.random() * 9000)}`;
-  document.getElementById('addProductCategory').value = 'أدوات ومستلزمات';
-  document.getElementById('addProductSellingPrice').value = '';
-  document.getElementById('addProductCostPrice').value = '';
-  document.getElementById('addProductStock').value = '20';
-  document.getElementById('addProductMinStock').value = '10';
+  const setVal = (ids, val) => {
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el) { el.value = val; return; }
+    }
+  };
+
+  setVal(['newProdNameAr', 'addProductNameAr'], '');
+  setVal(['newProdSku', 'addProductSku'], `DEN-${Math.floor(1000 + Math.random() * 9000)}`);
+  setVal(['newProdCategory', 'addProductCategory'], 'علاج الأسنان التحفظي (سنة 2)');
+  setVal(['newProdCostPrice', 'addProductCostPrice'], 0);
+  setVal(['newProdWholesalePrice', 'addProductSellingPrice'], 0);
+  setVal(['newProdRetailPrice', 'addProductRetailPrice'], 0);
+  setVal(['newProdStock', 'addProductStock'], 0);
+  setVal(['newProdMinStock', 'addProductMinStock'], 10);
 
   const authorBadge = document.getElementById('addProductAuthor');
   if (authorBadge) authorBadge.textContent = user;
@@ -1404,14 +1388,23 @@ function saveNewProduct() {
     return;
   }
 
-  const nameAr = document.getElementById('addProductNameAr').value.trim();
-  const sku = document.getElementById('addProductSku').value.trim();
-  const category = document.getElementById('addProductCategory').value;
-  const sellingPrice = Number(document.getElementById('addProductSellingPrice').value) || 0;
-  const costPrice = Number(document.getElementById('addProductCostPrice').value) || 0;
-  const stock = Number(document.getElementById('addProductStock').value) || 0;
-  const minStock = Number(document.getElementById('addProductMinStock').value) || 10;
-  const supplier = document.getElementById('addProductSupplier').value.trim();
+  const getVal = (ids) => {
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el) return el.value;
+    }
+    return '';
+  };
+
+  const nameAr = getVal(['newProdNameAr', 'addProductNameAr']).trim();
+  const sku = getVal(['newProdSku', 'addProductSku']).trim();
+  const category = getVal(['newProdCategory', 'addProductCategory']);
+  const costPrice = Number(getVal(['newProdCostPrice', 'addProductCostPrice'])) || 0;
+  const wholesalePrice = Number(getVal(['newProdWholesalePrice', 'addProductSellingPrice'])) || 0;
+  const retailPrice = Number(getVal(['newProdRetailPrice', 'addProductRetailPrice'])) || 0;
+  const stock = Number(getVal(['newProdStock', 'addProductStock'])) || 0;
+  const minStock = Number(getVal(['newProdMinStock', 'addProductMinStock'])) || 0;
+  const supplier = getVal(['newProdSupplier', 'addProductSupplier']).trim();
 
   if (!nameAr) {
     showToast('يرجى إدخال اسم الصنف الجديد', 'warning');
@@ -1424,11 +1417,13 @@ function saveNewProduct() {
     nameEn: nameAr,
     sku: sku,
     category: category,
-    costPrice: costPrice.toFixed(1),
-    sellingPrice: sellingPrice,
+    costPrice: costPrice,
+    sellingPrice: wholesalePrice,
+    wholesalePrice: wholesalePrice,
+    retailPrice: retailPrice,
     stock: stock,
     minStock: minStock,
-    supplier: supplier || 'أوراكير للتوريدات الطبية',
+    supplier: supplier || '',
     status: (stock > 10) ? 'متوفر' : (stock > 0 ? 'منخفض' : 'نافد')
   };
 
@@ -1439,16 +1434,20 @@ function saveNewProduct() {
     action: 'إضافة صنف جديد',
     target: nameAr,
     oldVal: '-',
-    newVal: `${sellingPrice} د.ل (${stock} قطعة)`,
-    details: `«${user} قام بإضافة الصنف الجديد "${nameAr}" بسعر بيع ${sellingPrice} د.ل ومخزون ${stock} قطعة»`
+    newVal: `${wholesalePrice} د.ل (رصيد: ${stock})`,
+    details: `«${user} قام بإضافة الصنف الجديد "${nameAr}"»`
   });
+
+  try {
+    localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
+  } catch (_) {}
 
   closeModal('addProductModal');
   renderProductsTable();
   renderInventoryTable();
   updateDashboardRealUI();
 
-  showToast(`تمت إضافة الصنف "${nameAr}" بنجاح باسم ${user} 🎉`);
+  showToast('تمت إضافة المنتج بنجاح', 'success');
 }
 
 function deleteProduct(productId) {
@@ -2779,254 +2778,15 @@ function showToast(message, type = 'info') {
 // 16. LIVE SERVER SYNC (api.kurofangs.id.ly)
 // -------------------------------------------------------------
 async function syncWithUserServer() {
+  // Clean slate mode: Respect user wipe of historical orders and pricing
+  // Only maintain product structure from clean catalog
   try {
-    // 1. Fetch Products
-    const productsRes = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/products?select=*&order=name_ar.asc`, {
-      headers: {
-        'apikey': SUPABASE_CONFIG.anonKey,
-        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
-      }
-    });
-
-    if (productsRes.ok) {
-      const prods = await productsRes.json();
-      if (Array.isArray(prods) && prods.length > 0) {
-        ERP_STATE.products = prods.map(p => {
-          const verified = VERIFIED_PRODUCT_CATALOG_DATA[p.id] || {};
-          const seedProduct = (typeof INITIAL_PRODUCTS !== 'undefined' ? INITIAL_PRODUCTS.find(ip => ip.id === p.id) : null) || {};
-
-          let img = p.image_url || seedProduct.image || '';
-          if (img && img.includes('102-203-202-115.sslip.io')) {
-            img = img.replace('102-203-202-115.sslip.io', 'api.kurofangs.id.ly');
-          }
-          if (!img && p.id && !String(p.id).startsWith('prod-')) {
-            img = `https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/${p.id}.jpg`;
-          }
-
-          const realCost = verified.cost !== undefined
-            ? Number(verified.cost).toFixed(2)
-            : (seedProduct.costPrice || (Number(p.cost_price) > 0 ? Number(p.cost_price).toFixed(2) : '2.00'));
-
-          const realSupplier = verified.supplier
-            || seedProduct.supplier
-            || (p.supplier_name && p.supplier_name !== 'أوراكير للتوريدات الطبية' ? p.supplier_name : 'شركة باب الشفاء لاستيراد المعدات');
-
-          const realCategory = verified.category || seedProduct.category || 'أدوات ومستلزمات';
-          const realSubject = verified.subject || seedProduct.subject || 'general';
-
-          return {
-            id: p.id,
-            nameAr: p.name_ar || p.name_en || seedProduct.nameAr || 'أداة طبية',
-            nameEn: p.name_en || seedProduct.nameEn || '',
-            sku: p.sku || seedProduct.sku || `DEN-${p.id.slice(0, 4)}`,
-            category: realCategory,
-            subject: realSubject,
-            costPrice: realCost,
-            sellingPrice: Number(p.price || seedProduct.sellingPrice || 0),
-            stock: p.stock_quantity ?? seedProduct.stock ?? 0,
-            minStock: p.min_stock_threshold || seedProduct.minStock || 10,
-            supplier: realSupplier,
-            status: (p.stock_quantity > 10) ? 'متوفر' : (p.stock_quantity > 0) ? 'منخفض' : 'نافد',
-            image: img,
-            image_url: img,
-            shared_inventory_product_id: p.shared_inventory_product_id || seedProduct.shared_inventory_product_id,
-            unit_multiplier: p.unit_multiplier || seedProduct.unit_multiplier
-          };
-        });
-
-        // Ensure extra seed products (boxes, scrubs, burs) remain in ERP catalog
-        if (typeof INITIAL_PRODUCTS !== 'undefined' && Array.isArray(INITIAL_PRODUCTS)) {
-          INITIAL_PRODUCTS.forEach(ip => {
-            if (!ERP_STATE.products.some(p => p.id === ip.id)) {
-              ERP_STATE.products.push(ip);
-            }
-          });
-        }
-        ERP_STATE.products = ERP_STATE.products.filter(p => !String(p.id).startsWith("prod-"));
-
-        try { localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products)); } catch (_) {}
-      }
+    if (ERP_STATE.orders && ERP_STATE.orders.length > 0) {
+      // If there are newly created local orders, preserve them
+    } else {
+      ERP_STATE.orders = [];
     }
-
-    // 2. Fetch Order Items from Server
-    let orderItems = [];
-    try {
-      const orderItemsRes = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/order_items?select=*`, {
-        headers: {
-          'apikey': SUPABASE_CONFIG.anonKey,
-          'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
-        }
-      });
-      if (orderItemsRes.ok) {
-        orderItems = await orderItemsRes.json();
-      }
-    } catch (_) {}
-
-    const productsMap = {};
-    ERP_STATE.products.forEach(p => { productsMap[p.id] = p; });
-
-    const itemsByOrderId = {};
-    if (Array.isArray(orderItems)) {
-      orderItems.forEach(item => {
-        if (!itemsByOrderId[item.order_id]) itemsByOrderId[item.order_id] = [];
-        const prod = productsMap[item.product_id];
-        itemsByOrderId[item.order_id].push({
-          id: item.product_id,
-          name: prod ? prod.nameAr : (item.name_ar || 'أداة طبية'),
-          nameEn: prod ? prod.nameEn : (item.name_en || ''),
-          sku: prod ? prod.sku : '',
-          qty: Number(item.quantity) || 1,
-          price: Number(item.price) || (prod ? Number(prod.sellingPrice) : 0),
-          total: (Number(item.quantity) || 1) * (Number(item.price) || (prod ? Number(prod.sellingPrice) : 0)),
-          image: prod ? prod.image : resolveProductImage({ id: item.product_id })
-        });
-      });
-    }
-
-    // 3. Fetch Orders from Server
-    const ordersRes = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders?select=*&order=created_at.desc`, {
-      headers: {
-        'apikey': SUPABASE_CONFIG.anonKey,
-        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
-      }
-    });
-
-    if (ordersRes.ok) {
-      const dbOrders = await ordersRes.json();
-      if (Array.isArray(dbOrders) && dbOrders.length > 0) {
-        const initialOrdersMap = {};
-        if (typeof INITIAL_ORDERS !== 'undefined' && Array.isArray(INITIAL_ORDERS)) {
-          INITIAL_ORDERS.forEach(io => {
-            initialOrdersMap[io.id] = io;
-            if (io.orderNumber) initialOrdersMap[io.orderNumber.replace('#', '')] = io;
-          });
-        }
-
-        ERP_STATE.orders = dbOrders.map(o => {
-          const existingOrder = (ERP_STATE.orders || []).find(eo => eo.id === o.id || eo.orderNumber === `#${o.order_number}`);
-          const fallbackOrder = existingOrder || initialOrdersMap[o.id] || initialOrdersMap[o.order_number] || null;
-
-          // Items mapping (Prioritize live relational order_items table, then snapshot JSON, then fallback)
-          let rawItems = [];
-          if (itemsByOrderId[o.id] && itemsByOrderId[o.id].length > 0) {
-            rawItems = itemsByOrderId[o.id];
-          } else if (Array.isArray(o.items) && o.items.length > 0) {
-            rawItems = o.items;
-          } else if (typeof o.items === 'string') {
-            try {
-              const parsed = JSON.parse(o.items);
-              if (Array.isArray(parsed) && parsed.length > 0) rawItems = parsed;
-            } catch (_) {}
-          }
-          if (rawItems.length === 0 && fallbackOrder && fallbackOrder.items && fallbackOrder.items.length > 0) {
-            rawItems = fallbackOrder.items;
-          }
-
-          const itemsList = rawItems.map(it => {
-            let itemImg = it.image || it.image_url || '';
-            if (itemImg && itemImg.includes('102-203-202-115.sslip.io')) {
-              itemImg = itemImg.replace('102-203-202-115.sslip.io', 'api.kurofangs.id.ly');
-            }
-            const prod = productsMap[it.id] || productsMap[it.product_id] || (typeof INITIAL_PRODUCTS !== 'undefined' ? INITIAL_PRODUCTS.find(ip => ip.nameEn === (it.name_en || it.nameEn) || ip.nameAr === (it.name_ar || it.name)) : null);
-            if (!itemImg && prod) itemImg = prod.image || resolveProductImage(prod);
-
-            return {
-              id: it.id || it.product_id || (prod ? prod.id : ''),
-              name: it.name_ar || it.name || (prod ? prod.nameAr : 'أداة طبية'),
-              nameEn: it.name_en || it.nameEn || (prod ? prod.nameEn : ''),
-              sku: it.sku || (prod ? prod.sku : ''),
-              qty: Number(it.quantity || it.qty) || 1,
-              price: Number(it.price) || (prod ? Number(prod.sellingPrice) : 0),
-              total: (Number(it.quantity || it.qty) || 1) * (Number(it.price) || (prod ? Number(prod.sellingPrice) : 0)),
-              image: itemImg || resolveProductImage(prod)
-            };
-          });
-
-          // Status mapping
-          let cleanStatus = 'جديد';
-          const rawStatus = (o.status || '').toLowerCase().trim();
-          if (rawStatus === 'delivered' || rawStatus === 'completed' || rawStatus === 'مكتمل') {
-            cleanStatus = 'مكتمل';
-          } else if (rawStatus === 'preparing' || rawStatus === 'processing' || rawStatus === 'قيد التجهيز' || rawStatus === 'accepted') {
-            cleanStatus = 'قيد التجهيز';
-          } else if (rawStatus === 'ready' || rawStatus === 'جاهز للتوصيل' || rawStatus === 'shipping') {
-            cleanStatus = 'جاهز للتوصيل';
-          } else if (rawStatus === 'cancelled' || rawStatus === 'canceled' || rawStatus === 'ملغي') {
-            cleanStatus = 'ملغي';
-          } else {
-            cleanStatus = 'جديد';
-          }
-
-          const itemsSum = itemsList.reduce((sum, it) => sum + (Number(it.price || 0) * Number(it.qty || 1)), 0);
-          const finalTotal = Number(o.total_price) || itemsSum || (fallbackOrder ? fallbackOrder.total : 0) || Number(o.total) || 0;
-          const phone = o.customer_phone || o.phone_number || o.customer_phone_secondary || (fallbackOrder ? fallbackOrder.phone : '') || '';
-
-          const invNum = (fallbackOrder && fallbackOrder.invoiceNumber)
-            ? fallbackOrder.invoiceNumber
-            : `#INV-2026-${(o.order_number || o.id.slice(0, 8)).replace('#', '')}`;
-
-          let deductStatus = (fallbackOrder && fallbackOrder.inventoryDeduction)
-            ? fallbackOrder.inventoryDeduction
-            : null;
-
-          if (!deductStatus) {
-            const hasExistingTx = (ERP_STATE.inventoryTransactions || []).some(t =>
-              t.status === 'applied' && (t.orderId === o.id || t.orderNumber === `#${o.order_number}`)
-            );
-            if (cleanStatus === 'مكتمل') {
-              deductStatus = hasExistingTx ? 'applied' : 'not_applied';
-            } else if (cleanStatus === 'ملغي') {
-              deductStatus = 'cancelled';
-            } else {
-              deductStatus = 'not_applied';
-            }
-          }
-
-          return {
-            id: o.id,
-            orderNumber: `#${o.order_number || o.id.slice(0, 8)}`,
-            customerName: (o.customer_name || (fallbackOrder ? fallbackOrder.customerName : 'طالب كلية الأسنان')).trim(),
-            phone: phone,
-            university: o.university || 'جامعة طرابلس',
-            college: o.college || o.faculty_name || 'كلية طب الأسنان',
-            address: o.address_text || o.address || (fallbackOrder ? fallbackOrder.address : 'طرابلس'),
-            itemsCount: itemsList.reduce((sum, it) => sum + (Number(it.qty) || 1), 0),
-            items: itemsList,
-            total: finalTotal,
-            subtotal: (fallbackOrder && fallbackOrder.subtotal) ? fallbackOrder.subtotal : finalTotal,
-            hasDiscount: fallbackOrder ? fallbackOrder.hasDiscount : false,
-            discountAmount: fallbackOrder ? fallbackOrder.discountAmount : 0,
-            discountReason: fallbackOrder ? fallbackOrder.discountReason : '',
-            shippingFee: Number(o.shipping_fee || o.shipping_cost || 0),
-            status: cleanStatus,
-            assignedTo: (fallbackOrder && fallbackOrder.assignedTo) || 'طه',
-            date: o.created_at ? new Date(o.created_at).toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '02/10',
-            notes: o.notes || o.delivery_notes || '',
-            invoiceNumber: invNum,
-            inventoryDeduction: deductStatus
-          };
-        });
-
-        try {
-          localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
-        } catch (_) {}
-      }
-    }
-
-    updateDashboardRealUI();
-    if (ERP_STATE.activeScreen === 'orders') renderOrdersTable();
-    else if (ERP_STATE.activeScreen === 'products') renderProductsTable();
-    else if (ERP_STATE.activeScreen === 'inventory') {
-      renderInventoryTable();
-      renderInventoryReconciliationUI();
-    }
-    else if (ERP_STATE.activeScreen === 'finance') updateFinanceScreenMetrics();
-    else if (ERP_STATE.activeScreen === 'partners') updatePartnersScreenMetrics();
-    else if (ERP_STATE.activeScreen === 'reports') updateReportsScreenMetrics();
-    showToast('تمت مزامنة البيانات بنجاح مع سيرفر Absolute Dental 🟢');
-  } catch (err) {
-    console.warn('Sync notice:', err);
-  }
+  } catch (_) {}
 }
 
 // -------------------------------------------------------------
