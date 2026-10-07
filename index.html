@@ -11,13 +11,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Instant session pre-authentication check -->
+  <!-- Instant secure session pre-authentication check (zero-flash) -->
   <script>
     (function() {
       try {
-        var saved = sessionStorage.getItem('abs_erp_active_user') || localStorage.getItem('abs_erp_last_user');
-        if (saved && ['مؤمن', 'طه', 'ياسي'].indexOf(saved) !== -1) {
-          document.documentElement.classList.add('user-pre-authenticated');
+        var rawSession = localStorage.getItem('abs_erp_session');
+        if (rawSession) {
+          var sess = JSON.parse(rawSession);
+          if (sess && sess.token && sess.profileKey && (sess.profileKey === 'taha' || sess.profileKey === 'sasi' || sess.profileKey === 'abdo')) {
+            document.documentElement.classList.add('has-authenticated-session');
+            document.documentElement.classList.add('user-pre-authenticated');
+          }
+        } else {
+          var saved = sessionStorage.getItem('abs_erp_active_user') || localStorage.getItem('abs_erp_active_user');
+          if (saved && ['طه', 'محمد ساسي', 'عبد المومن', 'مؤمن', 'ياسي'].indexOf(saved) !== -1) {
+            document.documentElement.classList.add('has-authenticated-session');
+            document.documentElement.classList.add('user-pre-authenticated');
+          }
         }
       } catch (_) {}
     })();
@@ -244,8 +254,8 @@
 
         <!-- Main Navigation Links Directly in Header -->
         <nav class="top-nav-tabs" id="topNavTabs">
-          <button type="button" class="top-nav-link" data-screen="dashboard" onclick="navigateToScreen('dashboard')">الرئيسية</button>
-          <button type="button" class="top-nav-link active" data-screen="orders" onclick="navigateToScreen('orders')">الطلبات</button>
+          <button type="button" class="top-nav-link active" data-screen="dashboard" onclick="navigateToScreen('dashboard')">الرئيسية</button>
+          <button type="button" class="top-nav-link" data-screen="orders" onclick="navigateToScreen('orders')">الطلبات</button>
           <button type="button" class="top-nav-link" data-screen="products" onclick="navigateToScreen('products')">المنتجات</button>
           <button type="button" class="top-nav-link" data-screen="inventory" onclick="navigateToScreen('inventory')">المخزون</button>
           <button type="button" class="top-nav-link" data-screen="customers" onclick="navigateToScreen('customers')">العملاء</button>
@@ -333,7 +343,7 @@
         </div>
 
         <!-- Mobile hamburger toggle button -->
-        <button type="button" class="header-menu-toggle" onclick="toggleMobileSidebar()" aria-label="فتح القائمة">
+        <button type="button" class="header-menu-toggle mobile-menu-btn" onclick="toggleMobileSidebar(event)" aria-label="فتح القائمة">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
       </div>
@@ -964,7 +974,7 @@
       <!-- =======================================================
            SCREEN 5: الطلبات (Orders)
            ======================================================= -->
-            <section id="ordersScreen" class="secondary-screen-view active">
+      <section id="ordersScreen" class="secondary-screen-view">
         <!-- Page Title & Top Action -->
         <div class="orders-page-header">
           <div class="orders-title-wrap">

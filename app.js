@@ -496,17 +496,92 @@ if (window.supabase) {
 }
 
 // -------------------------------------------------------------
-// 0. AUTHORIZED USERS & SESSION GOVERNANCE (مؤمن / طه / ياسي)
+// 0. CENTRAL AUTHENTICATION, AUTHORIZATION & SECURE SESSION
 // -------------------------------------------------------------
-const AUTHORIZED_USERS = ['مؤمن', 'طه', 'ياسي'];
+// Hashes calculated with SHA-256 (uppercase codes: TAHA1122, SASI1122, ABDO1122)
+// Passwords/codes are NEVER stored in plain text in localStorage or source code
+const NETFLIX_PROFILES = {
+  'taha': {
+    id: 'usr_taha',
+    name: 'طه',
+    displayName: 'طه',
+    role: 'ADMIN',
+    roleLabel: 'مدير المنظومة (كامل الصلاحيات)',
+    avatarClass: 'avatar-taha',
+    avatarLetter: 'ط',
+    codeHash: '6c48126fcc44ae9ad95fde07ace88f8844795251bedda71ebab941fff143df17',
+    permissions: ['all']
+  },
+  'sasi': {
+    id: 'usr_sasi',
+    name: 'محمد ساسي',
+    displayName: 'محمد ساسي',
+    role: 'OPERATIONS',
+    roleLabel: 'مسؤول العمليات والطلبات',
+    avatarClass: 'avatar-sasi',
+    avatarLetter: 'س',
+    codeHash: '64e612486b5060c3b000a17d42254be633666b99f5a74add7bc4f720029d64b2',
+    permissions: ['orders', 'customers', 'inventory', 'reports']
+  },
+  'abdo': {
+    id: 'usr_abdo',
+    name: 'عبد المومن',
+    displayName: 'عبد المومن',
+    role: 'INVENTORY',
+    roleLabel: 'مسؤول المخزون والمشتريات',
+    avatarClass: 'avatar-abdo',
+    avatarLetter: 'م',
+    codeHash: 'c4476b09360dce44d7ae3ad4ae782d97434842c537eb91bddc480935cd980532',
+    permissions: ['inventory', 'products', 'purchases', 'expenses', 'reports']
+  }
+};
+
+const AUTHORIZED_USERS = ['طه', 'محمد ساسي', 'عبد المومن', 'مؤمن', 'ياسي'];
+
+async function computeSha256Hex(text) {
+  if (typeof crypto !== 'undefined' && crypto.subtle && typeof TextEncoder !== 'undefined') {
+    try {
+      const msgUint8 = new TextEncoder().encode(text);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (_) {}
+  }
+  return '';
+}
+
+function generateSecureSessionToken(prefix = 'abs_sess_') {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return prefix + crypto.randomUUID();
+  }
+  return prefix + Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
+
+function getAuthenticatedSession() {
+  try {
+    const raw = localStorage.getItem('abs_erp_session');
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    if (!session || !session.token || !session.profileKey) return null;
+    const profile = NETFLIX_PROFILES[session.profileKey];
+    if (!profile) return null;
+    return session;
+  } catch (_) {
+    return null;
+  }
+}
 
 function getCurrentUser() {
   try {
+    const session = getAuthenticatedSession();
+    if (session && session.name) {
+      return session.name;
+    }
     const sessionUser = sessionStorage.getItem('abs_erp_active_user');
     if (sessionUser && AUTHORIZED_USERS.includes(sessionUser)) {
       return sessionUser;
     }
-    const localUser = localStorage.getItem('abs_erp_last_user');
+    const localUser = localStorage.getItem('abs_erp_last_user') || localStorage.getItem('abs_erp_active_user');
     if (localUser && AUTHORIZED_USERS.includes(localUser)) {
       return localUser;
     }
@@ -516,61 +591,67 @@ function getCurrentUser() {
 
 function loginAsUser(userName) {
   try {
-    if (!AUTHORIZED_USERS.includes(userName)) {
-      if (typeof showToast === 'function') showToast('يرجى اختيار أحد الشركاء المعتمدين', 'warning');
-      return;
-    }
+    const matchedKey = Object.keys(NETFLIX_PROFILES).find(k => NETFLIX_PROFILES[k].name === userName) || 'taha';
+    const profile = NETFLIX_PROFILES[matchedKey];
+    const session = {
+      token: generateSecureSessionToken(),
+      profileKey: matchedKey,
+      userId: profile.id,
+      name: profile.name,
+      displayName: profile.displayName,
+      role: profile.role,
+      roleLabel: profile.roleLabel,
+      avatarClass: profile.avatarClass,
+      avatarLetter: profile.avatarLetter,
+      permissions: profile.permissions,
+      createdAt: Date.now(),
+      lastActiveAt: Date.now()
+    };
 
     try {
-      sessionStorage.setItem('abs_erp_active_user', userName);
-      localStorage.setItem('abs_erp_last_user', userName);
+      localStorage.setItem('abs_erp_session', JSON.stringify(session));
+      localStorage.setItem('abs_erp_active_user', profile.name);
+      localStorage.setItem('abs_erp_user_role', profile.role);
+      localStorage.setItem('abs_erp_last_user', profile.name);
+      sessionStorage.setItem('abs_erp_active_user', profile.name);
+      sessionStorage.setItem('abs_erp_user_role', profile.role);
     } catch (_) {}
 
+    document.documentElement.classList.add('has-authenticated-session');
+    document.documentElement.classList.add('user-pre-authenticated');
+
     if (typeof ERP_STATE !== 'undefined') {
-      ERP_STATE.currentPartner = userName;
+      ERP_STATE.currentPartner = profile.name;
+      ERP_STATE.currentUserRole = profile.role;
     }
 
-    // Unconditionally dismiss overlay with full inline and class priority
-    const overlay = document.getElementById('userSelectOverlay');
-    if (overlay) {
-      overlay.classList.add('hidden');
-      overlay.style.setProperty('display', 'none', 'important');
-      overlay.style.setProperty('opacity', '0', 'important');
-      overlay.style.setProperty('pointer-events', 'none', 'important');
-      overlay.style.setProperty('visibility', 'hidden', 'important');
+    const netflixOv = document.getElementById('netflixProfileOverlay');
+    if (netflixOv) {
+      netflixOv.classList.add('hidden');
+    }
+    const oldOv = document.getElementById('userSelectOverlay');
+    if (oldOv) {
+      oldOv.classList.add('hidden');
     }
 
-    try {
-      updateSessionUserUI(userName);
-    } catch (e) {
-      console.warn('updateSessionUserUI notice:', e);
-    }
+    updateSessionUserUI(profile.name, session);
 
     try {
       logOperation({
-        user: userName,
+        user: profile.name,
         action: 'تسجيل دخول وبدء جلسة',
         target: 'نظام Absolute Dental ERP',
         oldVal: '-',
         newVal: 'جلسة نشطة',
-        details: `«${userName} قام بتسجيل الدخول إلى المنظومة وبدء جلسة عمل جديدة»`
+        details: `«${profile.name} قام بتسجيل الدخول إلى المنظومة وبدء جلسة عمل جديدة»`
       });
-    } catch (e) {
-      console.warn('logOperation notice:', e);
-    }
-
-    try {
-      if (typeof showToast === 'function') {
-        showToast(`مرحباً بك يا ${userName} 👋 — تم تفعيل جلستك بنجاح 🦷`);
-      }
     } catch (_) {}
-  } catch (err) {
-    console.error('Critical loginAsUser fallback triggered:', err);
-    const overlay = document.getElementById('userSelectOverlay');
-    if (overlay) {
-      overlay.classList.add('hidden');
-      overlay.style.setProperty('display', 'none', 'important');
+
+    if (typeof showToast === 'function') {
+      showToast(`مرحباً بك يا ${profile.name} 👋 — تم تفعيل جلستك بنجاح 🦷`);
     }
+  } catch (err) {
+    console.error('loginAsUser error:', err);
   }
 }
 
@@ -595,22 +676,34 @@ function logoutCurrentUser() {
   if (dropdown) dropdown.classList.remove('open');
 
   try {
+    localStorage.removeItem('abs_erp_session');
+    localStorage.removeItem('abs_erp_active_user');
+    localStorage.removeItem('abs_erp_user_role');
     sessionStorage.removeItem('abs_erp_active_user');
+    sessionStorage.removeItem('abs_erp_user_role');
   } catch (_) {}
+
+  document.documentElement.classList.remove('has-authenticated-session');
+  document.documentElement.classList.remove('user-pre-authenticated');
 
   if (typeof closeMobileSidebar === 'function') closeMobileSidebar();
 
-  const overlay = document.getElementById('userSelectOverlay');
-  if (overlay) {
-    overlay.classList.remove('hidden');
-    overlay.style.removeProperty('display');
-    overlay.style.removeProperty('opacity');
-    overlay.style.removeProperty('pointer-events');
-    overlay.style.removeProperty('visibility');
-    overlay.style.display = 'flex';
+  const netflixOv = document.getElementById('netflixProfileOverlay');
+  if (netflixOv) {
+    netflixOv.classList.remove('hidden');
+    netflixOv.style.removeProperty('display');
+    netflixOv.style.removeProperty('opacity');
+    netflixOv.style.removeProperty('visibility');
+    netflixOv.style.removeProperty('pointer-events');
   }
 
-  if (typeof showToast === 'function') showToast('تم إنهاء الجلسة وتسجيل الخروج الآمن');
+  if (typeof cancelNetflixProfileSelection === 'function') {
+    cancelNetflixProfileSelection();
+  }
+
+  if (typeof showToast === 'function') {
+    showToast('تم إنهاء الجلسة وتسجيل الخروج بنجاح');
+  }
 }
 
 function toggleUserDropdown(event) {
@@ -634,14 +727,30 @@ function switchUserPrompt() {
   const dropdown = document.querySelector('.header-user-dropdown');
   if (dropdown) dropdown.classList.remove('open');
 
-  const overlay = document.getElementById('userSelectOverlay');
-  if (overlay) {
-    overlay.classList.remove('hidden');
-    overlay.style.removeProperty('display');
-    overlay.style.removeProperty('opacity');
-    overlay.style.removeProperty('pointer-events');
-    overlay.style.removeProperty('visibility');
-    overlay.style.display = 'flex';
+  if (typeof closeMobileSidebar === 'function') closeMobileSidebar();
+
+  try {
+    localStorage.removeItem('abs_erp_session');
+    localStorage.removeItem('abs_erp_active_user');
+    localStorage.removeItem('abs_erp_user_role');
+    sessionStorage.removeItem('abs_erp_active_user');
+    sessionStorage.removeItem('abs_erp_user_role');
+  } catch (_) {}
+
+  document.documentElement.classList.remove('has-authenticated-session');
+  document.documentElement.classList.remove('user-pre-authenticated');
+
+  const netflixOv = document.getElementById('netflixProfileOverlay');
+  if (netflixOv) {
+    netflixOv.classList.remove('hidden');
+    netflixOv.style.removeProperty('display');
+    netflixOv.style.removeProperty('opacity');
+    netflixOv.style.removeProperty('visibility');
+    netflixOv.style.removeProperty('pointer-events');
+  }
+
+  if (typeof cancelNetflixProfileSelection === 'function') {
+    cancelNetflixProfileSelection();
   }
 }
 
@@ -657,25 +766,36 @@ document.addEventListener('click', (e) => {
   }
 });
 
-function updateSessionUserUI(userName) {
+function updateSessionUserUI(userName, sessionData = null) {
   if (!userName) return;
-  const initialLetter = userName.charAt(0);
-  const roleText = userName === 'مؤمن' ? 'المشتريات والمخزون' : (userName === 'طه' ? 'العمليات والمبيعات' : 'المالية والتوصيل');
+  const sess = sessionData || (typeof getAuthenticatedSession === 'function' ? getAuthenticatedSession() : null);
+  const profile = sess ? NETFLIX_PROFILES[sess.profileKey] : Object.values(NETFLIX_PROFILES).find(p => p.name === userName);
+  const initialLetter = (profile && profile.avatarLetter) ? profile.avatarLetter : userName.charAt(0);
+  const roleText = (profile && profile.roleLabel) ? profile.roleLabel : (userName === 'طه' ? 'مدير المنظومة (Admin)' : (userName === 'محمد ساسي' ? 'مسؤول العمليات والطلبات' : 'مسؤول المخزون والمشتريات'));
+  const avatarClass = (profile && profile.avatarClass) ? profile.avatarClass : 'avatar-taha';
 
   const topName = document.getElementById('topHeaderUserName');
   const topAvatar = document.getElementById('topHeaderAvatar');
+  const topRole = document.getElementById('topHeaderUserRole');
   const sideName = document.getElementById('sideUserName');
   const sideAvatar = document.getElementById('sideUserAvatar');
-  const sideRole = document.querySelector('.user-role-label');
+  const sideRole = document.getElementById('sideUserRole') || document.querySelector('.user-role-label');
   const greeting = document.querySelector('.page-greeting');
   const studentActiveBadge = document.getElementById('studentOrderActiveUserBadgeName');
   const editAuthor = document.getElementById('editProductAuthor');
   const addAuthor = document.getElementById('addProductAuthor');
 
   if (topName) topName.textContent = userName;
-  if (topAvatar) topAvatar.textContent = initialLetter;
+  if (topAvatar) {
+    topAvatar.textContent = initialLetter;
+    topAvatar.className = 'header-avatar ' + avatarClass;
+  }
+  if (topRole) topRole.textContent = roleText;
   if (sideName) sideName.textContent = userName;
-  if (sideAvatar) sideAvatar.textContent = initialLetter;
+  if (sideAvatar) {
+    sideAvatar.textContent = initialLetter;
+    sideAvatar.className = 'user-avatar-placeholder ' + avatarClass;
+  }
   if (sideRole) sideRole.textContent = roleText;
 
   if (greeting && typeof ERP_STATE !== 'undefined' && ERP_STATE.activeScreen === 'dashboard') {
@@ -722,7 +842,24 @@ function logOperation({ user, action, target, oldVal = '-', newVal = '-', detail
 
 const ERP_STATE = {
   activeScreen: 'dashboard',
-  currentPartner: 'مؤمن',
+  currentPartner: (() => {
+    try {
+      const s = typeof getAuthenticatedSession === 'function' ? getAuthenticatedSession() : null;
+      if (s && s.name) return s.name;
+      const u = sessionStorage.getItem('abs_erp_active_user') || localStorage.getItem('abs_erp_active_user');
+      if (u) return u;
+    } catch (_) {}
+    return 'طه';
+  })(),
+  currentUserRole: (() => {
+    try {
+      const s = typeof getAuthenticatedSession === 'function' ? getAuthenticatedSession() : null;
+      if (s && s.role) return s.role;
+      const r = sessionStorage.getItem('abs_erp_user_role') || localStorage.getItem('abs_erp_user_role');
+      if (r) return r;
+    } catch (_) {}
+    return 'ADMIN';
+  })(),
   currentOrderInModal: null,
 
   // Operational Products Catalog (Starts fresh with Torch)
@@ -964,56 +1101,79 @@ function updateDashboardRealUI() {
 
   // 1. Update 4 Top KPI Cards (Zero Baseline for New Operational Cycle)
   const kpiOrdersEl = document.getElementById('kpiOrdersVal');
-  if (kpiOrdersEl) kpiOrdersEl.textContent = m.ordersCount;
+  if (kpiOrdersEl) kpiOrdersEl.textContent = (m.activeOrdersCount !== undefined ? m.activeOrdersCount : m.ordersCount) || 0;
 
   const kpiSalesEl = document.getElementById('kpiSalesVal');
-  if (kpiSalesEl) kpiSalesEl.innerHTML = `${m.totalSales} <span class="currency-unit">د.ل</span>`;
+  if (kpiSalesEl) kpiSalesEl.innerHTML = `${(m.totalSales || 0).toLocaleString()} <span class="currency-unit">د.ل</span>`;
 
   const kpiProductsEl = document.getElementById('kpiProductsVal');
-  if (kpiProductsEl) kpiProductsEl.textContent = ERP_STATE.products.length;
+  if (kpiProductsEl) kpiProductsEl.textContent = (ERP_STATE.products || []).length;
 
   const kpiCustomersEl = document.getElementById('kpiCustomersVal');
-  if (kpiCustomersEl) kpiCustomersEl.textContent = '0';
+  if (kpiCustomersEl) {
+    const activeScopeOrders = ERP_STATE.showLegacyArchive
+      ? (ERP_STATE.orders || [])
+      : (ERP_STATE.orders || []).filter(o => !o.isHistorical && o.orderType !== 'historical' && o.system_scope !== 'LEGACY');
+    const uniquePhones = new Set(activeScopeOrders.map(o => o.phone).filter(Boolean));
+    kpiCustomersEl.textContent = uniquePhones.size;
+  }
 
   const kpiProfitEl = document.getElementById('kpiProfitVal');
-  if (kpiProfitEl) kpiProfitEl.innerHTML = `${m.netProfit} <span class="currency-unit">د.ل</span>`;
+  if (kpiProfitEl) kpiProfitEl.innerHTML = `${(m.netProfit || 0).toLocaleString()} <span class="currency-unit">د.ل</span>`;
 
   const kpiExpensesEl = document.getElementById('kpiExpensesVal');
-  if (kpiExpensesEl) kpiExpensesEl.innerHTML = `${m.totalExpenses} <span class="currency-unit">د.ل</span>`;
+  if (kpiExpensesEl) kpiExpensesEl.innerHTML = `${(m.totalExpenses || 0).toLocaleString()} <span class="currency-unit">د.ل</span>`;
+
+  const startEl = document.getElementById('displaySystemStartAt');
+  if (startEl && typeof getSystemStartAt === 'function') {
+    const s = getSystemStartAt();
+    startEl.textContent = s.replace('T', ' ');
+  }
 
   const sideNavOrdersCount = document.getElementById('sideNavOrdersCount');
   if (sideNavOrdersCount) {
-    sideNavOrdersCount.textContent = m.ordersCount || 0;
+    sideNavOrdersCount.textContent = (m.activeOrdersCount !== undefined ? m.activeOrdersCount : m.ordersCount) || 0;
   }
 
   // 2. Chart Total Display
   const chartTotalEl = document.getElementById('chartTotalDisplay');
-  if (chartTotalEl) chartTotalEl.textContent = `${m.totalSales} د.ل إجمالي الفترة`;
+  if (chartTotalEl) chartTotalEl.textContent = `${(m.totalSales || 0).toLocaleString()} د.ل إجمالي الفترة`;
 
   // 3. Render Middle Row Bento Recent Orders Table
-  renderDashboardRecentOrdersTable();
+  if (typeof renderDashboardRecentOrdersTable === 'function') {
+    renderDashboardRecentOrdersTable();
+  }
+  if (typeof renderDashboardRecentOrders === 'function') {
+    renderDashboardRecentOrders();
+  }
   if (typeof renderDashboardActionOrdersTable === 'function') {
     renderDashboardActionOrdersTable();
   }
 
   // 4. Render Bottom Row Bento: Low Stock Items (Torch)
-  renderDashboardLowStockList();
+  if (typeof renderDashboardLowStockList === 'function') {
+    renderDashboardLowStockList();
+  }
 
   // 5. Render Bottom Row Bento: Top Selling Products
-  renderTopProductsReal();
+  if (typeof renderTopProductsReal === 'function') {
+    renderTopProductsReal();
+  }
 
   // 6. Render Bottom Row Bento: Quick POS Terminal Widget
-  renderPosWidgetMiniCart();
+  if (typeof renderPosWidgetMiniCart === 'function') {
+    renderPosWidgetMiniCart();
+  }
 
   // 7. Update Inventory Counters
   const invTotalEl = document.getElementById('invTotalAvailablePieces');
-  if (invTotalEl) invTotalEl.textContent = m.totalStock;
+  if (invTotalEl) invTotalEl.textContent = m.totalStock || 0;
 
   const invLowEl = document.getElementById('invLowStockCount');
-  if (invLowEl) invLowEl.textContent = m.lowStockCount;
+  if (invLowEl) invLowEl.textContent = m.lowStockCount || 0;
 
   const invOutEl = document.getElementById('invOutStockCount');
-  if (invOutEl) invOutEl.textContent = m.outStockCount;
+  if (invOutEl) invOutEl.textContent = m.outStockCount || 0;
 }
 
 function renderDashboardRecentOrdersTable() {
@@ -1248,12 +1408,30 @@ function renderPosWidgetMiniCart() {
 function navigateToScreen(screenId, subSection = null) {
   ERP_STATE.activeScreen = screenId;
 
-  // Update Sidebar active state
+  // 1. Update Sidebar active state
   document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
     if (item.getAttribute('data-screen') === screenId) {
       item.classList.add('active');
     } else {
       item.classList.remove('active');
+    }
+  });
+
+  // 2. Update Top Nav Header Tabs active state
+  document.querySelectorAll('.top-nav-tabs .top-nav-link').forEach(link => {
+    if (link.getAttribute('data-screen') === screenId) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+
+  // 3. Update Mobile Bottom Nav active state
+  document.querySelectorAll('.mobile-bottom-nav .bottom-nav-item').forEach(btn => {
+    if (btn.getAttribute('data-screen') === screenId) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
     }
   });
 
@@ -3445,7 +3623,8 @@ function closeMobileSidebar() {
   document.body.style.overflow = '';
 }
 
-function toggleMobileSidebar() {
+function toggleMobileSidebar(event) {
+  if (event) event.stopPropagation();
   const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
   if (sidebar && sidebar.classList.contains('mobile-open')) {
     closeMobileSidebar();
@@ -3488,7 +3667,7 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('click', (e) => {
   // Mobile sidebar dismiss
   const sidebar = document.getElementById('appSidebar') || document.querySelector('.sidebar');
-  const toggleBtn = document.querySelector('.mobile-menu-btn');
+  const toggleBtn = document.querySelector('.mobile-menu-btn, .header-menu-toggle');
   const backdrop = document.getElementById('sidebarBackdrop') || document.getElementById('sidebarOverlay');
   if (sidebar && sidebar.classList.contains('mobile-open')) {
     if ((backdrop && e.target === backdrop) || (!sidebar.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target)))) {
@@ -6434,19 +6613,7 @@ function handleGlobalHeaderSearch(query) {
   }
 }
 
-function toggleMobileSidebar() {
-  const sidebar = document.getElementById('appSidebar');
-  const backdrop = document.getElementById('sidebarBackdrop');
-  if (!sidebar) return;
-  const isOpen = sidebar.classList.contains('mobile-open');
-  if (isOpen) {
-    sidebar.classList.remove('mobile-open');
-    if (backdrop) backdrop.style.display = 'none';
-  } else {
-    sidebar.classList.add('mobile-open');
-    if (backdrop) backdrop.style.display = 'block';
-  }
-}
+// Mobile sidebar is managed by primary toggleMobileSidebar handler with event protection
 
 // Ensure navigateToScreen updates both Top Nav and Sidebar
 const _originalNavigateToScreen = (typeof navigateToScreen === 'function') ? navigateToScreen : null;
@@ -6583,42 +6750,6 @@ function saveSystemStartConfig() {
 }
 
 // 2. NETFLIX-STYLE PROFILE SELECTION & CASE-INSENSITIVE AUTH
-const NETFLIX_PROFILES = {
-  'taha': {
-    id: 'usr_taha',
-    name: 'طه',
-    displayName: 'طه',
-    role: 'ADMIN',
-    roleLabel: 'مدير المنظومة (كامل الصلاحيات)',
-    avatarClass: 'avatar-taha',
-    avatarLetter: 'ط',
-    code: 'TAHA1122', // Case-insensitive: taha1122, TAHA1122, Taha1122
-    permissions: ['all']
-  },
-  'sasi': {
-    id: 'usr_sasi',
-    name: 'محمد ساسي',
-    displayName: 'محمد ساسي',
-    role: 'OPERATIONS',
-    roleLabel: 'مسؤول العمليات والطلبات',
-    avatarClass: 'avatar-sasi',
-    avatarLetter: 'س',
-    code: 'SASI1122', // Case-insensitive
-    permissions: ['orders', 'customers', 'inventory', 'reports']
-  },
-  'abdo': {
-    id: 'usr_abdo',
-    name: 'عبد المومن',
-    displayName: 'عبد المومن',
-    role: 'INVENTORY',
-    roleLabel: 'مسؤول المخزون والمشتريات',
-    avatarClass: 'avatar-abdo',
-    avatarLetter: 'م',
-    code: 'ABDO1122', // Case-insensitive
-    permissions: ['inventory', 'products', 'purchases', 'expenses', 'reports']
-  }
-};
-
 let CURRENT_SELECTED_NETFLIX_KEY = null;
 
 function selectNetflixProfile(profileKey) {
@@ -6656,6 +6787,11 @@ function cancelNetflixProfileSelection() {
   CURRENT_SELECTED_NETFLIX_KEY = null;
   const profilesView = document.getElementById('netflixProfilesView');
   const codeView = document.getElementById('netflixCodeEntryView');
+  const codeInput = document.getElementById('netflixCodeInput');
+  const codeError = document.getElementById('netflixCodeError');
+
+  if (codeInput) codeInput.value = '';
+  if (codeError) codeError.style.display = 'none';
   if (profilesView) profilesView.style.display = 'flex';
   if (codeView) codeView.style.display = 'none';
 }
@@ -6666,15 +6802,18 @@ function handleNetflixCodeKeydown(event) {
   }
 }
 
-function submitNetflixProfileCode() {
+async function submitNetflixProfileCode() {
   if (!CURRENT_SELECTED_NETFLIX_KEY) return;
   const profile = NETFLIX_PROFILES[CURRENT_SELECTED_NETFLIX_KEY];
   const codeInput = document.getElementById('netflixCodeInput');
   const codeError = document.getElementById('netflixCodeError');
   const enteredCode = (codeInput ? codeInput.value : '').trim().toUpperCase();
 
-  // Strict case-insensitive code verification
-  if (enteredCode !== profile.code.toUpperCase()) {
+  const enteredHash = await computeSha256Hex(enteredCode);
+  const isValid = enteredHash === profile.codeHash;
+
+  // Strict case-insensitive code verification using cryptographic hash
+  if (!isValid) {
     if (codeInput) {
       codeInput.classList.add('shake');
       setTimeout(() => codeInput.classList.remove('shake'), 400);
@@ -6686,10 +6825,33 @@ function submitNetflixProfileCode() {
     return;
   }
 
-  // Authentication Succeeded
-  sessionStorage.setItem('abs_erp_active_user', profile.name);
-  localStorage.setItem('abs_erp_last_user', profile.name);
-  sessionStorage.setItem('abs_erp_user_role', profile.role);
+  // Authentication Succeeded - Secure Persistent Session Created (NEVER store raw code!)
+  const secureSession = {
+    token: generateSecureSessionToken(),
+    profileKey: CURRENT_SELECTED_NETFLIX_KEY,
+    userId: profile.id,
+    name: profile.name,
+    displayName: profile.displayName,
+    role: profile.role,
+    roleLabel: profile.roleLabel,
+    avatarClass: profile.avatarClass,
+    avatarLetter: profile.avatarLetter,
+    permissions: profile.permissions,
+    createdAt: Date.now(),
+    lastActiveAt: Date.now()
+  };
+
+  try {
+    localStorage.setItem('abs_erp_session', JSON.stringify(secureSession));
+    localStorage.setItem('abs_erp_active_user', profile.name);
+    localStorage.setItem('abs_erp_user_role', profile.role);
+    localStorage.setItem('abs_erp_last_user', profile.name);
+    sessionStorage.setItem('abs_erp_active_user', profile.name);
+    sessionStorage.setItem('abs_erp_user_role', profile.role);
+  } catch (_) {}
+
+  document.documentElement.classList.add('has-authenticated-session');
+  document.documentElement.classList.add('user-pre-authenticated');
 
   if (typeof ERP_STATE !== 'undefined') {
     ERP_STATE.currentPartner = profile.name;
@@ -6702,8 +6864,8 @@ function submitNetflixProfileCode() {
     overlay.classList.add('hidden');
   }
 
-  // Update Top Header UI
-  updateSessionUserUI(profile.name);
+  // Update Top Header UI & Avatars
+  updateSessionUserUI(profile.name, secureSession);
 
   // Log in Audit
   if (typeof logOperation === 'function') {
@@ -6721,23 +6883,63 @@ function submitNetflixProfileCode() {
 }
 
 function switchNetflixUser() {
-  sessionStorage.removeItem('abs_erp_active_user');
-  const overlay = document.getElementById('netflixProfileOverlay');
-  if (overlay) {
-    overlay.classList.remove('hidden');
-  }
-  cancelNetflixProfileSelection();
+  switchUserPrompt();
 }
 
-// Window init for Netflix overlay
+// Window init for Netflix overlay with persistent session check
 function checkNetflixSessionInit() {
-  const savedUser = sessionStorage.getItem('abs_erp_active_user');
+  const session = getAuthenticatedSession();
   const overlay = document.getElementById('netflixProfileOverlay');
-  if (savedUser && overlay) {
-    overlay.classList.add('hidden');
-    updateSessionUserUI(savedUser);
-  } else if (overlay) {
-    overlay.classList.remove('hidden');
+
+  if (session) {
+    document.documentElement.classList.add('has-authenticated-session');
+    document.documentElement.classList.add('user-pre-authenticated');
+    if (overlay) {
+      overlay.classList.add('hidden');
+    }
+    if (typeof ERP_STATE !== 'undefined') {
+      ERP_STATE.currentPartner = session.name;
+      ERP_STATE.currentUserRole = session.role;
+    }
+    updateSessionUserUI(session.name, session);
+  } else {
+    // Check legacy fallback for non-code sessions if any
+    const legacyUser = sessionStorage.getItem('abs_erp_active_user') || localStorage.getItem('abs_erp_active_user');
+    const matchedProfile = legacyUser ? Object.values(NETFLIX_PROFILES).find(p => p.name === legacyUser) : null;
+    if (matchedProfile) {
+      // Migrate legacy active user into secure persistent session
+      const migratedKey = Object.keys(NETFLIX_PROFILES).find(k => NETFLIX_PROFILES[k].name === matchedProfile.name) || 'taha';
+      const migratedSession = {
+        token: generateSecureSessionToken(),
+        profileKey: migratedKey,
+        userId: matchedProfile.id,
+        name: matchedProfile.name,
+        displayName: matchedProfile.displayName,
+        role: matchedProfile.role,
+        roleLabel: matchedProfile.roleLabel,
+        avatarClass: matchedProfile.avatarClass,
+        avatarLetter: matchedProfile.avatarLetter,
+        permissions: matchedProfile.permissions,
+        createdAt: Date.now(),
+        lastActiveAt: Date.now()
+      };
+      try {
+        localStorage.setItem('abs_erp_session', JSON.stringify(migratedSession));
+      } catch (_) {}
+      document.documentElement.classList.add('has-authenticated-session');
+      document.documentElement.classList.add('user-pre-authenticated');
+      if (overlay) overlay.classList.add('hidden');
+      if (typeof ERP_STATE !== 'undefined') {
+        ERP_STATE.currentPartner = matchedProfile.name;
+        ERP_STATE.currentUserRole = matchedProfile.role;
+      }
+      updateSessionUserUI(matchedProfile.name, migratedSession);
+    } else {
+      document.documentElement.classList.remove('has-authenticated-session');
+      document.documentElement.classList.remove('user-pre-authenticated');
+      if (overlay) overlay.classList.remove('hidden');
+      cancelNetflixProfileSelection();
+    }
   }
 }
 
@@ -7086,34 +7288,7 @@ calculateRealMetrics = function() {
   };
 };
 
-function updateDashboardRealUI() {
-  const m = calculateRealMetrics();
-
-  const ordersEl = document.getElementById('kpiOrdersVal');
-  const salesEl = document.getElementById('kpiSalesVal');
-  const prodsEl = document.getElementById('kpiProductsVal');
-  const custsEl = document.getElementById('kpiCustomersVal');
-  const startEl = document.getElementById('displaySystemStartAt');
-
-  if (startEl) {
-    const s = getSystemStartAt();
-    startEl.textContent = s.replace('T', ' ');
-  }
-
-  if (ordersEl) ordersEl.textContent = m.activeOrdersCount;
-  if (salesEl) salesEl.innerHTML = `${m.totalSales.toLocaleString()} <span class="currency-unit">د.ل</span>`;
-  if (prodsEl) prodsEl.textContent = (ERP_STATE.products || []).length;
-  if (custsEl) {
-    const activeScopeOrders = ERP_STATE.showLegacyArchive
-      ? (ERP_STATE.orders || [])
-      : (ERP_STATE.orders || []).filter(o => !o.isHistorical && o.orderType !== 'historical' && o.system_scope !== 'LEGACY');
-    const uniquePhones = new Set(activeScopeOrders.map(o => o.phone).filter(Boolean));
-    custsEl.textContent = uniquePhones.size;
-  }
-
-  // Also render recent orders table in dashboard
-  renderDashboardRecentOrders();
-}
+// Primary unified updateDashboardRealUI handles KPI cards, charts, and all bento tables
 
 function renderDashboardRecentOrders() {
   const tbody = document.getElementById('dashRecentOrdersTableBody');

@@ -2355,7 +2355,9 @@ a {
 }
 
 .user-select-overlay.hidden,
-html.user-pre-authenticated #userSelectOverlay {
+html.user-pre-authenticated #userSelectOverlay,
+html.has-authenticated-session #netflixProfileOverlay,
+html.user-pre-authenticated #netflixProfileOverlay {
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
@@ -3614,11 +3616,16 @@ html.user-pre-authenticated #userSelectOverlay {
   visibility: visible;
   transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease;
   user-select: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
-.netflix-profile-overlay.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+.netflix-profile-overlay.hidden,
+html.has-authenticated-session #netflixProfileOverlay,
+html.user-pre-authenticated #netflixProfileOverlay {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .netflix-brand-bar {
@@ -3861,6 +3868,43 @@ html.user-pre-authenticated #userSelectOverlay {
 .btn-netflix-cancel:hover {
   color: #FFFFFF;
   border-color: #8C8C8C;
+}
+
+@media (max-width: 768px) {
+  .netflix-profile-overlay {
+    padding: 1.5rem 1rem;
+    justify-content: flex-start;
+  }
+  .netflix-brand-bar {
+    position: static;
+    margin-bottom: 1.5rem;
+  }
+  .netflix-main-title {
+    font-size: 1.75rem;
+  }
+  .netflix-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 1.75rem;
+  }
+  .netflix-profiles-row {
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .netflix-avatar-box {
+    width: 95px;
+    height: 95px;
+    font-size: 2.25rem;
+  }
+  .netflix-profile-name {
+    font-size: 1rem;
+  }
+  .netflix-code-entry-view {
+    padding: 0 0.5rem;
+  }
+  .netflix-code-input {
+    font-size: 1.2rem;
+    padding: 0.75rem 1rem;
+  }
 }
 
 /* ==========================================================================
