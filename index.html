@@ -201,20 +201,39 @@
   <div class="main-wrapper">
 
     <!-- Top Sticky Header -->
+        <!-- Absolute Dental Official Store / Back Office Header (Matching Reference Images 3 & 4) -->
     <header class="top-header">
       <div class="header-right">
-        <button type="button" class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" title="تبديل عرض القائمة (Icon Rail)">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
+        <a href="#" class="top-brand-wrap" onclick="navigateToScreen('dashboard'); return false;">
+          <img src="assets/brand-logo-trimmed.png" alt="Absolute Dental Logo" class="top-brand-logo-img" onerror="this.style.display='none'">
+          <span class="top-brand-title">Absolute Dental</span>
+        </a>
 
-        <div class="search-container" onclick="openCommandPalette()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <input type="text" class="search-input" placeholder="البحث في المنتجات، الطلبات، العملاء..." readonly>
-          <span class="search-kbd">Ctrl K</span>
+        <!-- Main Navigation Links Directly in Header -->
+        <nav class="top-nav-tabs" id="topNavTabs">
+          <button type="button" class="top-nav-link" data-screen="dashboard" onclick="navigateToScreen('dashboard')">الرئيسية</button>
+          <button type="button" class="top-nav-link active" data-screen="orders" onclick="navigateToScreen('orders')">الطلبات</button>
+          <button type="button" class="top-nav-link" data-screen="products" onclick="navigateToScreen('products')">المنتجات</button>
+          <button type="button" class="top-nav-link" data-screen="inventory" onclick="navigateToScreen('inventory')">المخزون</button>
+          <button type="button" class="top-nav-link" data-screen="customers" onclick="navigateToScreen('customers')">العملاء</button>
+          <button type="button" class="top-nav-link" data-screen="reports" onclick="navigateToScreen('reports')">التقارير</button>
+          <button type="button" class="top-nav-link" data-screen="audit" onclick="navigateToScreen('audit')">سجل العمليات</button>
+        </nav>
+      </div>
+
+      <div class="top-header-center">
+        <div class="top-search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="globalTopSearchInput" placeholder="ابحث عن منتج، طلب أو عميل..." oninput="handleGlobalHeaderSearch(this.value)">
         </div>
       </div>
 
       <div class="header-left">
+        <!-- Language button -->
+        <button type="button" class="header-icon-btn" title="اللغة / Language">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </button>
+
         <!-- Notification Bell & Dropdown -->
         <div style="position: relative;">
           <button type="button" class="header-icon-btn" onclick="toggleNotificationsDropdown(event)" title="التنبيهات">
@@ -225,7 +244,7 @@
           <div id="notificationsDropdown" class="notifications-dropdown">
             <div class="notifications-header">
               <span>التنبيهات (3)</span>
-              <span style="font-size: 0.72rem; color: #2563EB; cursor: pointer;" onclick="markAllNotificationsRead(event)">تحديد الكل كمقروء</span>
+              <span style="font-size: 0.72rem; color: #3D352E; cursor: pointer; font-weight: 700;" onclick="markAllNotificationsRead(event)">تحديد الكل كمقروء</span>
             </div>
             <div class="notifications-list">
               <div class="notification-item unread">
@@ -279,12 +298,17 @@
             </div>
           </div>
         </div>
+
+        <!-- Mobile hamburger toggle button -->
+        <button type="button" class="header-menu-toggle" onclick="toggleMobileSidebar()" aria-label="فتح القائمة">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
       </div>
     </header>
 
     <!-- Main Dynamic Content Container -->
     <main class="page-content">
-           SCREEN 1: الرئيسية (Dashboard — 100% Matching Reference)
+           SCREEN 1: الرئيسية ()
            ======================================================= -->
       <section id="dashboardScreen" class="secondary-screen-view active">
         <!-- Page Header -->
@@ -884,112 +908,73 @@
       <!-- =======================================================
            SCREEN 5: الطلبات (Orders)
            ======================================================= -->
-      <section id="ordersScreen" class="secondary-screen-view">
-        <div class="page-header">
-          <div class="page-header-titles">
-            <h1 class="page-title">الطلبات</h1>
-            <p class="page-subtitle">إدارة ومتابعة طلبات العملاء وحالات التجهيز</p>
+            <section id="ordersScreen" class="secondary-screen-view active">
+        <!-- Page Title & Top Action -->
+        <div class="orders-page-header">
+          <div class="orders-title-wrap">
+            <h1>الطلبات</h1>
+            <p>إدارة جميع الطلبات ومتابعة حالتها حتى التسليم</p>
           </div>
-          <div style="display: flex; gap: 0.5rem;">
-            <button type="button" class="btn-secondary" onclick="exportOrdersToCsv()">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>تصدير</span>
-            </button>
-            <button type="button" class="btn-primary" onclick="navigateToScreen('pos')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>+ طلب جديد</span>
+          <div>
+            <button type="button" class="btn-add-order-main" onclick="openAddOrderDrawer()">
+              <span>+ إضافة طلب</span>
+              <span class="btn-add-order-sub">إنشاء طلب جديد لعميل من قبل الأدمن</span>
             </button>
           </div>
         </div>
 
-        <!-- Cut-Off & Transition Banner -->
-        <div class="system-cutover-banner">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(37,99,235,0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0;">⏱️</div>
-            <div>
-              <div style="font-weight: 800; font-size: 0.875rem; color: var(--text-main);">نقطة بداية المنظومة: 7 أكتوبر 2026 — الساعة 1:55 صباحاً</div>
-              <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 2px;">
-                الطلبات السابقة من الـ Admin معفاة من الخصم وتحتفظ بأسعارها التاريخية. أي طلب جديد يخصم تلقائياً من رصيد البداية (258 قطعة).
-              </div>
+        <!-- Search & Filters Container (Matching Image 3 & 4) -->
+        <div class="orders-filter-container">
+          <div class="orders-filter-row">
+            <!-- Search input -->
+            <div class="orders-search-input-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="ordersUnifiedSearchInput" placeholder="ابحث برقم الطلب، اسم العميل، رقم الهاتف..." oninput="handleOrdersFilterChange()">
             </div>
-          </div>
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <span style="background: rgba(16,185,129,0.1); color: #065F46; border: 1px solid rgba(16,185,129,0.3); font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: var(--radius-pill);">
-              ● المنظومة مستقلة ونشطة
-            </span>
+
+            <!-- Order Source filter -->
+            <select id="ordersSourceFilterSelect" class="orders-filter-select" onchange="handleOrdersFilterChange()">
+              <option value="all">كل مصادر الطلبات</option>
+              <option value="website">من الموقع 🌐</option>
+              <option value="admin">أنشأه الأدمن 👤</option>
+            </select>
+
+            <!-- Order Status filter -->
+            <select id="ordersStatusFilterSelect" class="orders-filter-select" onchange="handleOrdersFilterChange()">
+              <option value="all">كل الحالات</option>
+              <option value="pending">في انتظار المراجعة</option>
+              <option value="accepted">تم قبول الطلب</option>
+              <option value="preparing">قيد التجهيز</option>
+              <option value="shipping">خرج للتوصيل</option>
+              <option value="delivered">تم التسليم</option>
+              <option value="cancelled">ملغاة</option>
+            </select>
+
+            <!-- Date filter -->
+            <select id="ordersDateFilterSelect" class="orders-filter-select" onchange="handleOrdersFilterChange()">
+              <option value="all">كل التواريخ</option>
+              <option value="today">اليوم</option>
+              <option value="week">آخر 7 أيام</option>
+              <option value="month">آخر 30 يوم</option>
+            </select>
+
+            <!-- Total count indicator -->
+            <div class="orders-count-indicator">
+              <span id="ordersTotalDisplayCount">0</span> طلب
+            </div>
           </div>
         </div>
 
-        <div class="erp-table-card">
-          <!-- Primary Scope Bar (All vs New ERP vs Historical Admin Archive) -->
-          <div class="orders-scope-bar">
-            <button type="button" class="orders-scope-btn active" id="scopeBtnAll" onclick="setOrdersScope('all', this)">
-              <span>🌐 كل الطلبات</span>
-              <span class="scope-count" id="scopeCountAll">62</span>
-            </button>
-            <button type="button" class="orders-scope-btn" id="scopeBtnNew" onclick="setOrdersScope('new', this)">
-              <span>✨ طلبات المنظومة الجديدة</span>
-              <span class="scope-count" id="scopeCountNew">0</span>
-            </button>
-            <button type="button" class="orders-scope-btn" id="scopeBtnHistorical" onclick="setOrdersScope('historical', this)">
-              <span>📦 طلبات سابقة (أرشيف الـ Admin)</span>
-              <span class="scope-count" id="scopeCountHistorical">62</span>
-            </button>
-          </div>
+        <!-- Orders Horizontal Cards List -->
+        <div id="ordersCardsList" class="orders-cards-list">
+          <!-- Dynamically populated via renderOrdersCardsList() -->
+        </div>
 
-          <!-- Filter Tabs & Search -->
-          <div class="orders-filter-bar">
-            <div class="orders-filter-pills">
-              <button type="button" class="order-filter-btn active" data-filter="all" onclick="filterOrdersTable('all', this)">
-                الكل <span class="order-filter-count">(<span id="tabCountAll">0</span>)</span>
-              </button>
-              <button type="button" class="order-filter-btn" data-filter="new" onclick="filterOrdersTable('new', this)">
-                جديد <span class="order-filter-count">(<span id="tabCountNew">0</span>)</span>
-              </button>
-              <button type="button" class="order-filter-btn" data-filter="preparing" onclick="filterOrdersTable('preparing', this)">
-                قيد التجهيز <span class="order-filter-count">(<span id="tabCountPrep">0</span>)</span>
-              </button>
-              <button type="button" class="order-filter-btn" data-filter="completed" onclick="filterOrdersTable('completed', this)">
-                مكتمل <span class="order-filter-count">(<span id="tabCountComp">0</span>)</span>
-              </button>
-              <button type="button" class="order-filter-btn" data-filter="cancelled" onclick="filterOrdersTable('cancelled', this)">
-                ملغي <span class="order-filter-count">(<span id="tabCountCanc">0</span>)</span>
-              </button>
-            </div>
-
-            <div style="width: 260px;">
-              <input type="text" id="ordersSearchInput" class="form-input-clean" placeholder="ابحث عن طلب برقم الطلب أو العميل..." oninput="handleOrdersSearch(this.value)" style="width: 100%;">
-            </div>
-          </div>
-
-          <div class="table-responsive">
-            <table class="erp-table">
-              <thead>
-                <tr>
-                  <th>رقم الطلب</th>
-                  <th>السجل / التصنيف</th>
-                  <th>العميل</th>
-                  <th>المنتجات</th>
-                  <th>الإجمالي</th>
-                  <th>الحالة</th>
-                  <th>أثر المخزون</th>
-                  <th>التاريخ</th>
-                  <th style="text-align: center;">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody id="ordersTableBody">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
-
-            <div id="ordersEmptyState" class="erp-empty-state" style="display: none;">
-              <div class="empty-state-icon-circle">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>
-              </div>
-              <div class="empty-state-title">لا توجد طلبات بعد</div>
-              <div class="empty-state-subtitle">ستظهر هنا الطلبات عند تسجيلها</div>
-            </div>
-          </div>
+        <!-- Empty state when no orders match -->
+        <div id="ordersCardsEmptyState" class="erp-empty-state" style="display: none; padding: 4rem 1rem; text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📦</div>
+          <div style="font-weight: 800; font-size: 1.1rem; color: var(--brand-brown); margin-bottom: 0.35rem;">لا توجد طلبات تطابق هذا البحث</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">جرب تغيير الفلاتر أو ابدأ بإضافة طلب جديد للعميل عبر زر «+ إضافة طلب» أعلاه.</div>
         </div>
       </section>
 
@@ -1660,6 +1645,174 @@
     <span>المزيد</span>
   </button>
 </nav>
+
+
+<!-- =========================================================
+     DRAWER 1: إضافة طلب (ADD ORDER DRAWER — Matching Image 4)
+     ========================================================= -->
+<div id="addOrderDrawerBackdrop" class="drawer-backdrop" onclick="closeAddOrderDrawer()"></div>
+<aside id="addOrderDrawer" class="side-drawer" aria-label="إضافة طلب جديد">
+  <div class="drawer-header">
+    <div class="drawer-header-titles">
+      <h2>+ إضافة طلب</h2>
+      <p>إنشاء طلب جديد لعميل من قبل الأدمن</p>
+    </div>
+    <button type="button" class="drawer-close-btn" onclick="closeAddOrderDrawer()" title="إغلاق">✕</button>
+  </div>
+
+  <div class="drawer-body">
+    <!-- STEP 1: اختيار العميل -->
+    <div class="drawer-step-block">
+      <div class="drawer-step-header">
+        <span class="drawer-step-title"><span class="drawer-step-num">1</span> اختيار العميل</span>
+        <button type="button" class="btn-text-sm" onclick="toggleAddCustomerInlineForm()" style="color: #2563EB; font-weight: 700; cursor: pointer; background: none; border: none;">+ عميل جديد</button>
+      </div>
+
+      <!-- Customer Search -->
+      <div style="position: relative;">
+        <input type="text" id="addOrderCustomerSearch" class="form-input-clean" placeholder="ابحث باسم العميل أو رقم الهاتف..." oninput="handleCustomerSearchInput(this.value)" style="width: 100%; height: 42px; border-radius: 8px; border: 1px solid var(--border-card); padding: 0 1rem; font-family: inherit;">
+        <div id="customerSearchResults" class="customer-dropdown-results" style="display: none; position: absolute; top: 46px; left: 0; right: 0; background: #FFFFFF; border: 1px solid var(--border-card); border-radius: 8px; box-shadow: var(--shadow-dropdown); max-height: 180px; overflow-y: auto; z-index: 50;"></div>
+      </div>
+
+      <!-- Inline Add Customer Form (hidden by default) -->
+      <div id="inlineAddCustomerForm" style="display: none; background: #FAF8F5; border: 1px solid var(--border-card); border-radius: 8px; padding: 0.85rem; flex-direction: column; gap: 0.5rem;">
+        <input type="text" id="newCustNameInput" placeholder="اسم العميل *" style="height: 36px; border: 1px solid var(--border-card); border-radius: 6px; padding: 0 0.75rem; font-family: inherit;">
+        <input type="text" id="newCustPhoneInput" placeholder="رقم الهاتف *" style="height: 36px; border: 1px solid var(--border-card); border-radius: 6px; padding: 0 0.75rem; font-family: inherit;">
+        <input type="text" id="newCustAddressInput" placeholder="العنوان / المدينة" style="height: 36px; border: 1px solid var(--border-card); border-radius: 6px; padding: 0 0.75rem; font-family: inherit;">
+        <button type="button" class="btn-primary btn-sm" onclick="saveNewInlineCustomer()" style="background: #3D352E; color: #FFFFFF; padding: 0.45rem; border-radius: 6px; font-weight: 700; cursor: pointer; border: none;">حفظ العميل</button>
+      </div>
+
+      <!-- Selected Customer Preview Card -->
+      <div id="selectedCustomerPreviewCard" class="customer-quick-card">
+        <div>
+          <div class="customer-quick-name" id="selectedCustomerNameDisplay">ساسي</div>
+          <div class="customer-quick-meta" id="selectedCustomerPhoneDisplay">0912345678 • طرابلس، حي الأندلس</div>
+        </div>
+        <div style="font-size: 1.25rem; color: #10B981;">✓</div>
+      </div>
+    </div>
+
+    <!-- STEP 2: اختيار السنة -->
+    <div class="drawer-step-block">
+      <span class="drawer-step-title"><span class="drawer-step-num">2</span> اختيار السنة</span>
+      <div class="year-segmented-tabs">
+        <button type="button" class="year-tab-btn active" id="yearTabBtn1" onclick="switchAddOrderYear('1st-year', this)">السنة الأولى</button>
+        <button type="button" class="year-tab-btn" id="yearTabBtn2" onclick="switchAddOrderYear('2nd-year', this)">السنة الثانية</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: اختيار المادة -->
+    <div class="drawer-step-block">
+      <span class="drawer-step-title"><span class="drawer-step-num">3</span> اختيار المادة</span>
+      <div id="addOrderSubjectsGrid" class="subjects-visual-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- STEP 4: اختيار المنتجات والكمية -->
+    <div class="drawer-step-block">
+      <div class="drawer-step-header">
+        <span class="drawer-step-title"><span class="drawer-step-num">4</span> اختيار المنتجات والكمية</span>
+      </div>
+      <input type="text" id="addOrderProductSearch" class="form-input-clean" placeholder="ابحث في منتجات المادة المحددة..." oninput="handleSubjectProductSearch(this.value)" style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid var(--border-card); padding: 0 1rem; font-family: inherit;">
+
+      <div id="addOrderProductsGrid" class="products-drawer-grid">
+        <!-- Rendered dynamically with real product images and stock -->
+      </div>
+    </div>
+
+    <!-- STEP 5: ملخص الطلب ومعلومات الدفع -->
+    <div class="drawer-step-block" style="border-top: 1px solid var(--border-card); padding-top: 1.25rem;">
+      <span class="drawer-step-title">🛒 محتويات الطلب (<span id="addOrderCartCount">0</span>)</span>
+      <div id="addOrderCartItemsList" style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <div style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.825rem; background: #FAF8F5; border-radius: 8px;">لم تتم إضافة منتجات للطلب بعد</div>
+      </div>
+    </div>
+
+    <!-- معلومات الطلب والتوصيل -->
+    <div class="drawer-step-block">
+      <span class="drawer-step-title">📋 معلومات الطلب</span>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+        <div>
+          <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">طريقة الاستلام</label>
+          <select id="addOrderDeliveryMethod" class="orders-filter-select" onchange="handleAddOrderDeliveryMethodChange(this.value)" style="width: 100%;">
+            <option value="delivery">توصيل (10 د.ل)</option>
+            <option value="pickup">استلام من المقر (مجاني)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">طريقة الدفع</label>
+          <select id="addOrderPaymentMethod" class="orders-filter-select" style="width: 100%;">
+            <option value="الدفع عند الاستلام">الدفع عند الاستلام</option>
+            <option value="تحويل مصرفي">تحويل مصرفي</option>
+            <option value="نقدي">نقدي</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">ملاحظات الطلب (اختياري)</label>
+        <textarea id="addOrderNotesInput" placeholder="أضف ملاحظات تخص التوصيل أو العميل..." style="width: 100%; height: 60px; border-radius: 8px; border: 1px solid var(--border-card); padding: 0.5rem 0.75rem; font-family: inherit; font-size: 0.85rem; resize: none;"></textarea>
+      </div>
+
+      <!-- Financial Totals Box -->
+      <div style="background: #FAF8F5; border: 1px solid var(--border-card); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; gap: 0.4rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+          <span style="color: var(--text-muted);">المجموع الفرعي:</span>
+          <span style="font-weight: 700;" id="addOrderSubtotalDisplay">0 د.ل</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+          <span style="color: var(--text-muted);">التوصيل:</span>
+          <span style="font-weight: 700;" id="addOrderDeliveryFeeDisplay">10 د.ل</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+          <span style="color: var(--text-muted);">الخصم:</span>
+          <span style="font-weight: 700; color: #10B981;" id="addOrderDiscountDisplay">0 د.ل</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 800; border-top: 1px dashed var(--border-card); padding-top: 0.5rem; margin-top: 0.2rem; color: #3D352E;">
+          <span>الإجمالي النهائي:</span>
+          <span id="addOrderTotalDisplay">10 د.ل</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <button type="button" class="btn-add-order-main" onclick="submitAddOrderForm()" style="width: 100%; height: 48px; font-size: 1rem;">
+      <span>إنشاء الطلب 🛒</span>
+    </button>
+  </div>
+</aside>
+
+<!-- =========================================================
+     DRAWER 2: تفاصيل الطلب (ORDER DETAILS DRAWER — Matching Image 3)
+     ========================================================= -->
+<div id="orderDetailsDrawerBackdrop" class="drawer-backdrop" onclick="closeOrderDetailsDrawer()"></div>
+<aside id="orderDetailsDrawer" class="side-drawer" aria-label="تفاصيل الطلب">
+  <div class="drawer-header">
+    <div class="drawer-header-titles">
+      <h2>تفاصيل الطلب</h2>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.2rem;">
+        <span class="num-mono" id="orderDrawerNumberDisplay" style="font-weight: 800; color: #2563EB;">#49558608</span>
+        <span id="orderDrawerStatusBadge" class="order-status-badge preparing">قيد التجهيز</span>
+      </div>
+    </div>
+    <button type="button" class="drawer-close-btn" onclick="closeOrderDetailsDrawer()" title="إغلاق">✕</button>
+  </div>
+
+  <div class="drawer-body" id="orderDetailsDrawerBody">
+    <!-- Populated dynamically via openOrderDetailsDrawer() -->
+  </div>
+
+  <div class="drawer-footer" style="display: flex; gap: 0.75rem;">
+    <button type="button" class="btn-secondary" onclick="printOrderInvoiceFromDrawer()" style="flex: 1; height: 44px; font-weight: 700;">
+      🧾 طباعة الفاتورة
+    </button>
+    <button type="button" class="btn-primary" onclick="closeOrderDetailsDrawer()" style="flex: 1; height: 44px; font-weight: 700; background: #3D352E; color: #FFFFFF; border: none; border-radius: 8px; cursor: pointer;">
+      إغلاق
+    </button>
+  </div>
+</aside>
 
 </body>
 </html>

@@ -4994,3 +4994,898 @@ function openPurchaseInvoiceModal(purId) {
 
   modal.classList.add('active');
 }
+
+
+// ==========================================================================
+// ABSOLUTE DENTAL OFFICIAL ORDERS & DRAWER SYSTEM (Matching Images 3 & 4)
+// ==========================================================================
+
+const OFFICIAL_NAV_SUBJECTS = {
+  '1st-year': [
+    { id: 'dental-anatomy', nameAr: 'تشريح الأسنان', nameEn: 'Dental Anatomy', artwork: 'assets/dental-anatomy-faded.png' },
+    { id: 'dental-materials', nameAr: 'مواد طب الأسنان', nameEn: 'Dental Materials', artwork: 'assets/dental-materials-faded.png' }
+  ],
+  '2nd-year': [
+    { id: 'fixed-prosthodontics', nameAr: 'صناعة الأسنان الثابتة', nameEn: 'Fixed Prosthodontics', artwork: 'assets/fixed-prosthodontics-faded.png' },
+    { id: 'removable-prosthodontics', nameAr: 'صناعة الأسنان المتحركة', nameEn: 'Removable Prosthodontics', artwork: 'assets/removable-prosthodontics-faded.png' },
+    { id: 'restorative-dentistry', nameAr: 'علاج الأسنان التحفظي', nameEn: 'Restorative Dentistry', artwork: 'assets/operative-dentistry-faded.png' }
+  ]
+};
+
+const ADD_ORDER_STATE = {
+  customer: {
+    name: 'ساسي',
+    phone: '0912345678',
+    address: 'طرابلس، حي الأندلس'
+  },
+  year: '1st-year',
+  subject: 'dental-anatomy',
+  items: [], // [{ product, qty }]
+  deliveryMethod: 'delivery',
+  deliveryFee: 10,
+  discount: 0,
+  paymentMethod: 'الدفع عند الاستلام',
+  notes: ''
+};
+
+// ── 1. RENDER ORDERS CARDS LIST (Matching Images 3 & 4) ──
+function renderOrdersCardsList() {
+  const container = document.getElementById('ordersCardsList');
+  const emptyState = document.getElementById('ordersCardsEmptyState');
+  const countEl = document.getElementById('ordersTotalDisplayCount');
+  if (!container) return;
+
+  const searchInput = document.getElementById('ordersUnifiedSearchInput');
+  const sourceSelect = document.getElementById('ordersSourceFilterSelect');
+  const statusSelect = document.getElementById('ordersStatusFilterSelect');
+  const dateSelect = document.getElementById('ordersDateFilterSelect');
+
+  const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+  const sourceFilter = sourceSelect ? sourceSelect.value : 'all';
+  const statusFilter = statusSelect ? statusSelect.value : 'all';
+  const dateFilter = dateSelect ? dateSelect.value : 'all';
+
+  let orders = Array.isArray(ERP_STATE.orders) ? [...ERP_STATE.orders] : [];
+
+  // Filter by Source
+  if (sourceFilter === 'website') {
+    orders = orders.filter(o => o.orderSource === 'website' || (!o.orderSource && o.source !== 'أنشأه الأدمن'));
+  } else if (sourceFilter === 'admin') {
+    orders = orders.filter(o => o.orderSource === 'admin' || o.source === 'أنشأه الأدمن');
+  }
+
+  // Filter by Status
+  if (statusFilter !== 'all') {
+    const statusMap = {
+      'pending': 'في انتظار المراجعة',
+      'accepted': 'تم قبول الطلب',
+      'preparing': 'قيد التجهيز',
+      'shipping': 'خرج للتوصيل',
+      'delivered': 'تم التسليم',
+      'cancelled': 'ملغاة'
+    };
+    const targetStatus = statusMap[statusFilter] || statusFilter;
+    orders = orders.filter(o => {
+      const s = o.status || '';
+      if (statusFilter === 'preparing') return s.includes('تجهيز');
+      if (statusFilter === 'shipping') return s.includes('توصيل');
+      if (statusFilter === 'delivered') return s.includes('تسليم') || s.includes('مكتمل');
+      if (statusFilter === 'cancelled') return s.includes('ملغ');
+      if (statusFilter === 'pending') return s.includes('انتظار') || s.includes('جديد');
+      return s === targetStatus;
+    });
+  }
+
+  // Filter by Search Query
+  if (query) {
+    orders = orders.filter(o => {
+      const num = (o.orderNumber || o.rawOrderNumber || '').toLowerCase();
+      const cust = (o.customerName || '').toLowerCase();
+      const ph = (o.phone || '').toLowerCase();
+      const itemsMatch = (o.items || []).some(it => (it.name || '').toLowerCase().includes(query));
+      return num.includes(query) || cust.includes(query) || ph.includes(query) || itemsMatch;
+    });
+  }
+
+  // Update Count Indicator
+  if (countEl) countEl.textContent = orders.length;
+
+  if (orders.length === 0) {
+    container.innerHTML = '';
+    if (emptyState) emptyState.style.display = 'block';
+    return;
+  }
+
+  if (emptyState) emptyState.style.display = 'none';
+
+  container.innerHTML = orders.map(order => {
+    const num = order.orderNumber || ('#' + (order.rawOrderNumber || '49558608'));
+    const dateStr = order.date ? order.date.replace(' ص', '').replace(' م', '') : '2026/10/07 17:04';
+    const custName = order.customerName || 'عميل';
+    const custPhone = order.phone || '-';
+
+    const items = Array.isArray(order.items) ? order.items : [];
+    const itemsCount = items.length || order.itemsCount || 1;
+    const itemsText = `${itemsCount} ${itemsCount === 1 ? 'منتج' : (itemsCount === 2 ? 'منتجان' : 'منتجات')}`;
+    const totalVal = order.total || 0;
+
+    // Thumbnails
+    const thumbs = items.slice(0, 3).map(it => {
+      const src = it.imageUrl || (typeof resolveProductImage === 'function' ? resolveProductImage(it) : 'assets/brand-logo-trimmed.png');
+      return `<img class="order-thumb-img" src="${src}" alt="${it.name || 'منتج'}" onerror="this.src='assets/brand-logo-trimmed.png'">`;
+    });
+    if (items.length > 3) {
+      thumbs.push(`<div class="order-thumb-more">+${items.length - 3}</div>`);
+    }
+
+    // Status mapping & pill
+    const rawStatus = order.status || 'قيد التجهيز';
+    let statusClass = 'preparing';
+    let statusLabel = rawStatus;
+    if (rawStatus.includes('انتظار') || rawStatus === 'جديد') {
+      statusClass = 'pending';
+      statusLabel = 'في انتظار المراجعة';
+    } else if (rawStatus.includes('قبول')) {
+      statusClass = 'accepted';
+      statusLabel = 'تم قبول الطلب';
+    } else if (rawStatus.includes('تجهيز')) {
+      statusClass = 'preparing';
+      statusLabel = 'قيد التجهيز';
+    } else if (rawStatus.includes('توصيل')) {
+      statusClass = 'shipping';
+      statusLabel = 'خرج للتوصيل';
+    } else if (rawStatus.includes('تسليم') || rawStatus.includes('مكتمل')) {
+      statusClass = 'delivered';
+      statusLabel = 'تم التسليم';
+    } else if (rawStatus.includes('ملغ')) {
+      statusClass = 'cancelled';
+      statusLabel = 'ملغاة';
+    }
+
+    // Source badge
+    const isAdminCreated = order.orderSource === 'admin' || order.source === 'أنشأه الأدمن';
+    const sourceClass = isAdminCreated ? 'admin' : 'web';
+    const sourceLabel = isAdminCreated ? 'أنشأه الأدمن' : 'من الموقع';
+    const sourceIcon = isAdminCreated ? '👤' : '🌐';
+
+    return `
+      <div class="order-card-row" onclick="openOrderDetailsById('${order.id}')" title="انقر لعرض تفاصيل الطلب">
+        <!-- Col 1: Order Num & Date -->
+        <div class="order-card-id-col">
+          <span class="order-card-num">${num}</span>
+          <span class="order-card-date">${dateStr}</span>
+        </div>
+
+        <!-- Col 2: Customer Name & Phone -->
+        <div class="order-card-customer-col">
+          <div class="order-card-cust-name">${custName}</div>
+          <div class="order-card-cust-phone">${custPhone}</div>
+        </div>
+
+        <!-- Col 3: Items Count & Total -->
+        <div class="order-card-pricing-col">
+          <div class="order-card-items-count">${itemsText}</div>
+          <div class="order-card-total">${totalVal} د.ل</div>
+        </div>
+
+        <!-- Col 4: Thumbnails -->
+        <div class="order-card-thumbs-col">
+          ${thumbs.join('')}
+        </div>
+
+        <!-- Col 5: Badges -->
+        <div class="order-card-badges-col">
+          <span class="order-status-badge ${statusClass}">${statusLabel}</span>
+          <span class="order-source-badge ${sourceClass}">${sourceIcon} ${sourceLabel}</span>
+        </div>
+
+        <!-- Col 6: Action Button -->
+        <div class="order-card-action-col">
+          <button type="button" class="order-view-btn" onclick="event.stopPropagation(); openOrderDetailsById('${order.id}')">
+            <span>عرض الطلب</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function handleOrdersFilterChange() {
+  renderOrdersCardsList();
+}
+
+// ── 2. ADD ORDER DRAWER (Matching Image 4) ──
+function openAddOrderDrawer() {
+  const drawer = document.getElementById('addOrderDrawer');
+  const backdrop = document.getElementById('addOrderDrawerBackdrop');
+  if (!drawer) return;
+
+  // Initialize customer default
+  if (!ADD_ORDER_STATE.customer) {
+    const existing = (ERP_STATE.orders || []).find(o => o.customerName && o.phone);
+    if (existing) {
+      ADD_ORDER_STATE.customer = {
+        name: existing.customerName,
+        phone: existing.phone,
+        address: existing.address || 'طرابلس، حي الأندلس'
+      };
+    } else {
+      ADD_ORDER_STATE.customer = { name: 'ساسي', phone: '0912345678', address: 'طرابلس، حي الأندلس' };
+    }
+  }
+
+  updateSelectedCustomerUI();
+  renderAddOrderSubjects();
+  renderAddOrderProducts();
+  renderAddOrderSummary();
+
+  drawer.classList.add('open');
+  if (backdrop) backdrop.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAddOrderDrawer() {
+  const drawer = document.getElementById('addOrderDrawer');
+  const backdrop = document.getElementById('addOrderDrawerBackdrop');
+  if (drawer) drawer.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function updateSelectedCustomerUI() {
+  const nameEl = document.getElementById('selectedCustomerNameDisplay');
+  const phoneEl = document.getElementById('selectedCustomerPhoneDisplay');
+  if (ADD_ORDER_STATE.customer) {
+    if (nameEl) nameEl.textContent = ADD_ORDER_STATE.customer.name;
+    if (phoneEl) phoneEl.textContent = `${ADD_ORDER_STATE.customer.phone} • ${ADD_ORDER_STATE.customer.address || 'طرابلس'}`;
+  }
+}
+
+function handleCustomerSearchInput(q) {
+  const resContainer = document.getElementById('customerSearchResults');
+  if (!resContainer) return;
+  const query = q.toLowerCase().trim();
+  if (!query) {
+    resContainer.style.display = 'none';
+    return;
+  }
+
+  const seen = new Set();
+  const matches = [];
+  (ERP_STATE.orders || []).forEach(o => {
+    if (o.customerName && !seen.has(o.customerName)) {
+      if (o.customerName.toLowerCase().includes(query) || (o.phone && o.phone.includes(query))) {
+        seen.add(o.customerName);
+        matches.push({ name: o.customerName, phone: o.phone || '', address: o.address || 'طرابلس' });
+      }
+    }
+  });
+
+  if (matches.length === 0) {
+    resContainer.innerHTML = '<div style="padding: 0.75rem 1rem; color: var(--text-muted); font-size: 0.8rem;">لا يوجد عميل مطابق</div>';
+    resContainer.style.display = 'block';
+    return;
+  }
+
+  resContainer.innerHTML = matches.slice(0, 5).map(c => `
+    <div onclick="selectAddOrderCustomer('${c.name}', '${c.phone}', '${c.address}')" style="padding: 0.65rem 1rem; border-bottom: 1px solid var(--border-card); cursor: pointer; transition: background 0.15s ease;" onmouseover="this.style.background='#FAF8F5'" onmouseout="this.style.background='#FFFFFF'">
+      <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-main);">${c.name}</div>
+      <div style="font-size: 0.75rem; color: var(--text-muted);">${c.phone} • ${c.address}</div>
+    </div>
+  `).join('');
+  resContainer.style.display = 'block';
+}
+
+function selectAddOrderCustomer(name, phone, address) {
+  ADD_ORDER_STATE.customer = { name, phone, address };
+  updateSelectedCustomerUI();
+  const resContainer = document.getElementById('customerSearchResults');
+  if (resContainer) resContainer.style.display = 'none';
+  const input = document.getElementById('addOrderCustomerSearch');
+  if (input) input.value = '';
+}
+
+function toggleAddCustomerInlineForm() {
+  const form = document.getElementById('inlineAddCustomerForm');
+  if (!form) return;
+  const isHidden = form.style.display === 'none';
+  form.style.display = isHidden ? 'flex' : 'none';
+}
+
+function saveNewInlineCustomer() {
+  const name = (document.getElementById('newCustNameInput')?.value || '').trim();
+  const phone = (document.getElementById('newCustPhoneInput')?.value || '').trim();
+  const address = (document.getElementById('newCustAddressInput')?.value || '').trim();
+
+  if (!name || !phone) {
+    if (typeof showToast === 'function') showToast('يرجى إدخال اسم العميل ورقم الهاتف على الأقل', 'warning');
+    return;
+  }
+
+  ADD_ORDER_STATE.customer = { name, phone, address: address || 'طرابلس' };
+  updateSelectedCustomerUI();
+  toggleAddCustomerInlineForm();
+  if (typeof showToast === 'function') showToast(`تم تعيين العميل ${name} للطلب الجديد`, 'success');
+}
+
+function switchAddOrderYear(yearSlug, btn) {
+  document.querySelectorAll('.year-tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  ADD_ORDER_STATE.year = yearSlug;
+
+  const subjects = OFFICIAL_NAV_SUBJECTS[yearSlug] || [];
+  if (subjects.length > 0) {
+    ADD_ORDER_STATE.subject = subjects[0].id;
+  }
+  renderAddOrderSubjects();
+  renderAddOrderProducts();
+}
+
+function renderAddOrderSubjects() {
+  const container = document.getElementById('addOrderSubjectsGrid');
+  if (!container) return;
+
+  const subjects = OFFICIAL_NAV_SUBJECTS[ADD_ORDER_STATE.year] || [];
+  container.innerHTML = subjects.map(sub => {
+    const isActive = sub.id === ADD_ORDER_STATE.subject;
+    const activeBadge = isActive ? '<span class="subject-active-badge">✓</span>' : '';
+    return `
+      <div class="subject-visual-card ${isActive ? 'active' : ''}" onclick="setAddOrderSubject('${sub.id}')">
+        ${activeBadge}
+        <img class="subject-card-img" src="${sub.artwork}" alt="${sub.nameAr}" onerror="this.src='assets/brand-logo-trimmed.png'">
+        <span class="subject-card-title">${sub.nameAr}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function setAddOrderSubject(subjectId) {
+  ADD_ORDER_STATE.subject = subjectId;
+  renderAddOrderSubjects();
+  renderAddOrderProducts();
+}
+
+function handleSubjectProductSearch(val) {
+  renderAddOrderProducts(val);
+}
+
+function renderAddOrderProducts(searchVal = '') {
+  const container = document.getElementById('addOrderProductsGrid');
+  if (!container) return;
+
+  const q = (searchVal || '').toLowerCase().trim();
+  let prods = Array.isArray(ERP_STATE.products) ? [...ERP_STATE.products] : [];
+
+  // Filter products by subject
+  if (ADD_ORDER_STATE.subject) {
+    prods = prods.filter(p => (p.subject === ADD_ORDER_STATE.subject) || (!p.subject && ADD_ORDER_STATE.subject === 'dental-anatomy'));
+  }
+
+  if (q) {
+    prods = prods.filter(p => (p.nameAr && p.nameAr.toLowerCase().includes(q)) || (p.nameEn && p.nameEn.toLowerCase().includes(q)) || (p.sku && p.sku.toLowerCase().includes(q)));
+  }
+
+  if (prods.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem;">لا توجد منتجات مسجلة لهذه المادة</div>`;
+    return;
+  }
+
+  container.innerHTML = prods.map(p => {
+    const stock = Number(p.stock) || 0;
+    const price = Number(p.sellingPrice || p.price || p.retailPrice || 0);
+    const imgSrc = p.image || (typeof resolveProductImage === 'function' ? resolveProductImage(p) : 'assets/brand-logo-trimmed.png');
+    const isOut = stock === 0;
+
+    return `
+      <div class="product-drawer-card">
+        <img class="product-drawer-thumb" src="${imgSrc}" alt="${p.nameAr}" onerror="this.src='assets/brand-logo-trimmed.png'">
+        <div>
+          <div class="product-drawer-name">${p.nameAr}</div>
+          <div class="product-drawer-stock" style="color: ${isOut ? '#EF4444' : '#64748B'};">${isOut ? 'نافد بالمخزن' : `المخزون: ${stock} قطعة`}</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.25rem;">
+          <span class="product-drawer-price num-mono">${price} د.ل</span>
+          <button type="button" class="btn-add-item-drawer" onclick="addOrderItemToDrawer('${p.id}')" title="إضافة للطلب" ${isOut ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''}>+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function addOrderItemToDrawer(productId) {
+  const prod = (ERP_STATE.products || []).find(p => p.id === productId);
+  if (!prod) return;
+
+  const stock = Number(prod.stock) || 0;
+  const existing = ADD_ORDER_STATE.items.find(i => i.product.id === productId);
+
+  if (existing) {
+    if (existing.qty + 1 > stock && stock > 0) {
+      if (typeof showToast === 'function') showToast(`الكمية المطلوبة تتجاوز المخزون المتوفر (${stock} قطعة)`, 'warning');
+      return;
+    }
+    existing.qty += 1;
+  } else {
+    ADD_ORDER_STATE.items.push({ product: prod, qty: 1 });
+  }
+
+  renderAddOrderSummary();
+  if (typeof showToast === 'function') showToast(`تمت إضافة ${prod.nameAr} للطلب`, 'info');
+}
+
+function removeOrderItemFromDrawer(productId) {
+  ADD_ORDER_STATE.items = ADD_ORDER_STATE.items.filter(i => i.product.id !== productId);
+  renderAddOrderSummary();
+}
+
+function updateDrawerItemQty(productId, delta) {
+  const item = ADD_ORDER_STATE.items.find(i => i.product.id === productId);
+  if (!item) return;
+
+  const newQty = item.qty + delta;
+  const stock = Number(item.product.stock) || 0;
+
+  if (newQty <= 0) {
+    removeOrderItemFromDrawer(productId);
+    return;
+  }
+
+  if (newQty > stock && stock > 0) {
+    if (typeof showToast === 'function') showToast(`المخزون المتوفر ${stock} قطعة فقط`, 'warning');
+    return;
+  }
+
+  item.qty = newQty;
+  renderAddOrderSummary();
+}
+
+function handleAddOrderDeliveryMethodChange(val) {
+  ADD_ORDER_STATE.deliveryMethod = val;
+  ADD_ORDER_STATE.deliveryFee = (val === 'delivery') ? 10 : 0;
+  renderAddOrderSummary();
+}
+
+function renderAddOrderSummary() {
+  const countEl = document.getElementById('addOrderCartCount');
+  const listEl = document.getElementById('addOrderCartItemsList');
+  const subtotalEl = document.getElementById('addOrderSubtotalDisplay');
+  const deliveryEl = document.getElementById('addOrderDeliveryFeeDisplay');
+  const discountEl = document.getElementById('addOrderDiscountDisplay');
+  const totalEl = document.getElementById('addOrderTotalDisplay');
+
+  const totalItemsCount = ADD_ORDER_STATE.items.reduce((s, i) => s + i.qty, 0);
+  const subtotal = ADD_ORDER_STATE.items.reduce((s, i) => s + (i.qty * Number(i.product.sellingPrice || i.product.price || 0)), 0);
+  const fee = ADD_ORDER_STATE.deliveryFee;
+  const discount = ADD_ORDER_STATE.discount;
+  const finalTotal = Math.max(0, subtotal + fee - discount);
+
+  if (countEl) countEl.textContent = totalItemsCount;
+  if (subtotalEl) subtotalEl.textContent = `${subtotal} د.ل`;
+  if (deliveryEl) deliveryEl.textContent = `${fee} د.ل`;
+  if (discountEl) discountEl.textContent = `${discount} د.ل`;
+  if (totalEl) totalEl.textContent = `${finalTotal} د.ل`;
+
+  if (!listEl) return;
+
+  if (ADD_ORDER_STATE.items.length === 0) {
+    listEl.innerHTML = `<div style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.825rem; background: #FAF8F5; border-radius: 8px;">لم تتم إضافة منتجات للطلب بعد</div>`;
+    return;
+  }
+
+  listEl.innerHTML = ADD_ORDER_STATE.items.map(it => {
+    const p = it.product;
+    const price = Number(p.sellingPrice || p.price || 0);
+    const lineTotal = price * it.qty;
+    const imgSrc = p.image || (typeof resolveProductImage === 'function' ? resolveProductImage(p) : 'assets/brand-logo-trimmed.png');
+
+    return `
+      <div class="selected-cart-item">
+        <img src="${imgSrc}" alt="${p.nameAr}" style="width: 36px; height: 36px; border-radius: 6px; object-fit: contain; background: #FFFFFF; border: 1px solid var(--border-card);">
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.nameAr}</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" class="num-mono">${price} د.ل × ${it.qty} = ${lineTotal} د.ل</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.35rem;">
+          <button type="button" onclick="updateDrawerItemQty('${p.id}', -1)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--border-card); background: #FFFFFF; font-weight: 800; cursor: pointer;">-</button>
+          <span style="font-weight: 800; font-size: 0.85rem;" class="num-mono">${it.qty}</span>
+          <button type="button" onclick="updateDrawerItemQty('${p.id}', 1)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--border-card); background: #FFFFFF; font-weight: 800; cursor: pointer;">+</button>
+          <button type="button" onclick="removeOrderItemFromDrawer('${p.id}')" style="background: none; border: none; color: #EF4444; font-size: 1rem; cursor: pointer; padding: 0 4px;">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function submitAddOrderForm() {
+  if (!ADD_ORDER_STATE.customer || !ADD_ORDER_STATE.customer.name) {
+    if (typeof showToast === 'function') showToast('يرجى تحديد العميل أولاً', 'warning');
+    return;
+  }
+
+  if (ADD_ORDER_STATE.items.length === 0) {
+    if (typeof showToast === 'function') showToast('يرجى إضافة منتج واحد على الأقل للطلب', 'warning');
+    return;
+  }
+
+  const subtotal = ADD_ORDER_STATE.items.reduce((s, i) => s + (i.qty * Number(i.product.sellingPrice || i.product.price || 0)), 0);
+  const fee = ADD_ORDER_STATE.deliveryFee;
+  const discount = ADD_ORDER_STATE.discount;
+  const finalTotal = Math.max(0, subtotal + fee - discount);
+
+  const orderNum = '#49' + Math.floor(100000 + Math.random() * 900000);
+  const now = new Date();
+  const dateFormatted = now.toLocaleDateString('ar-LY', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' + now.toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' });
+
+  const newOrder = {
+    id: 'ord-' + Date.now(),
+    orderNumber: orderNum,
+    rawOrderNumber: orderNum.replace('#', ''),
+    invoiceNumber: '#INV-ADM-' + orderNum.replace('#', ''),
+    orderType: 'operational',
+    isHistorical: false,
+    orderSource: 'admin',
+    source: 'أنشأه الأدمن',
+    inventoryDeduction: 'pending',
+    inventoryDeducted: false,
+    customerName: ADD_ORDER_STATE.customer.name,
+    phone: ADD_ORDER_STATE.customer.phone,
+    secondaryPhone: null,
+    email: '',
+    university: 'جامعة طرابلس',
+    college: 'كلية طب الأسنان',
+    address: ADD_ORDER_STATE.customer.address || 'طرابلس',
+    itemsCount: ADD_ORDER_STATE.items.reduce((s, i) => s + i.qty, 0),
+    items: ADD_ORDER_STATE.items.map(it => ({
+      id: it.product.id,
+      name: it.product.nameAr || it.product.name,
+      qty: it.qty,
+      price: Number(it.product.sellingPrice || it.product.price || 0),
+      imageUrl: it.product.image || (typeof resolveProductImage === 'function' ? resolveProductImage(it.product) : '')
+    })),
+    total: finalTotal,
+    subtotal: subtotal,
+    shippingFee: fee,
+    discountAmount: discount,
+    status: 'قيد التجهيز',
+    originalStatus: 'preparing',
+    date: dateFormatted,
+    created_at: now.toISOString(),
+    deliveryMethod: ADD_ORDER_STATE.deliveryMethod,
+    paymentMethod: document.getElementById('addOrderPaymentMethod')?.value || 'الدفع عند الاستلام',
+    notes: document.getElementById('addOrderNotesInput')?.value || null
+  };
+
+  ERP_STATE.orders.unshift(newOrder);
+
+  try {
+    localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+  } catch (_) {}
+
+  // Log in Audit
+  if (typeof logOperation === 'function') {
+    logOperation({
+      user: getCurrentUser() || 'طه',
+      action: 'إنشاء طلب جديد (يدوي)',
+      target: orderNum,
+      details: `قام الأدمن بإنشاء طلب جديد للعميل ${newOrder.customerName} بقيمة ${finalTotal} د.ل`
+    });
+  }
+
+  // Clear cart items in drawer
+  ADD_ORDER_STATE.items = [];
+  closeAddOrderDrawer();
+
+  if (typeof showToast === 'function') {
+    showToast(`تم إنشاء الطلب ${orderNum} بنجاح وإدراجه في منظومة الطلبات`, 'success');
+  }
+
+  renderOrdersCardsList();
+  if (typeof updateDashboardRealUI === 'function') updateDashboardRealUI();
+}
+
+// ── 3. ORDER DETAILS DRAWER (Matching Image 3) ──
+function openOrderDetailsById(orderId) {
+  const order = (ERP_STATE.orders || []).find(o => o.id === orderId || o.orderNumber === orderId || o.rawOrderNumber === orderId);
+  if (!order) return;
+
+  const drawer = document.getElementById('orderDetailsDrawer');
+  const backdrop = document.getElementById('orderDetailsDrawerBackdrop');
+  const body = document.getElementById('orderDetailsDrawerBody');
+  const numDisplay = document.getElementById('orderDrawerNumberDisplay');
+  const statusBadge = document.getElementById('orderDrawerStatusBadge');
+  if (!drawer || !body) return;
+
+  const orderNum = order.orderNumber || ('#' + (order.rawOrderNumber || ''));
+  if (numDisplay) numDisplay.textContent = orderNum;
+
+  // Status mapping
+  const rawStatus = order.status || 'قيد التجهيز';
+  let statusClass = 'preparing';
+  let statusLabel = rawStatus;
+  if (rawStatus.includes('انتظار') || rawStatus === 'جديد') {
+    statusClass = 'pending'; statusLabel = 'في انتظار المراجعة';
+  } else if (rawStatus.includes('قبول')) {
+    statusClass = 'accepted'; statusLabel = 'تم قبول الطلب';
+  } else if (rawStatus.includes('تجهيز')) {
+    statusClass = 'preparing'; statusLabel = 'قيد التجهيز';
+  } else if (rawStatus.includes('توصيل')) {
+    statusClass = 'shipping'; statusLabel = 'خرج للتوصيل';
+  } else if (rawStatus.includes('تسليم') || rawStatus.includes('مكتمل')) {
+    statusClass = 'delivered'; statusLabel = 'تم التسليم';
+  } else if (rawStatus.includes('ملغ')) {
+    statusClass = 'cancelled'; statusLabel = 'ملغاة';
+  }
+
+  if (statusBadge) {
+    statusBadge.className = `order-status-badge ${statusClass}`;
+    statusBadge.textContent = statusLabel;
+  }
+
+  const items = Array.isArray(order.items) ? order.items : [];
+  const subtotal = order.subtotal || items.reduce((s, it) => s + (Number(it.price) * Number(it.qty || 1)), 0) || order.total || 0;
+  const delivery = order.shippingFee || 0;
+  const discount = order.discountAmount || 0;
+  const total = order.total || (subtotal + delivery - discount);
+
+  body.innerHTML = `
+    <!-- 1. Customer Info -->
+    <div class="order-detail-card-box">
+      <div class="order-detail-title">
+        <span>👤 بيانات العميل</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem;">
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">الاسم:</span>
+          <span style="font-weight: 700; color: var(--text-main);">${order.customerName || 'عميل'}</span>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">رقم الهاتف:</span>
+          <span style="font-weight: 700;" class="num-mono">${order.phone || '-'}</span>
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">العنوان / منطقة التوصيل:</span>
+          <span style="font-weight: 600;">${order.address || order.city || 'طرابلس'}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Products List -->
+    <div class="order-detail-card-box">
+      <div class="order-detail-title">
+        <span>📦 المنتجات (${items.length || 1})</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        ${items.map(it => {
+          const src = it.imageUrl || (typeof resolveProductImage === 'function' ? resolveProductImage(it) : 'assets/brand-logo-trimmed.png');
+          const p = Number(it.price) || 0;
+          const q = Number(it.qty) || 1;
+          const lineTot = p * q;
+          return `
+            <div class="order-detail-item-row">
+              <img class="order-detail-item-thumb" src="${src}" alt="${it.name}" onerror="this.src='assets/brand-logo-trimmed.png'">
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${it.name}</div>
+                <div style="font-size: 0.775rem; color: var(--text-muted);" class="num-mono">${p} د.ل × ${q}</div>
+              </div>
+              <div style="font-weight: 800; font-size: 0.95rem; color: var(--brand-brown);" class="num-mono">${lineTot} د.ل</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <!-- Price Breakdown -->
+      <div style="border-top: 1px solid var(--border-subtle); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.85rem;">
+        <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
+          <span>المجموع الفرعي:</span>
+          <span class="num-mono" style="font-weight: 700;">${subtotal} د.ل</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
+          <span>التوصيل:</span>
+          <span class="num-mono" style="font-weight: 700;">${delivery} د.ل</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
+          <span>الخصم:</span>
+          <span class="num-mono" style="font-weight: 700; color: #10B981;">${discount} د.ل</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.05rem; color: var(--brand-brown); border-top: 1px dashed var(--border-card); padding-top: 0.5rem; margin-top: 0.2rem;">
+          <span>الإجمالي النهائي:</span>
+          <span class="num-mono">${total} د.ل</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Additional Details -->
+    <div class="order-detail-card-box">
+      <div class="order-detail-title">
+        <span>📋 معلومات إضافية</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem;">
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">طريقة الدفع:</span>
+          <span style="font-weight: 700;">${order.paymentMethod || 'الدفع عند الاستلام'}</span>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">مصدر الطلب:</span>
+          <span style="font-weight: 700;">${order.orderSource === 'admin' ? 'أنشأه الأدمن 👤' : 'من الموقع 🌐'}</span>
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">ملاحظات العميل:</span>
+          <span style="font-weight: 500; color: var(--text-body);">${order.notes || 'لا توجد ملاحظات'}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Interactive Order Status & Inventory Logic -->
+    <div class="order-detail-card-box" style="background: #FAF8F5;">
+      <div class="order-detail-title">
+        <span>⚙️ تحديث حالة الطلب والمخزون</span>
+      </div>
+      <p style="font-size: 0.775rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+        عند تحويل الحالة إلى «خرج للتوصيل»، يتم خصم كميات المنتجات من المخزون تلقائياً وتسجيل العملية في سجل العمليات.
+      </p>
+
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'في انتظار المراجعة')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
+          في انتظار المراجعة
+        </button>
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'تم قبول الطلب')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
+          تم قبول الطلب
+        </button>
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'قيد التجهيز')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
+          قيد التجهيز
+        </button>
+        <button type="button" class="btn-primary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'خرج للتوصيل')" style="font-weight: 700; background: #7C3AED; color: #FFFFFF; border: none; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
+          🚚 خرج للتوصيل (خصم المخزون)
+        </button>
+        <button type="button" class="btn-primary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'تم التسليم')" style="font-weight: 700; background: #10B981; color: #FFFFFF; border: none; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
+          ✓ تم التسليم
+        </button>
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'ملغاة')" style="font-weight: 700; background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
+          ✕ إلغاء الطلب
+        </button>
+      </div>
+
+      ${order.inventoryDeducted ? `
+        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #065F46; background: #DCFCE7; padding: 0.4rem 0.65rem; border-radius: 6px; font-weight: 700;">
+          ✓ تم خصم كميات هذا الطلب من المخزون بنجاح (العملية محصنة ضد التكرار).
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  window.CURRENT_DRAWER_ORDER_ID = order.id;
+  drawer.classList.add('open');
+  if (backdrop) backdrop.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOrderDetailsDrawer() {
+  const drawer = document.getElementById('orderDetailsDrawer');
+  const backdrop = document.getElementById('orderDetailsDrawerBackdrop');
+  if (drawer) drawer.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function changeOrderStatusFromDrawer(orderId, newStatus) {
+  const order = (ERP_STATE.orders || []).find(o => o.id === orderId || o.orderNumber === orderId);
+  if (!order) return;
+
+  const oldStatus = order.status;
+  order.status = newStatus;
+
+  // INVENTORY DEDUCTION LOGIC ON 'خرج للتوصيل'
+  if (newStatus === 'خرج للتوصيل' && !order.inventoryDeducted) {
+    (order.items || []).forEach(it => {
+      const prod = (ERP_STATE.products || []).find(p => p.id === it.id || p.nameAr === it.name || p.nameEn === it.name);
+      if (prod) {
+        const qtyToDeduct = Number(it.qty) || 1;
+        prod.stock = Math.max(0, (Number(prod.stock) || 0) - qtyToDeduct);
+      }
+    });
+
+    order.inventoryDeducted = true;
+    order.inventoryDeduction = 'applied';
+
+    try {
+      localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
+    } catch (_) {}
+
+    if (typeof logOperation === 'function') {
+      logOperation({
+        user: getCurrentUser() || 'طه',
+        action: 'خصم مخزون (خرج للتوصيل)',
+        target: order.orderNumber,
+        details: `تم خصم منتجات الطلب ${order.orderNumber} تلقائياً لخروجه للتوصيل`
+      });
+    }
+
+    if (typeof showToast === 'function') {
+      showToast(`تم تحويل الطلب إلى خرج للتوصيل وخصم الكميات من المخزون بنجاح`, 'success');
+    }
+  } else {
+    if (typeof showToast === 'function') {
+      showToast(`تم تحديث حالة الطلب إلى «${newStatus}»`, 'info');
+    }
+  }
+
+  try {
+    localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+  } catch (_) {}
+
+  renderOrdersCardsList();
+  openOrderDetailsById(order.id);
+  if (typeof updateDashboardRealUI === 'function') updateDashboardRealUI();
+}
+
+function printOrderInvoiceFromDrawer() {
+  if (window.CURRENT_DRAWER_ORDER_ID) {
+    openInvoiceModal(window.CURRENT_DRAWER_ORDER_ID);
+  }
+}
+
+function handleGlobalHeaderSearch(query) {
+  const q = (query || '').trim();
+  if (!q) return;
+
+  // Switch to orders and filter by query
+  navigateToScreen('orders');
+  const input = document.getElementById('ordersUnifiedSearchInput');
+  if (input) {
+    input.value = q;
+    handleOrdersFilterChange();
+  }
+}
+
+function toggleMobileSidebar() {
+  const sidebar = document.getElementById('appSidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (!sidebar) return;
+  const isOpen = sidebar.classList.contains('mobile-open');
+  if (isOpen) {
+    sidebar.classList.remove('mobile-open');
+    if (backdrop) backdrop.style.display = 'none';
+  } else {
+    sidebar.classList.add('mobile-open');
+    if (backdrop) backdrop.style.display = 'block';
+  }
+}
+
+// Ensure navigateToScreen updates both Top Nav and Sidebar
+const _originalNavigateToScreen = (typeof navigateToScreen === 'function') ? navigateToScreen : null;
+navigateToScreen = function(screenId, subSection = null) {
+  // Alias POS to Add Order drawer in Orders page
+  if (screenId === 'pos') {
+    navigateToScreen('orders');
+    setTimeout(() => openAddOrderDrawer(), 150);
+    return;
+  }
+
+  // Update Top Nav Tabs
+  document.querySelectorAll('.top-nav-link').forEach(btn => {
+    if (btn.getAttribute('data-screen') === screenId) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  // Call base screen switcher
+  if (_originalNavigateToScreen) {
+    _originalNavigateToScreen(screenId, subSection);
+  }
+
+  // If opening orders, render cards list
+  if (screenId === 'orders') {
+    setTimeout(() => renderOrdersCardsList(), 50);
+  }
+};
+
+// Window load hook to initialize orders cards list
+window.addEventListener('DOMContentLoaded', () => {
+  renderOrdersCardsList();
+});
+setTimeout(() => {
+  renderOrdersCardsList();
+}, 200);
