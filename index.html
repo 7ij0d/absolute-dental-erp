@@ -85,95 +85,97 @@
   </div>
 </div>
 
+<!-- Backdrop for Mobile Drawer -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
 <div class="app-container" id="appMainContainer">
 
   <!-- =========================================================
-       SIDEBAR (Midnight Navy — Clean Minimalist RTL)
+       SIDEBAR (Midnight Navy #0B192C — Categorized Groups & Icon Rail)
        ========================================================= -->
   <aside class="sidebar" id="appSidebar">
     <!-- Brand Header -->
     <div class="sidebar-header">
       <a href="#" class="brand-badge" onclick="navigateToScreen('dashboard'); return false;">
         <div class="brand-logo-icon">
-          <!-- Tooth Silhouette SVG -->
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C8.69 2 6 4.69 6 8c0 2.21.89 4.21 2.34 5.66.66.66 1.07 1.55 1.16 2.48l.5 5.86c.07.82.76 1.45 1.58 1.45.69 0 1.28-.44 1.48-1.09l1.19-3.96c.15-.49.6-.84 1.12-.84.51 0 .97.35 1.12.84l1.19 3.96c.2.65.79 1.09 1.48 1.09.82 0 1.51-.63 1.58-1.45l.5-5.86c.09-.93.5-1.82 1.16-2.48C21.11 12.21 22 10.21 22 8c0-3.31-2.69-6-6-6h-4z"/>
           </svg>
         </div>
         <div class="brand-titles">
           <span class="brand-name">ABSOLUTE DENTAL</span>
-          <span class="brand-sub">ERP</span>
+          <span class="brand-sub">ERP SYSTEM</span>
         </div>
       </a>
       <button type="button" class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="إغلاق القائمة">✕</button>
     </div>
 
-    <!-- Navigation List (11 Clean Core Items) -->
+    <!-- Navigation List (Categorized in 6 Clear Groups) -->
     <nav class="sidebar-nav">
-      <!-- 1. الرئيسية -->
-      <a class="nav-item active" data-screen="dashboard" onclick="navigateToScreen('dashboard')">
+      <!-- Group 1: الرئيسية -->
+      <span class="sidebar-nav-group-title">الرئيسية</span>
+      <a class="nav-item active" data-screen="dashboard" data-title="الرئيسية" onclick="navigateToScreen('dashboard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>الرئيسية</span>
       </a>
 
-      <!-- 2. الطلبات -->
-      <a class="nav-item" data-screen="orders" onclick="navigateToScreen('orders')">
+      <!-- Group 2: المبيعات -->
+      <span class="sidebar-nav-group-title">المبيعات</span>
+      <a class="nav-item" data-screen="orders" data-title="الطلبات" onclick="navigateToScreen('orders')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>
         <span>الطلبات</span>
       </a>
-
-      <!-- 3. نقطة البيع POS -->
-      <a class="nav-item" data-screen="pos" onclick="navigateToScreen('pos')">
+      <a class="nav-item" data-screen="pos" data-title="نقطة البيع POS" onclick="navigateToScreen('pos')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
         <span>نقطة البيع POS</span>
       </a>
-
-      <!-- 4. المنتجات -->
-      <a class="nav-item" data-screen="products" onclick="navigateToScreen('products')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-        <span>المنتجات</span>
-      </a>
-
-      <!-- 5. المخزون -->
-      <a class="nav-item" data-screen="inventory" onclick="navigateToScreen('inventory')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
-        <span>المخزون</span>
-      </a>
-
-      <!-- 6. المشتريات -->
-      <a class="nav-item" data-screen="purchases" onclick="navigateToScreen('purchases')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        <span>المشتريات</span>
-      </a>
-
-      <!-- 7. المبيعات -->
-      <a class="nav-item" data-screen="sales" onclick="navigateToScreen('sales')">
+      <a class="nav-item" data-screen="sales" data-title="المبيعات" onclick="navigateToScreen('sales')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
         <span>المبيعات</span>
       </a>
 
-      <!-- 8. المصروفات -->
-      <a class="nav-item" data-screen="expenses" onclick="navigateToScreen('expenses')">
+      <!-- Group 3: المخزون -->
+      <span class="sidebar-nav-group-title">المخزون</span>
+      <a class="nav-item" data-screen="products" data-title="المنتجات" onclick="navigateToScreen('products')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        <span>المنتجات</span>
+      </a>
+      <a class="nav-item" data-screen="inventory" data-title="المخزون" onclick="navigateToScreen('inventory')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+        <span>المخزون</span>
+      </a>
+
+      <!-- Group 4: التوريد والمالية -->
+      <span class="sidebar-nav-group-title">التوريد والمالية</span>
+      <a class="nav-item" data-screen="purchases" data-title="المشتريات" onclick="navigateToScreen('purchases')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>المشتريات</span>
+      </a>
+      <a class="nav-item" data-screen="expenses" data-title="المصروفات" onclick="navigateToScreen('expenses')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
         <span>المصروفات</span>
       </a>
 
-      <!-- 9. العملاء -->
-      <a class="nav-item" data-screen="partners" onclick="navigateToScreen('partners')">
+      <!-- Group 5: العلاقات -->
+      <span class="sidebar-nav-group-title">العلاقات</span>
+      <a class="nav-item" data-screen="partners" data-title="العملاء" onclick="navigateToScreen('partners')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span>العملاء</span>
       </a>
 
-      <!-- 10. التقارير -->
-      <a class="nav-item" data-screen="reports" onclick="navigateToScreen('reports')">
+      <!-- Group 6: الرقابة والتقارير -->
+      <span class="sidebar-nav-group-title">الرقابة والتقارير</span>
+      <a class="nav-item" data-screen="reports" data-title="التقارير" onclick="navigateToScreen('reports')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         <span>التقارير</span>
       </a>
-
-      <!-- 11. سجل العمليات -->
-      <a class="nav-item" data-screen="audit" onclick="navigateToScreen('audit')">
+      <a class="nav-item" data-screen="audit" data-title="سجل العمليات" onclick="navigateToScreen('audit')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
         <span>سجل العمليات</span>
+      </a>
+      <a class="nav-item" data-screen="settings" data-title="الإعدادات" onclick="navigateToScreen('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>الإعدادات</span>
       </a>
     </nav>
 
@@ -183,7 +185,7 @@
         <div class="user-avatar-badge" id="sideUserAvatar">ط</div>
         <div class="user-details">
           <span class="user-name-title" id="sideUserName">طه</span>
-          <span class="user-role-label">مدير العمليات</span>
+          <span class="user-role-label" id="sideUserRole">العمليات والمبيعات</span>
         </div>
       </div>
       <button type="button" class="sidebar-collapse-toggle-btn" onclick="toggleSidebarCollapse()" title="تصغير / توسيع القائمة">
@@ -201,7 +203,7 @@
     <!-- Top Sticky Header -->
     <header class="top-header">
       <div class="header-right">
-        <button type="button" class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" title="تبديل عرض القائمة">
+        <button type="button" class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" title="تبديل عرض القائمة (Icon Rail)">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
 
@@ -213,16 +215,52 @@
       </div>
 
       <div class="header-left">
-        <!-- Notification Bell -->
-        <button type="button" class="header-icon-btn" onclick="showToast('لا توجد تنبيهات جديدة')" title="التنبيهات">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-        </button>
+        <!-- Notification Bell & Dropdown -->
+        <div style="position: relative;">
+          <button type="button" class="header-icon-btn" onclick="toggleNotificationsDropdown(event)" title="التنبيهات">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            <span class="header-icon-badge" id="notificationsBadge">3</span>
+          </button>
+
+          <div id="notificationsDropdown" class="notifications-dropdown">
+            <div class="notifications-header">
+              <span>التنبيهات (3)</span>
+              <span style="font-size: 0.72rem; color: #2563EB; cursor: pointer;" onclick="markAllNotificationsRead(event)">تحديد الكل كمقروء</span>
+            </div>
+            <div class="notifications-list">
+              <div class="notification-item unread">
+                <div class="notification-dot"></div>
+                <div>
+                  <div class="notification-title">تنبيه مخزون: قلاس سلاب وصل للحد الأدنى (5 قطع)</div>
+                  <div class="notification-time">منذ 15 دقيقة</div>
+                </div>
+              </div>
+              <div class="notification-item unread">
+                <div class="notification-dot"></div>
+                <div>
+                  <div class="notification-title">طلب جديد مسجل في المنظومة بنجاح</div>
+                  <div class="notification-time">منذ ساعة واحدة</div>
+                </div>
+              </div>
+              <div class="notification-item">
+                <div class="notification-dot" style="background-color: #94A3B8;"></div>
+                <div>
+                  <div class="notification-title">اكتمال نقطة الفصل التاريخية وترحيل الأرشيف بنجاح</div>
+                  <div class="notification-time">07 أكتوبر 01:55 ص</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Current User Avatar Dropdown -->
         <div style="position: relative;">
           <button type="button" class="header-user-btn" onclick="toggleUserDropdown(event)" title="حساب المستخدم النشط">
             <div class="header-avatar" id="topHeaderAvatar">ط</div>
-            <span class="header-user-name" id="topHeaderUserName">طه</span>
+            <div class="header-user-meta">
+              <span class="header-user-name" id="topHeaderUserName">طه</span>
+              <span class="header-user-sub" id="topHeaderUserRole">العمليات والمبيعات</span>
+            </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
 
@@ -246,143 +284,252 @@
 
     <!-- Main Dynamic Content Container -->
     <main class="page-content">
-
-      <!-- =======================================================
-           SCREEN 1: الرئيسية (Dashboard)
+           SCREEN 1: الرئيسية (Dashboard — 100% Matching Reference)
            ======================================================= -->
       <section id="dashboardScreen" class="secondary-screen-view active">
+        <!-- Page Header -->
         <div class="page-header">
           <div class="page-header-titles">
-            <h1 class="page-title">الرئيسية</h1>
-            <p class="page-subtitle">ملخص عمليات Absolute Dental</p>
+            <h1 class="page-title">لوحة التحكم الرئيسية</h1>
+            <p class="page-subtitle">ملخص الأداء اليومي، حركة المبيعات، ومراقبة المخزون</p>
+          </div>
+          <div class="page-header-actions">
+            <button type="button" class="btn-secondary" onclick="navigateToScreen('orders')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg>
+              <span>سجل الطلبات</span>
+            </button>
+            <button type="button" class="btn-primary" onclick="navigateToScreen('pos')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+              <span>+ نقطة البيع POS</span>
+            </button>
           </div>
         </div>
 
-        <!-- 4 Compact KPI Blocks -->
+        <!-- 1. Top 4 KPI Cards (Matching Image 1) -->
         <div class="kpi-grid">
-          <!-- Card 1: إجمالي المبيعات -->
+          <!-- Card 1: إجمالي الطلبات -->
           <div class="kpi-card">
             <div class="kpi-top-row">
-              <div class="kpi-label">إجمالي المبيعات</div>
-              <div class="kpi-icon-box purple">
+              <span class="kpi-label">إجمالي الطلبات</span>
+              <div class="kpi-icon-pill green">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
               </div>
             </div>
-            <div class="kpi-value num-mono" id="kpiSalesVal">0 د.ل</div>
-            <div class="kpi-bottom-row">0% هذا الشهر</div>
+            <div class="kpi-value num-mono" id="kpiOrdersVal">258</div>
+            <div class="kpi-trend-pill up">
+              <span>↑ 12%</span>
+              <span class="trend-sub">من الأسبوع الماضي</span>
+            </div>
           </div>
 
-          <!-- Card 2: عدد الطلبات -->
+          <!-- Card 2: إجمالي المبيعات -->
           <div class="kpi-card">
             <div class="kpi-top-row">
-              <div class="kpi-label">عدد الطلبات</div>
-              <div class="kpi-icon-box blue">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>
+              <span class="kpi-label">إجمالي المبيعات</span>
+              <div class="kpi-icon-pill blue">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
             </div>
-            <div class="kpi-value num-mono" id="kpiOrdersVal">0</div>
-            <div class="kpi-bottom-row">0% هذا الشهر</div>
+            <div class="kpi-value num-mono" id="kpiSalesVal">5,885 <span class="currency-unit">د.ل</span></div>
+            <div class="kpi-trend-pill up">
+              <span>↑ 18%</span>
+              <span class="trend-sub">من الأسبوع الماضي</span>
+            </div>
           </div>
 
-          <!-- Card 3: صافي الربح -->
+          <!-- Card 3: عدد المنتجات -->
           <div class="kpi-card">
             <div class="kpi-top-row">
-              <div class="kpi-label">صافي الربح</div>
-              <div class="kpi-icon-box green">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+              <span class="kpi-label">عدد المنتجات</span>
+              <div class="kpi-icon-pill orange">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
               </div>
             </div>
-            <div class="kpi-value num-mono" id="kpiProfitVal">0 د.ل</div>
-            <div class="kpi-bottom-row">0% هذا الشهر</div>
+            <div class="kpi-value num-mono" id="kpiProductsVal">1,240</div>
+            <div class="kpi-trend-pill up">
+              <span>↑ 5%</span>
+              <span class="trend-sub">منتج نشط</span>
+            </div>
           </div>
 
-          <!-- Card 4: المصروفات -->
+          <!-- Card 4: عدد العملاء -->
           <div class="kpi-card">
             <div class="kpi-top-row">
-              <div class="kpi-label">المصروفات</div>
-              <div class="kpi-icon-box red">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              <span class="kpi-label">عدد العملاء</span>
+              <div class="kpi-icon-pill purple">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
             </div>
-            <div class="kpi-value num-mono" id="kpiExpensesVal">0 د.ل</div>
-            <div class="kpi-bottom-row">0% هذا الشهر</div>
+            <div class="kpi-value num-mono" id="kpiCustomersVal">386</div>
+            <div class="kpi-trend-pill up">
+              <span>↑ 9%</span>
+              <span class="trend-sub">عميل نشط</span>
+            </div>
           </div>
         </div>
 
-        <!-- Dashboard 2-Column Section -->
-        <div class="dashboard-layout-grid">
-          <!-- Right: قسم المبيعات الأخيرة -->
-          <div class="dashboard-card">
-            <div class="card-header-row">
-              <span class="card-title">المبيعات الأخيرة</span>
-              <span class="card-link" onclick="navigateToScreen('orders')">عرض الكل ←</span>
+        <!-- 2. Middle Row: Sales Chart + Recent Orders (Matching Image 1) -->
+        <div class="dashboard-mid-grid">
+          <!-- Right: أحدث الطلبات -->
+          <div class="bento-card">
+            <div class="bento-header">
+              <div class="bento-title-group">
+                <h3 class="bento-title">أحدث الطلبات</h3>
+                <span class="bento-subtitle">آخر العمليات المضافة للمنظومة</span>
+              </div>
+              <button type="button" class="bento-action-btn" onclick="navigateToScreen('orders')">عرض الكل</button>
             </div>
 
             <div class="table-responsive">
-              <table class="erp-table">
+              <table class="erp-table table-compact">
                 <thead>
                   <tr>
-                    <th>رقم الطلب</th>
-                    <th>العميل</th>
+                    <th>الرقم</th>
+                    <th>اسم العميل</th>
+                    <th>المنتجات</th>
                     <th>المبلغ</th>
                     <th>الحالة</th>
                     <th>التاريخ</th>
                   </tr>
                 </thead>
-                <tbody id="dashboardRecentSalesBody">
-                  <!-- Dynamically rendered or shows empty state -->
+                <tbody id="dashRecentOrdersTableBody">
+                  <!-- Rendered dynamically -->
                 </tbody>
               </table>
-              <div id="dashboardRecentSalesEmpty" class="erp-empty-state">
-                <div class="empty-state-icon-circle">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>
-                </div>
-                <div class="empty-state-title">لا توجد مبيعات بعد</div>
-                <div class="empty-state-subtitle">ستظهر هنا آخر الطلبات عند تسجيلها</div>
-              </div>
+              <tbody id="dashboardActionOrdersTableBody" style="display: none;"></tbody>
             </div>
           </div>
 
-          <!-- Left: قسم حالة المخزون -->
-          <div class="dashboard-card">
-            <div class="card-header-row">
-              <span class="card-title">حالة المخزون</span>
-              <span class="card-link" onclick="navigateToScreen('inventory')">عرض جميع المنتجات ←</span>
+          <!-- Left: المبيعات خلال آخر 7 أيام -->
+          <div class="bento-card">
+            <div class="bento-header">
+              <div class="bento-title-group">
+                <h3 class="bento-title">المبيعات خلال آخر 7 أيام</h3>
+                <span class="bento-subtitle" id="chartTotalDisplay">3,818 د.ل إجمالي الفترة</span>
+              </div>
+              <select class="form-select-sm" onchange="filterChartPeriod(this.value, this)">
+                <option value="week" selected>آخر 7 أيام</option>
+                <option value="month">آخر 30 يوم</option>
+                <option value="day">اليوم</option>
+              </select>
             </div>
 
-            <div class="inventory-status-list">
-              <div class="inv-status-item">
-                <div class="inv-status-label">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
-                  <span>إجمالي المنتجات</span>
+            <div class="dash-chart-container">
+              <div class="dash-bar-chart" id="dashSalesBarChart">
+                <!-- 7 interactive bars -->
+                <div class="chart-col">
+                  <div class="chart-bar-wrap">
+                    <div class="chart-bar" style="height: 30%;" data-val="850 د.ل"></div>
+                  </div>
+                  <span class="chart-label">1 أكتوبر</span>
                 </div>
-                <span class="inv-status-val num-mono" id="dashTotalProducts">39</span>
-              </div>
-
-              <div class="inv-status-item">
-                <div class="inv-status-label">
-                  <span class="dot-indicator dot-amber"></span>
-                  <span>منخفض المخزون</span>
+                <div class="chart-col">
+                  <div class="chart-bar-wrap">
+                    <div class="chart-bar" style="height: 45%;" data-val="1,350 د.ل"></div>
+                  </div>
+                  <span class="chart-label">2 أكتوبر</span>
                 </div>
-                <span class="inv-status-val num-mono" id="dashLowStockCount" style="color: var(--status-warning);">0</span>
-              </div>
-
-              <div class="inv-status-item">
-                <div class="inv-status-label">
-                  <span class="dot-indicator dot-red"></span>
-                  <span>نافد</span>
+                <div class="chart-col">
+                  <div class="chart-bar-wrap">
+                    <div class="chart-bar" style="height: 55%;" data-val="1,680 د.ل"></div>
+                  </div>
+                  <span class="chart-label">3 أكتوبر</span>
                 </div>
-                <span class="inv-status-val num-mono" id="dashOutStockCount" style="color: var(--status-danger);">39</span>
-              </div>
-
-              <div class="inv-status-item">
-                <div class="inv-status-label">
-                  <span class="dot-indicator dot-green"></span>
-                  <span>متوفر</span>
+                <div class="chart-col">
+                  <div class="chart-bar-wrap">
+                    <div class="chart-bar" style="height: 65%;" data-val="1,950 د.ل"></div>
+                  </div>
+                  <span class="chart-label">4 أكتوبر</span>
                 </div>
-                <span class="inv-status-val num-mono" id="dashAvailStockCount" style="color: var(--status-success);">0</span>
+                <div class="chart-col">
+                  <div class="chart-bar-wrap">
+                    <div class="chart-bar" style="height: 85%;" data-val="2,560 د.ل"></div>
+                  </div>
+                  <span class="chart-label">5 أكتوبر</span>
+                </div>
+                <div class="chart-col">
+                  <div class="chart-bar-wrap">
+                    <div class="chart-bar" style="height: 35%;" data-val="1,050 د.ل"></div>
+                  </div>
+                  <span class="chart-label">6 أكتوبر</span>
+                </div>
+                <div class="chart-col">
+                  <div class="chart-bar-wrap">
+                    <div class="chart-bar active" style="height: 75%;" data-val="2,280 د.ل"></div>
+                  </div>
+                  <span class="chart-label">7 أكتوبر</span>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- 3. Bottom Row: 3 Bento Cards (Matching Image 1) -->
+        <div class="dashboard-bottom-grid">
+          <!-- Card 1: حالة المخزون -->
+          <div class="bento-card">
+            <div class="bento-header">
+              <div class="bento-title-group">
+                <h3 class="bento-title">حالة المخزون</h3>
+                <span class="bento-subtitle">أصناف بحاجة لإعادة طلب</span>
+              </div>
+              <button type="button" class="bento-action-btn" onclick="navigateToScreen('inventory')">عرض الكل</button>
+            </div>
+
+            <div class="dash-mini-list" id="dashboardLowStockList">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Card 2: المنتجات الأكثر طلباً -->
+          <div class="bento-card">
+            <div class="bento-header">
+              <div class="bento-title-group">
+                <h3 class="bento-title">المنتجات الأكثر طلباً</h3>
+                <span class="bento-subtitle">الأعلى مبيعاً هذا الشهر</span>
+              </div>
+              <button type="button" class="bento-action-btn" onclick="navigateToScreen('products')">عرض الكل</button>
+            </div>
+
+            <div class="dash-mini-list" id="topProductsContainer">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Card 3: نقطة POS (Quick Terminal Widget) -->
+          <div class="bento-card dash-pos-widget">
+            <div class="bento-header">
+              <div class="bento-title-group">
+                <h3 class="bento-title">نقطة POS</h3>
+                <span class="bento-subtitle">عمليات بيع مباشرة سريعة</span>
+              </div>
+              <button type="button" class="bento-action-btn" onclick="navigateToScreen('pos')">فتح في صفحة مستقلة</button>
+            </div>
+
+            <div class="pos-widget-search-wrap">
+              <input type="text" class="form-input-clean" id="posWidgetSearch" placeholder="البحث عن منتج بالاسم أو SKU..." oninput="filterPosProducts(this.value)">
+              <span class="barcode-icon" style="font-size: 1.1rem; color: #2563EB;">🔍</span>
+            </div>
+
+            <div class="pos-widget-cart-items" id="posWidgetCartList">
+              <!-- Rendered items in cart or fast sample items -->
+            </div>
+
+            <div class="pos-widget-summary">
+              <div class="pos-widget-summary-row">
+                <span>المجموع الفرعي:</span>
+                <span class="num-mono" id="posWidgetSubtotal">115 د.ل</span>
+              </div>
+              <div class="pos-widget-summary-row total">
+                <span>الإجمالي:</span>
+                <span class="num-mono" id="posWidgetTotal">115 د.ل</span>
+              </div>
+            </div>
+
+            <button type="button" class="btn-primary btn-block" onclick="navigateToScreen('pos')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>إتمام الطلب وإصدار الفاتورة</span>
+            </button>
           </div>
         </div>
       </section>
@@ -1486,6 +1633,33 @@
 <!-- Data & Engine Scripts -->
 <script src="seed.js?v=20261007-v8"></script>
 <script src="app.js?v=20261007-v8"></script>
+
+
+<!-- Mobile Bottom Navigation Bar (<= 768px) -->
+<nav class="mobile-bottom-nav">
+  <button type="button" class="bottom-nav-item active" data-screen="dashboard" onclick="navigateToScreen('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>الرئيسية</span>
+  </button>
+  <button type="button" class="bottom-nav-item" data-screen="orders" onclick="navigateToScreen('orders')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>
+    <span>الطلبات</span>
+  </button>
+  <button type="button" class="bottom-nav-item pos-fab-btn" data-screen="pos" onclick="navigateToScreen('pos')" title="نقطة البيع السريعة">
+    <div class="pos-fab-circle">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <span>POS</span>
+  </button>
+  <button type="button" class="bottom-nav-item" data-screen="products" onclick="navigateToScreen('products')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+    <span>المنتجات</span>
+  </button>
+  <button type="button" class="bottom-nav-item" onclick="openMobileSidebar()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+    <span>المزيد</span>
+  </button>
+</nav>
 
 </body>
 </html>
