@@ -1611,8 +1611,12 @@ a {
   padding: 1.5rem;
 }
 
-.user-select-overlay.hidden {
+.user-select-overlay.hidden,
+html.user-pre-authenticated #userSelectOverlay {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .user-select-card {

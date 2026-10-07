@@ -1,9 +1,8 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.07_HISTORICAL_ARCHIVE_V7';
-const ERP_CUTOFF_DATE = (typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) ? window.ERP_CUTOFF_DATE : '2026-10-07T01:55:00+02:00';
-const ERP_CUTOFF_TIMESTAMP = new Date(ERP_CUTOFF_DATE).getTime();
+const ERP_DATABASE_VERSION = '2026.10.07_HISTORICAL_ARCHIVE_V8';
+const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
     localStorage.removeItem('abs_erp_products');
@@ -82,70 +81,116 @@ if (window.supabase) {
 const AUTHORIZED_USERS = ['مؤمن', 'طه', 'ياسي'];
 
 function getCurrentUser() {
-  const sessionUser = sessionStorage.getItem('abs_erp_active_user');
-  if (sessionUser && AUTHORIZED_USERS.includes(sessionUser)) {
-    return sessionUser;
-  }
+  try {
+    const sessionUser = sessionStorage.getItem('abs_erp_active_user');
+    if (sessionUser && AUTHORIZED_USERS.includes(sessionUser)) {
+      return sessionUser;
+    }
+    const localUser = localStorage.getItem('abs_erp_last_user');
+    if (localUser && AUTHORIZED_USERS.includes(localUser)) {
+      return localUser;
+    }
+  } catch (_) {}
   return null;
 }
 
 function loginAsUser(userName) {
-  if (!AUTHORIZED_USERS.includes(userName)) {
-    showToast('غير مخول بالدخول للمنظومة', 'warning');
-    return;
+  try {
+    if (!AUTHORIZED_USERS.includes(userName)) {
+      if (typeof showToast === 'function') showToast('يرجى اختيار أحد الشركاء المعتمدين', 'warning');
+      return;
+    }
+
+    try {
+      sessionStorage.setItem('abs_erp_active_user', userName);
+      localStorage.setItem('abs_erp_last_user', userName);
+    } catch (_) {}
+
+    if (typeof ERP_STATE !== 'undefined') {
+      ERP_STATE.currentPartner = userName;
+    }
+
+    // Unconditionally dismiss overlay with full inline and class priority
+    const overlay = document.getElementById('userSelectOverlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.style.setProperty('display', 'none', 'important');
+      overlay.style.setProperty('opacity', '0', 'important');
+      overlay.style.setProperty('pointer-events', 'none', 'important');
+      overlay.style.setProperty('visibility', 'hidden', 'important');
+    }
+
+    try {
+      updateSessionUserUI(userName);
+    } catch (e) {
+      console.warn('updateSessionUserUI notice:', e);
+    }
+
+    try {
+      logOperation({
+        user: userName,
+        action: 'تسجيل دخول وبدء جلسة',
+        target: 'نظام Absolute Dental ERP',
+        oldVal: '-',
+        newVal: 'جلسة نشطة',
+        details: `«${userName} قام بتسجيل الدخول إلى المنظومة وبدء جلسة عمل جديدة»`
+      });
+    } catch (e) {
+      console.warn('logOperation notice:', e);
+    }
+
+    try {
+      if (typeof showToast === 'function') {
+        showToast(`مرحباً بك يا ${userName} 👋 — تم تفعيل جلستك بنجاح 🦷`);
+      }
+    } catch (_) {}
+  } catch (err) {
+    console.error('Critical loginAsUser fallback triggered:', err);
+    const overlay = document.getElementById('userSelectOverlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.style.setProperty('display', 'none', 'important');
+    }
   }
-
-  sessionStorage.setItem('abs_erp_active_user', userName);
-  ERP_STATE.currentPartner = userName;
-
-  const overlay = document.getElementById('userSelectOverlay');
-  if (overlay) {
-    overlay.classList.add('hidden');
-    overlay.style.display = 'none';
-  }
-
-  updateSessionUserUI(userName);
-
-  logOperation({
-    user: userName,
-    action: 'تسجيل دخول وبدء جلسة',
-    target: 'نظام Absolute Dental ERP',
-    oldVal: '-',
-    newVal: 'جلسة نشطة',
-    details: `«${userName} قام بتسجيل الدخول إلى المنظومة وبدء جلسة عمل جديدة»`
-  });
-
-  showToast(`مرحباً بك يا ${userName} 👋 — تم تفعيل جلستك بنجاح 🦷`);
 }
 
 function logoutCurrentUser() {
-  const currentUser = getCurrentUser() || ERP_STATE.currentPartner;
-  if (currentUser) {
-    logOperation({
-      user: currentUser,
-      action: 'تسجيل خروج وإنهاء الجلسة',
-      target: 'نظام Absolute Dental ERP',
-      oldVal: 'جلسة نشطة',
-      newVal: 'تم تسجيل الخروج',
-      details: `«${currentUser} قام بإنهاء الجلسة وتسجيل الخروج»`
-    });
-  }
+  try {
+    const currentUser = getCurrentUser() || (typeof ERP_STATE !== 'undefined' && ERP_STATE.currentPartner);
+    if (currentUser) {
+      logOperation({
+        user: currentUser,
+        action: 'تسجيل خروج وإنهاء الجلسة',
+        target: 'نظام Absolute Dental ERP',
+        oldVal: 'جلسة نشطة',
+        newVal: 'تم تسجيل الخروج',
+        details: `«${currentUser} قام بإنهاء الجلسة وتسجيل الخروج»`
+      });
+    }
+  } catch (_) {}
 
   const menu = document.getElementById('headerUserMenu');
   if (menu) menu.classList.remove('active');
   const dropdown = document.querySelector('.header-user-dropdown');
   if (dropdown) dropdown.classList.remove('open');
 
-  sessionStorage.removeItem('abs_erp_active_user');
-  closeMobileSidebar();
+  try {
+    sessionStorage.removeItem('abs_erp_active_user');
+  } catch (_) {}
+
+  if (typeof closeMobileSidebar === 'function') closeMobileSidebar();
 
   const overlay = document.getElementById('userSelectOverlay');
   if (overlay) {
     overlay.classList.remove('hidden');
+    overlay.style.removeProperty('display');
+    overlay.style.removeProperty('opacity');
+    overlay.style.removeProperty('pointer-events');
+    overlay.style.removeProperty('visibility');
     overlay.style.display = 'flex';
   }
 
-  showToast('تم إنهاء الجلسة وتسجيل الخروج الآمن');
+  if (typeof showToast === 'function') showToast('تم إنهاء الجلسة وتسجيل الخروج الآمن');
 }
 
 function toggleUserDropdown(event) {
@@ -172,6 +217,10 @@ function switchUserPrompt() {
   const overlay = document.getElementById('userSelectOverlay');
   if (overlay) {
     overlay.classList.remove('hidden');
+    overlay.style.removeProperty('display');
+    overlay.style.removeProperty('opacity');
+    overlay.style.removeProperty('pointer-events');
+    overlay.style.removeProperty('visibility');
     overlay.style.display = 'flex';
   }
 }
@@ -189,20 +238,27 @@ document.addEventListener('click', (e) => {
 });
 
 function updateSessionUserUI(userName) {
+  if (!userName) return;
+  const initialLetter = userName.charAt(0);
+  const roleText = userName === 'مؤمن' ? 'المشتريات والمخزون' : (userName === 'طه' ? 'العمليات والمبيعات' : 'المالية والتوصيل');
+
   const topName = document.getElementById('topHeaderUserName');
   const topAvatar = document.getElementById('topHeaderAvatar');
   const sideName = document.getElementById('sideUserName');
   const sideAvatar = document.getElementById('sideUserAvatar');
+  const sideRole = document.querySelector('.user-role-label');
   const greeting = document.querySelector('.page-greeting');
   const studentActiveBadge = document.getElementById('studentOrderActiveUserBadgeName');
   const editAuthor = document.getElementById('editProductAuthor');
   const addAuthor = document.getElementById('addProductAuthor');
 
   if (topName) topName.textContent = userName;
-  if (topAvatar) topAvatar.textContent = userName;
+  if (topAvatar) topAvatar.textContent = initialLetter;
   if (sideName) sideName.textContent = userName;
-  if (sideAvatar) sideAvatar.textContent = userName;
-  if (greeting && ERP_STATE.activeScreen === 'dashboard') {
+  if (sideAvatar) sideAvatar.textContent = initialLetter;
+  if (sideRole) sideRole.textContent = roleText;
+
+  if (greeting && typeof ERP_STATE !== 'undefined' && ERP_STATE.activeScreen === 'dashboard') {
     greeting.textContent = `صباح الخير، ${userName} 👋`;
   }
   if (studentActiveBadge) studentActiveBadge.textContent = userName;
@@ -216,24 +272,31 @@ function updateSessionUserUI(userName) {
 }
 
 function logOperation({ user, action, target, oldVal = '-', newVal = '-', details }) {
-  const author = user || getCurrentUser() || ERP_STATE.currentPartner || 'مؤمن';
-  const newLog = {
-    id: `#${1100 + ERP_STATE.auditLogs.length}`,
-    time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
-    date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }),
-    user: author,
-    action: action,
-    target: target || '-',
-    oldVal: oldVal,
-    newVal: newVal,
-    details: details || `«${author} قام بـ ${action}»`
-  };
+  try {
+    const author = user || getCurrentUser() || (typeof ERP_STATE !== 'undefined' && ERP_STATE.currentPartner) || 'مؤمن';
+    const auditLogs = (typeof ERP_STATE !== 'undefined' && Array.isArray(ERP_STATE.auditLogs)) ? ERP_STATE.auditLogs : [];
+    const newLog = {
+      id: `#${1100 + auditLogs.length}`,
+      time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
+      date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }),
+      user: author,
+      action: action,
+      target: target || '-',
+      oldVal: oldVal,
+      newVal: newVal,
+      details: details || `«${author} قام بـ ${action}»`
+    };
 
-  ERP_STATE.auditLogs.unshift(newLog);
-  localStorage.setItem('abs_erp_audit', JSON.stringify(ERP_STATE.auditLogs));
+    auditLogs.unshift(newLog);
+    try {
+      localStorage.setItem('abs_erp_audit', JSON.stringify(auditLogs));
+    } catch (_) {}
 
-  if (ERP_STATE.activeScreen === 'audit') {
-    renderFullAuditTable();
+    if (typeof ERP_STATE !== 'undefined' && ERP_STATE.activeScreen === 'audit' && typeof renderFullAuditTable === 'function') {
+      renderFullAuditTable();
+    }
+  } catch (e) {
+    console.warn('logOperation notice:', e);
   }
 }
 
@@ -365,6 +428,9 @@ const ERP_STATE = {
     return list;
   })()
 };
+if (typeof window !== 'undefined') {
+  window.ERP_STATE = ERP_STATE;
+}
 
 // -------------------------------------------------------------
 // 2. DYNAMIC REAL DATA METRICS CALCULATION & RENDERING
@@ -4575,23 +4641,35 @@ ${discountText}🚚 *رسوم التوصيل:* ${order.shippingFee > 0 ? order.s
 }
 
 // -------------------------------------------------------------
+// -------------------------------------------------------------
 // 17. INITIALIZATION
 // -------------------------------------------------------------
-window.addEventListener('DOMContentLoaded', () => {
+function initializeERPApp() {
   // 1. Session verification & Startup User Selection
   const activeUser = getCurrentUser();
   const overlay = document.getElementById('userSelectOverlay');
 
   if (activeUser) {
-    ERP_STATE.currentPartner = activeUser;
+    if (typeof ERP_STATE !== 'undefined') {
+      ERP_STATE.currentPartner = activeUser;
+    }
     if (overlay) {
       overlay.classList.add('hidden');
-      overlay.style.display = 'none';
+      overlay.style.setProperty('display', 'none', 'important');
+      overlay.style.setProperty('opacity', '0', 'important');
+      overlay.style.setProperty('pointer-events', 'none', 'important');
+      overlay.style.setProperty('visibility', 'hidden', 'important');
     }
-    updateSessionUserUI(activeUser);
+    try {
+      updateSessionUserUI(activeUser);
+    } catch (_) {}
   } else {
     if (overlay) {
       overlay.classList.remove('hidden');
+      overlay.style.removeProperty('display');
+      overlay.style.removeProperty('opacity');
+      overlay.style.removeProperty('pointer-events');
+      overlay.style.removeProperty('visibility');
       overlay.style.display = 'flex';
     }
   }
@@ -4614,20 +4692,21 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // 3. Set current date string
-  const dateEl = document.getElementById('headerCurrentDateText');
-  if (dateEl) {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    try {
+  try {
+    const dateEl = document.getElementById('headerCurrentDateText');
+    if (dateEl) {
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       dateEl.textContent = new Date().toLocaleDateString('ar-LY', options);
-    } catch (_) {
-      dateEl.textContent = 'الخميس، 01 أكتوبر 2026';
     }
-  }
+  } catch (_) {}
 
   // 4. Initial Calculation & UI population from Real Database Seed
-  updateDashboardRealUI();
+  try {
+    updateDashboardRealUI();
+  } catch (e) {
+    console.warn('updateDashboardRealUI error:', e);
+  }
 
-  
   // 5. Setup Live Realtime Subscription with Supabase
   if (typeof supabase !== 'undefined' && supabase.createClient) {
     try {
@@ -4647,11 +4726,19 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // 6. Background Live Sync with Supabase (Immediate + periodic every 30s)
-  syncWithUserServer();
-  setInterval(() => {
+  try {
     syncWithUserServer();
-  }, 30000);
-});
+    setInterval(() => {
+      syncWithUserServer();
+    }, 30000);
+  } catch (_) {}
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', initializeERPApp);
+} else {
+  initializeERPApp();
+}
 
 
 

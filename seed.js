@@ -1,5 +1,7 @@
 /* Absolute Dental Production Catalog & Historical Orders Archive */
-const ERP_CUTOFF_DATE = '2026-10-07T01:55:00+02:00';
+if (typeof window !== 'undefined') {
+  window.ERP_CUTOFF_DATE = '2026-10-07T01:55:00+02:00';
+}
 const INITIAL_PRODUCTS = [
   {
     "id": "d02e821e-91e3-4ed4-869e-f636142d8247",
@@ -6444,7 +6446,7 @@ const INITIAL_PURCHASES = [];
 const INITIAL_EXPENSES = [];
 const INITIAL_ACTIVITY = [];
 if (typeof window !== 'undefined') {
-  window.ERP_CUTOFF_DATE = ERP_CUTOFF_DATE;
+  window.ERP_CUTOFF_DATE = window.ERP_CUTOFF_DATE || '2026-10-07T01:55:00+02:00';
   window.ERP_SEEDED_PRODUCTS = INITIAL_PRODUCTS;
   window.ERP_SEEDED_ORDERS = INITIAL_ORDERS;
   window.ERP_SEEDED_PURCHASES = INITIAL_PURCHASES;

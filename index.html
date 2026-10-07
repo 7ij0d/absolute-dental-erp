@@ -7,10 +7,21 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Absolute Dental — Operations ERP</title>
-  <link rel="stylesheet" href="styles.css?v=20261007-v1">
+  <link rel="stylesheet" href="styles.css?v=20261007-v8">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Instant session pre-authentication check -->
+  <script>
+    (function() {
+      try {
+        var saved = sessionStorage.getItem('abs_erp_active_user') || localStorage.getItem('abs_erp_last_user');
+        if (saved && ['مؤمن', 'طه', 'ياسي'].indexOf(saved) !== -1) {
+          document.documentElement.classList.add('user-pre-authenticated');
+        }
+      } catch (_) {}
+    })();
+  </script>
   <!-- html2canvas and jsPDF for identical storefront PDF invoice exports -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -20,6 +31,22 @@
 <!-- =========================================================
      USER SELECTION MODAL (من المستخدم؟)
      ========================================================= -->
+<script>
+  window.loginAsUser = window.loginAsUser || function(userName) {
+    try {
+      sessionStorage.setItem('abs_erp_active_user', userName);
+      localStorage.setItem('abs_erp_last_user', userName);
+    } catch (_) {}
+    var ov = document.getElementById('userSelectOverlay');
+    if (ov) {
+      ov.classList.add('hidden');
+      ov.style.setProperty('display', 'none', 'important');
+      ov.style.setProperty('opacity', '0', 'important');
+      ov.style.setProperty('pointer-events', 'none', 'important');
+      ov.style.setProperty('visibility', 'hidden', 'important');
+    }
+  };
+</script>
 <div id="userSelectOverlay" class="user-select-overlay">
   <div class="user-select-card">
     <div class="user-select-brand-badge">
@@ -1457,8 +1484,8 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <!-- Data & Engine Scripts -->
-<script src="seed.js?v=20261007-v7"></script>
-<script src="app.js?v=20261007-v7"></script>
+<script src="seed.js?v=20261007-v8"></script>
+<script src="app.js?v=20261007-v8"></script>
 
 </body>
 </html>
