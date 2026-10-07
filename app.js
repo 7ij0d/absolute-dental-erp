@@ -31,6 +31,210 @@ const SUPABASE_CONFIG = {
 };
 
 // -------------------------------------------------------------
+// CANONICAL ORDER STATUSES & UNIFIED SINGLE SOURCE OF TRUTH
+// Shared between Absolute Dental Admin and ERP Main System
+// -------------------------------------------------------------
+const CANONICAL_ORDER_STATUSES = {
+  pending_review: { key: 'pending_review', label: 'في انتظار المراجعة', badgeClass: 'pending', color: '#F59E0B' },
+  accepted: { key: 'accepted', label: 'تم قبول الطلب', badgeClass: 'accepted', color: '#3B82F6' },
+  preparing: { key: 'preparing', label: 'جاري التجهيز', badgeClass: 'preparing', color: '#06B6D4' },
+  ready_for_delivery: { key: 'ready_for_delivery', label: 'جاهز للتوصيل', badgeClass: 'ready', color: '#6366F1' },
+  out_for_delivery: { key: 'out_for_delivery', label: 'خرج للتوصيل', badgeClass: 'shipping', color: '#8B5CF6' },
+  delivered: { key: 'delivered', label: 'تم التسليم', badgeClass: 'delivered', color: '#10B981' },
+  cancelled: { key: 'cancelled', label: 'ملغى', badgeClass: 'cancelled', color: '#EF4444' },
+  rejected: { key: 'rejected', label: 'مرفوض', badgeClass: 'rejected', color: '#DC2626' }
+};
+
+function normalizeOrderStatus(raw) {
+  if (!raw) return 'pending_review';
+  const s = String(raw).trim().toLowerCase();
+  if (s === 'pending_review' || s === 'new' || s === 'under_review' || s.includes('انتظار') || s.includes('جديد')) return 'pending_review';
+  if (s === 'accepted' || s.includes('قبول')) return 'accepted';
+  if (s === 'preparing' || s.includes('تجهيز') || s === 'editing') return 'preparing';
+  if (s === 'ready_for_delivery' || s === 'ready' || s.includes('جاهز')) return 'ready_for_delivery';
+  if (s === 'out_for_delivery' || s === 'shipping' || (s.includes('خرج') && s.includes('توصيل'))) return 'out_for_delivery';
+  if (s === 'delivered' || s === 'completed' || s.includes('تسليم') || s.includes('مكتمل')) return 'delivered';
+  if (s === 'rejected' || s.includes('مرفوض')) return 'rejected';
+  if (s === 'cancelled' || s === 'canceled' || s.includes('ملغ')) return 'cancelled';
+  return 'pending_review';
+}
+
+function getOrderStatusMeta(raw) {
+  const k = normalizeOrderStatus(raw);
+  return CANONICAL_ORDER_STATUSES[k] || CANONICAL_ORDER_STATUSES.pending_review;
+}
+
+function getOrderStatusLabel(raw) {
+  return getOrderStatusMeta(raw).label;
+}
+
+// -------------------------------------------------------------
+// CENTRALIZED ORDER STATUS PERSISTENCE (SINGLE SOURCE OF TRUTH)
+// Synchronizes status directly with central Supabase database
+// -------------------------------------------------------------
+async function persistOrderStatusChange(orderId, newStatusRaw, authorName) {
+  const order = (ERP_STATE.orders || []).find(o => 
+    o.id === orderId || 
+    o.orderNumber === orderId || 
+    o.rawOrderNumber === orderId ||
+    (orderId && String(o.id).toLowerCase() === String(orderId).toLowerCase())
+  );
+  if (!order) {
+    console.warn('persistOrderStatusChange: Order not found for ID', orderId);
+    return { success: false, error: 'Order not found' };
+  }
+
+  const canonicalNewStatus = normalizeOrderStatus(newStatusRaw);
+  const canonicalOldStatus = normalizeOrderStatus(order.status);
+  const oldMeta = getOrderStatusMeta(canonicalOldStatus);
+  const newMeta = getOrderStatusMeta(canonicalNewStatus);
+
+  const author = authorName || getCurrentUser() || sessionStorage.getItem('abs_erp_active_user') || 'طه';
+  const now = new Date();
+  const dateFormatted = now.toLocaleDateString('ar-LY', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' + now.toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' });
+
+  // 1. Append Status History Audit
+  const auditEntry = {
+    from: oldMeta.label,
+    to: newMeta.label,
+    from_key: canonicalOldStatus,
+    to_key: canonicalNewStatus,
+    date: dateFormatted,
+    user: author,
+    timestamp: now.toISOString()
+  };
+  if (!Array.isArray(order.statusHistory)) order.statusHistory = [];
+  order.statusHistory.push(auditEntry);
+
+  // Update in-memory order object
+  order.status = canonicalNewStatus;
+  order.originalStatus = canonicalNewStatus;
+
+  // 2. Inventory Deduction / Restoration Logic (Idempotent)
+  let deductionNotice = '';
+  if ((canonicalNewStatus === 'out_for_delivery' || canonicalNewStatus === 'delivered') && !order.inventoryDeducted) {
+    (order.items || []).forEach(it => {
+      const prod = (ERP_STATE.products || []).find(p => p.id === it.id || (p.nameAr && p.nameAr === it.name) || (p.nameEn && p.nameEn === it.name));
+      if (prod) {
+        const qtyToDeduct = Number(it.qty) || 1;
+        prod.stock = Math.max(0, (Number(prod.stock) || 0) - qtyToDeduct);
+      }
+    });
+    order.inventoryDeducted = true;
+    order.inventoryDeduction = 'applied';
+
+    if (!Array.isArray(ERP_STATE.inventoryTransactions)) ERP_STATE.inventoryTransactions = [];
+    ERP_STATE.inventoryTransactions.unshift({
+      id: 'tx-' + Date.now(),
+      type: 'out',
+      date: dateFormatted,
+      orderNumber: order.orderNumber,
+      customer: order.customerName,
+      user: author,
+      itemsCount: (order.items || []).reduce((s, it) => s + (Number(it.qty) || 1), 0),
+      reason: `صرف بضاعة وخصم مخزون (${newMeta.label}) للطلب ${order.orderNumber}`
+    });
+    deductionNotice = ' (تم خصم المخزون تلقائياً)';
+  } else if ((canonicalNewStatus === 'cancelled' || canonicalNewStatus === 'rejected') && order.inventoryDeducted) {
+    (order.items || []).forEach(it => {
+      const prod = (ERP_STATE.products || []).find(p => p.id === it.id || (p.nameAr && p.nameAr === it.name) || (p.nameEn && p.nameEn === it.name));
+      if (prod) {
+        const qtyToRestore = Number(it.qty) || 1;
+        prod.stock = (Number(prod.stock) || 0) + qtyToRestore;
+      }
+    });
+    order.inventoryDeducted = false;
+    order.inventoryDeduction = 'reversed';
+
+    if (!Array.isArray(ERP_STATE.inventoryTransactions)) ERP_STATE.inventoryTransactions = [];
+    ERP_STATE.inventoryTransactions.unshift({
+      id: 'tx-rev-' + Date.now(),
+      type: 'return',
+      date: dateFormatted,
+      orderNumber: order.orderNumber,
+      customer: order.customerName,
+      user: author,
+      itemsCount: (order.items || []).reduce((s, it) => s + (Number(it.qty) || 1), 0),
+      reason: `إرجاع مخزون لإلغاء الطلب ${order.orderNumber}`
+    });
+    deductionNotice = ' (تمت استعادة المخزون)';
+  }
+
+  if (canonicalNewStatus === 'delivered') {
+    order.saleFinalized = true;
+  }
+
+  // 3. Central Supabase PATCH: Single Source of Truth
+  const statusNotePayload = JSON.stringify({
+    status_history: order.statusHistory,
+    last_change: auditEntry
+  });
+
+  try {
+    const patchUrl = `${SUPABASE_CONFIG.url}/rest/v1/orders?id=eq.${encodeURIComponent(order.id)}`;
+    const patchRes = await fetch(patchUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_CONFIG.anonKey,
+        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        status: canonicalNewStatus,
+        status_note: statusNotePayload,
+        updated_at: now.toISOString()
+      })
+    });
+    if (!patchRes.ok) {
+      console.warn('Central Supabase status sync returned status:', patchRes.status);
+    } else {
+      console.log(`⚡ Central Supabase synced order [${order.orderNumber}] -> [${canonicalNewStatus}]`);
+    }
+  } catch (syncErr) {
+    console.warn('Central Supabase status sync network warning:', syncErr);
+  }
+
+  // 4. Update Local Offline Cache
+  try {
+    localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+    localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
+    localStorage.setItem('abs_erp_inventory_transactions', JSON.stringify(ERP_STATE.inventoryTransactions));
+  } catch (_) {}
+
+  // 5. Update UI Across Screens
+  if (typeof renderOrdersCardsList === 'function') renderOrdersCardsList();
+  if (typeof renderOrdersTable === 'function') renderOrdersTable();
+  if (typeof updateDashboardRealUI === 'function') updateDashboardRealUI();
+  if (typeof renderProductsTable === 'function') renderProductsTable();
+  if (typeof renderInventoryTable === 'function') renderInventoryTable();
+
+  // If order details drawer is currently open for this order, refresh it
+  const drawer = document.getElementById('orderDetailsDrawer');
+  if (drawer && drawer.classList.contains('open') && window.CURRENT_DRAWER_ORDER_ID === order.id) {
+    if (typeof openOrderDetailsById === 'function') openOrderDetailsById(order.id);
+  }
+
+  // Log audit operation
+  if (typeof logOperation === 'function') {
+    logOperation({
+      user: author,
+      action: 'تحديث حالة الطلب (مركزي)',
+      target: order.orderNumber,
+      details: `تحديث الطلب ${order.orderNumber} لـ ${order.customerName} من (${oldMeta.label}) إلى (${newMeta.label})${deductionNotice}`,
+      oldVal: oldMeta.label,
+      newVal: newMeta.label
+    });
+  }
+
+  if (typeof showToast === 'function') {
+    showToast(`تم تحديث حالة الطلب إلى «${newMeta.label}» ومزامنتها مركزياً${deductionNotice}`, 'success');
+  }
+
+  return { success: true, order };
+}
+
+// -------------------------------------------------------------
 // VERIFIED PROCUREMENT AUDIT & SUBJECT TAXONOMY
 // 100% Matching 16 Real Procurement Invoices & Storefront Subjects
 // -------------------------------------------------------------
@@ -958,16 +1162,25 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
   // 2. Status Filter
   if (filterStatus && filterStatus !== 'all') {
     const statusMap = {
-      'new': ['جديد'],
-      'preparing': ['قيد التجهيز', 'تم قبول الطلب'],
-      'shipping': ['جاهز للتوصيل', 'خرج للتوصيل'],
-      'ready': ['جاهز للتوصيل', 'خرج للتوصيل'],
-      'completed': ['مكتمل', 'تم التسليم'],
-      'delivered': ['مكتمل', 'تم التسليم'],
-      'cancelled': ['ملغي', 'ملغى']
+      'new': ['pending_review'],
+      'pending': ['pending_review'],
+      'pending_review': ['pending_review'],
+      'accepted': ['accepted'],
+      'preparing': ['accepted', 'preparing'],
+      'shipping': ['ready_for_delivery', 'out_for_delivery'],
+      'ready': ['ready_for_delivery', 'out_for_delivery'],
+      'ready_for_delivery': ['ready_for_delivery'],
+      'out_for_delivery': ['out_for_delivery'],
+      'completed': ['delivered'],
+      'delivered': ['delivered'],
+      'cancelled': ['cancelled', 'rejected'],
+      'rejected': ['rejected']
     };
     const targetStatuses = statusMap[filterStatus] || [filterStatus];
-    filtered = filtered.filter(o => targetStatuses.includes(o.status));
+    filtered = filtered.filter(o => {
+      const canonical = normalizeOrderStatus(o.status);
+      return targetStatuses.includes(canonical) || targetStatuses.includes(o.status);
+    });
   }
 
   // 3. Search Query Filter
@@ -1003,10 +1216,10 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
 
   const tabCounts = {
     all: activeScopeOrders.length,
-    new: activeScopeOrders.filter(o => o.status === 'جديد').length,
-    prep: activeScopeOrders.filter(o => o.status === 'قيد التجهيز' || o.status === 'تم قبول الطلب').length,
-    comp: activeScopeOrders.filter(o => o.status === 'مكتمل' || o.status === 'تم التسليم').length,
-    canc: activeScopeOrders.filter(o => o.status === 'ملغي' || o.status === 'ملغى').length
+    new: activeScopeOrders.filter(o => normalizeOrderStatus(o.status) === 'pending_review').length,
+    prep: activeScopeOrders.filter(o => ['accepted', 'preparing'].includes(normalizeOrderStatus(o.status))).length,
+    comp: activeScopeOrders.filter(o => normalizeOrderStatus(o.status) === 'delivered').length,
+    canc: activeScopeOrders.filter(o => ['cancelled', 'rejected'].includes(normalizeOrderStatus(o.status))).length
   };
 
   const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
@@ -1056,7 +1269,7 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
         <td style="font-size: 0.825rem; color: var(--text-body);">${itemsSummary}</td>
         <td class="num-mono" style="font-weight: 800; color: var(--text-main);">${order.total} د.ل</td>
         <td>
-          <span class="status-pill ${getOrderStatusClass(order.status)}">${order.status}</span>
+          <span class="status-pill ${getOrderStatusClass(order.status)}">${getOrderStatusLabel(order.status)}</span>
         </td>
         <td>${stockBadge}</td>
         <td class="num-mono" style="color: var(--text-muted); font-size: 0.775rem;">${order.date ? order.date.replace(' ص', '').replace(' م', '') : '-'}</td>
@@ -1094,18 +1307,8 @@ function handleOrdersSearch(val) {
 }
 
 function getOrderStatusClass(status) {
-  switch (status) {
-    case 'جديد': return 'new status-new';
-    case 'قيد التجهيز':
-    case 'تم قبول الطلب': return 'preparing status-preparing';
-    case 'جاهز للتوصيل':
-    case 'خرج للتوصيل': return 'ready';
-    case 'مكتمل': return 'completed status-completed';
-    case 'تم التسليم': return 'delivered status-delivered';
-    case 'ملغي':
-    case 'ملغى': return 'cancelled status-cancelled';
-    default: return 'new status-new';
-  }
+  const meta = getOrderStatusMeta(status);
+  return `${meta.badgeClass} status-${meta.badgeClass}`;
 }
 
 // -------------------------------------------------------------
@@ -1232,75 +1435,12 @@ function openOrderDetailsById(orderId) {
   openModal('orderDetailsModal');
 }
 
-function updateOrderStatusFromModal(newStatus) {
+async function updateOrderStatusFromModal(newStatus) {
   if (!ERP_STATE.currentOrderInModal) return;
   const order = ERP_STATE.currentOrderInModal;
-  const oldStatus = order.status;
-  if (oldStatus === newStatus) return;
-
-  order.status = newStatus;
   const author = getCurrentUser() || ERP_STATE.currentPartner || 'طه';
-
-  // Apply or reverse inventory deduction based on strict logic
-  let deductionNotice = '';
-  if (newStatus === 'مكتمل') {
-    if (order.inventoryDeduction !== 'applied') {
-      const deductRes = applyOrderInventoryDeduction(order, author);
-      if (deductRes && deductRes.success) {
-        deductionNotice = ' وتم خصم أصناف الطلب من المخزون بنجاح 📦';
-      }
-    }
-  } else if (newStatus === 'ملغي') {
-    if (order.inventoryDeduction === 'applied') {
-      reverseOrderInventoryDeduction(order, author);
-      deductionNotice = ' وتمت استعادة الكميات المخصومة إلى المخزون 🔄';
-    } else {
-      order.inventoryDeduction = 'cancelled';
-    }
-  } else {
-    // If transitioning back from completed to preparing/ready/new, reverse deduction if it was applied
-    if (oldStatus === 'مكتمل' && order.inventoryDeduction === 'applied') {
-      reverseOrderInventoryDeduction(order, author);
-      deductionNotice = ' وتم إلغاء الخصم وحماية المخزون 🛡️';
-    } else if (newStatus !== 'ملغي') {
-      order.inventoryDeduction = 'not_applied';
-    }
-  }
-
-  // Update audit log
-  ERP_STATE.auditLogs.unshift({
-    id: `#${1095 + ERP_STATE.auditLogs.length}`,
-    time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
-    date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }),
-    user: author,
-    action: 'تحديث حالة الطلب',
-    details: `تحديث الطلب ${order.orderNumber} لـ ${order.customerName} من (${oldStatus}) إلى (${newStatus})${deductionNotice}`,
-    oldVal: oldStatus,
-    newVal: newStatus
-  });
-
-  try {
-    localStorage.setItem('abs_erp_audit', JSON.stringify(ERP_STATE.auditLogs));
-    localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
-  } catch (_) {}
-
-  // Update UI in modal
-  const statusBadge = document.getElementById('modalOrderStatus');
-  if (statusBadge) {
-    statusBadge.textContent = newStatus;
-    statusBadge.className = `status-pill ${getOrderStatusClass(newStatus)}`;
-  }
-
-  // Refresh pipeline in modal
+  await persistOrderStatusChange(order.id, newStatus, author);
   openOrderDetailsById(order.id);
-
-  showToast(`تم تحديث حالة الطلب ${order.orderNumber} إلى (${newStatus})${deductionNotice}`);
-  if (ERP_STATE.activeScreen === 'orders') renderOrdersTable();
-  if (ERP_STATE.activeScreen === 'inventory') {
-    renderInventoryTable();
-    renderInventoryReconciliationUI();
-  }
-  updateDashboardRealUI();
 }
 
 function openWhatsAppForCurrentModal() {
@@ -3183,13 +3323,8 @@ async function syncWithUserServer() {
       const createdAtTime = new Date(ord.created_at).getTime();
       const isHistorical = createdAtTime < cutoffTime;
 
-      // Map status from English to Arabic standard
-      let statusAr = 'جديد';
-      if (ord.status === 'delivered') statusAr = 'تم التسليم';
-      else if (ord.status === 'preparing' || ord.status === 'under_review' || ord.status === 'editing') statusAr = 'قيد التجهيز';
-      else if (ord.status === 'out_for_delivery' || ord.status === 'accepted') statusAr = 'جاهز للتوصيل';
-      else if (ord.status === 'cancelled') statusAr = 'ملغى';
-      else if (ord.status === 'new') statusAr = 'جديد';
+      // Canonical shared status
+      const canonicalStatus = normalizeOrderStatus(ord.status);
 
       // Check if order already exists in ERP_STATE.orders
       const existingIdx = ERP_STATE.orders.findIndex(o => 
@@ -3200,17 +3335,21 @@ async function syncWithUserServer() {
       );
 
       if (existingIdx >= 0) {
-        // Order exists: only update status if modified remotely
+        // Order exists: the SERVER database is authoritative
         const existing = ERP_STATE.orders[existingIdx];
-        if (ord.status === 'delivered' || existing.status === 'تم التسليم') {
-          existing.status = 'تم التسليم';
-          existing.originalStatus = 'delivered';
-          existing.saleFinalized = true;
-          stateChanged = true;
-        } else if (existing.originalStatus !== ord.status && ord.status) {
-          existing.status = statusAr;
+        if (existing.status !== canonicalStatus) {
+          existing.status = canonicalStatus;
           existing.originalStatus = ord.status;
+          if (canonicalStatus === 'delivered') existing.saleFinalized = true;
           stateChanged = true;
+        }
+        if (ord.status_note) {
+          try {
+            const parsed = JSON.parse(ord.status_note);
+            if (parsed && Array.isArray(parsed.status_history)) {
+              existing.statusHistory = parsed.status_history;
+            }
+          } catch (_) {}
         }
       } else {
         // New order from server: parse and integrate
@@ -3263,7 +3402,7 @@ async function syncWithUserServer() {
           total: Number(ord.total_price || 0),
           discountAmount: Number(ord.discount_amount || 0),
           shippingFee: Number(ord.shipping_fee || 0),
-          status: statusAr,
+          status: canonicalStatus,
           originalStatus: ord.status,
           date: dateFormatted,
           created_at: ord.created_at,
@@ -3317,9 +3456,17 @@ async function syncWithUserServer() {
         localStorage.setItem('abs_erp_inventory_transactions', JSON.stringify(ERP_STATE.inventoryTransactions));
       } catch (_) {}
       updateDashboardRealUI();
+      if (typeof renderOrdersCardsList === 'function') renderOrdersCardsList();
       if (ERP_STATE.activeScreen === 'orders') renderOrdersTable();
       if (ERP_STATE.activeScreen === 'inventory') renderInventoryTable();
       if (ERP_STATE.activeScreen === 'products') renderProductsTable();
+
+      if (window.CURRENT_DRAWER_ORDER_ID && typeof openOrderDetailsById === 'function') {
+        const drawer = document.getElementById('orderDetailsDrawer');
+        if (drawer && drawer.classList.contains('open')) {
+          openOrderDetailsById(window.CURRENT_DRAWER_ORDER_ID);
+        }
+      }
     }
   } catch (err) {
     console.warn('Sync with user server notice:', err);
@@ -3676,7 +3823,7 @@ async function submitStudentOrder() {
       university: 'جامعة طرابلس',
       college: college,
       address_text: fullAddress,
-      status: 'new',
+      status: 'pending_review',
       total_price: totalPrice,
       subtotal: subtotal,
       shipping_fee: shippingFee,
@@ -3789,7 +3936,7 @@ async function submitStudentOrder() {
     total: totalPrice,
     subtotal: subtotal,
     shippingFee: shippingFee,
-    status: 'جديد',
+    status: 'pending_review',
     assignedTo: partnerName,
     date: 'الآن (مباشر)',
     createdAt: nowIso,
@@ -4962,29 +5109,37 @@ function initializeERPApp() {
   }
 
   // 5. Setup Live Realtime Subscription with Supabase
-  if (typeof supabase !== 'undefined' && supabase.createClient) {
+  const supaLib = (typeof supabase !== 'undefined' && supabase.createClient) ? supabase : (window.supabase && window.supabase.createClient ? window.supabase : null);
+  if (supaLib) {
     try {
-      supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+      supabaseClient = supaLib.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
       supabaseClient.channel('realtime-orders-feed')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
-          console.log('⚡ Realtime order received from storefront:', payload);
-          showToast('🔔 طلبية جديدة أو تحديث وصل من متجر Absolute Dental!', 'info');
+          console.log('⚡ Realtime order received from central database:', payload);
+          showToast('🔔 تحديث فوري على الطلبيات وصل من قاعدة البيانات المركزية!', 'info');
           syncWithUserServer();
         })
         .subscribe((status) => {
-          console.log('⚡ Supabase Realtime status:', status);
+          console.log('⚡ Supabase Realtime subscription status:', status);
         });
     } catch (e) {
       console.warn('Realtime init notice:', e);
     }
   }
 
-  // 6. Background Live Sync with Supabase (Immediate + periodic every 30s)
+  // 6. Background Live Sync with Supabase (Immediate + periodic every 15s + on focus/visibility)
   try {
     syncWithUserServer();
     setInterval(() => {
       syncWithUserServer();
-    }, 30000);
+    }, 15000);
+
+    window.addEventListener('focus', () => {
+      syncWithUserServer();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) syncWithUserServer();
+    });
   } catch (_) {}
 }
 
@@ -5164,26 +5319,8 @@ function renderOrdersCardsList() {
 
   // Filter by Status
   if (statusFilter !== 'all') {
-    const statusMap = {
-      'pending': 'في انتظار المراجعة',
-      'accepted': 'تم قبول الطلب',
-      'preparing': 'قيد التجهيز',
-      'ready': 'جاهز للتوصيل',
-      'shipping': 'خرج للتوصيل',
-      'delivered': 'تم التسليم',
-      'cancelled': 'ملغاة'
-    };
-    const targetStatus = statusMap[statusFilter] || statusFilter;
-    orders = orders.filter(o => {
-      const s = o.status || '';
-      if (statusFilter === 'preparing') return s.includes('تجهيز');
-      if (statusFilter === 'ready') return s.includes('جاهز');
-      if (statusFilter === 'shipping') return s.includes('توصيل');
-      if (statusFilter === 'delivered') return s.includes('تسليم') || s.includes('مكتمل');
-      if (statusFilter === 'cancelled') return s.includes('ملغ') || s.includes('مرفوض');
-      if (statusFilter === 'pending') return s.includes('انتظار') || s.includes('جديد');
-      return s === targetStatus;
-    });
+    const targetStatus = normalizeOrderStatus(statusFilter);
+    orders = orders.filter(o => normalizeOrderStatus(o.status) === targetStatus);
   }
 
   // Filter by Search Query
@@ -5233,31 +5370,9 @@ function renderOrdersCardsList() {
     }
 
     // Status mapping & pill
-    const rawStatus = order.status || 'قيد التجهيز';
-    let statusClass = 'preparing';
-    let statusLabel = rawStatus;
-    if (rawStatus.includes('انتظار') || rawStatus === 'جديد') {
-      statusClass = 'pending';
-      statusLabel = 'في انتظار المراجعة';
-    } else if (rawStatus.includes('قبول')) {
-      statusClass = 'accepted';
-      statusLabel = 'تم قبول الطلب';
-    } else if (rawStatus.includes('تجهيز')) {
-      statusClass = 'preparing';
-      statusLabel = 'قيد التجهيز';
-    } else if (rawStatus.includes('جاهز')) {
-      statusClass = 'ready';
-      statusLabel = 'جاهز للتوصيل';
-    } else if (rawStatus.includes('خرج') || rawStatus.includes('توصيل')) {
-      statusClass = 'shipping';
-      statusLabel = 'خرج للتوصيل';
-    } else if (rawStatus.includes('تسليم') || rawStatus.includes('مكتمل')) {
-      statusClass = 'delivered';
-      statusLabel = 'تم التسليم';
-    } else if (rawStatus.includes('ملغ') || rawStatus.includes('مرفوض')) {
-      statusClass = 'cancelled';
-      statusLabel = rawStatus.includes('مرفوض') ? 'مرفوض' : 'ملغاة';
-    }
+    const meta = getOrderStatusMeta(order.status);
+    const statusClass = meta.badgeClass;
+    const statusLabel = meta.label;
 
     // Source badge & scope badge
     const isAdminCreated = order.orderSource === 'admin' || order.source === 'أنشأه الأدمن';
@@ -5622,7 +5737,7 @@ function renderAddOrderSummary() {
   }).join('');
 }
 
-function submitAddOrderForm() {
+async function submitAddOrderForm() {
   if (!ADD_ORDER_STATE.customer || !ADD_ORDER_STATE.customer.name) {
     if (typeof showToast === 'function') showToast('يرجى تحديد العميل أولاً', 'warning');
     return;
@@ -5638,15 +5753,96 @@ function submitAddOrderForm() {
   const discount = ADD_ORDER_STATE.discount;
   const finalTotal = Math.max(0, subtotal + fee - discount);
 
-  const orderNum = '#49' + Math.floor(100000 + Math.random() * 900000);
+  const randomSuffix = Math.floor(100000 + Math.random() * 900000);
+  const orderNum = `#49${randomSuffix}`;
+  const rawNum = `49${randomSuffix}`;
   const now = new Date();
   const dateFormatted = now.toLocaleDateString('ar-LY', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' + now.toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' });
 
+  // Order UUID
+  const orderId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('ord-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9));
+  const initialStatus = 'pending_review';
+  const author = getCurrentUser() || sessionStorage.getItem('abs_erp_active_user') || 'طه';
+
+  const orderNotePayload = JSON.stringify({
+    status_history: [{
+      from: 'جديد',
+      to: 'في انتظار المراجعة',
+      from_key: 'pending_review',
+      to_key: 'pending_review',
+      date: dateFormatted,
+      user: author,
+      timestamp: now.toISOString()
+    }],
+    created_by: author,
+    source: 'admin'
+  });
+
+  const payloadOrder = {
+    id: orderId,
+    order_number: rawNum,
+    customer_name: ADD_ORDER_STATE.customer.name,
+    customer_phone: ADD_ORDER_STATE.customer.phone,
+    customer_phone_secondary: null,
+    customer_email: null,
+    university: 'جامعة طرابلس',
+    college: 'كلية طب الأسنان',
+    address_text: ADD_ORDER_STATE.customer.address || 'طرابلس',
+    total_price: finalTotal,
+    discount_amount: discount,
+    shipping_fee: fee,
+    status: initialStatus,
+    status_note: orderNotePayload,
+    notes: document.getElementById('addOrderNotesInput')?.value || null,
+    created_at: now.toISOString()
+  };
+
+  // 1. Post to Central Supabase
+  try {
+    const postRes = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_CONFIG.anonKey,
+        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(payloadOrder)
+    });
+
+    if (postRes.ok) {
+      console.log('✅ Order created in central Supabase database:', orderId);
+      const itemsPayload = ADD_ORDER_STATE.items.map(it => ({
+        order_id: orderId,
+        product_id: it.product.id && !String(it.product.id).startsWith('burs-') && !String(it.product.id).startsWith('prod-') && String(it.product.id).length > 20 ? it.product.id : null,
+        name_ar: it.product.nameAr || it.product.name,
+        name_en: it.product.nameEn || it.product.name,
+        quantity: it.qty,
+        price: Number(it.product.sellingPrice || it.product.price || 0)
+      }));
+
+      await fetch(`${SUPABASE_CONFIG.url}/rest/v1/order_items`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_CONFIG.anonKey,
+          'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+        },
+        body: JSON.stringify(itemsPayload)
+      });
+    } else {
+      console.warn('Failed to insert order to Supabase:', postRes.status);
+    }
+  } catch (err) {
+    console.error('Error posting order to Supabase:', err);
+  }
+
+  // 2. Add to Local ERP_STATE
   const newOrder = {
-    id: 'ord-' + Date.now(),
+    id: orderId,
     orderNumber: orderNum,
-    rawOrderNumber: orderNum.replace('#', ''),
-    invoiceNumber: '#INV-ADM-' + orderNum.replace('#', ''),
+    rawOrderNumber: rawNum,
+    invoiceNumber: '#INV-ADM-' + rawNum,
     orderType: 'operational',
     isHistorical: false,
     orderSource: 'admin',
@@ -5672,8 +5868,17 @@ function submitAddOrderForm() {
     subtotal: subtotal,
     shippingFee: fee,
     discountAmount: discount,
-    status: 'قيد التجهيز',
-    originalStatus: 'preparing',
+    status: initialStatus,
+    originalStatus: initialStatus,
+    statusHistory: [{
+      from: 'جديد',
+      to: 'في انتظار المراجعة',
+      from_key: 'pending_review',
+      to_key: 'pending_review',
+      date: dateFormatted,
+      user: author,
+      timestamp: now.toISOString()
+    }],
     date: dateFormatted,
     created_at: now.toISOString(),
     deliveryMethod: ADD_ORDER_STATE.deliveryMethod,
@@ -5690,10 +5895,10 @@ function submitAddOrderForm() {
   // Log in Audit
   if (typeof logOperation === 'function') {
     logOperation({
-      user: getCurrentUser() || 'طه',
+      user: author,
       action: 'إنشاء طلب جديد (يدوي)',
       target: orderNum,
-      details: `قام الأدمن بإنشاء طلب جديد للعميل ${newOrder.customerName} بقيمة ${finalTotal} د.ل`
+      details: `قام الأدمن بإنشاء طلب جديد للعميل ${newOrder.customerName} بقيمة ${finalTotal} د.ل ومزامنته مركزياً`
     });
   }
 
@@ -5702,7 +5907,7 @@ function submitAddOrderForm() {
   closeAddOrderDrawer();
 
   if (typeof showToast === 'function') {
-    showToast(`تم إنشاء الطلب ${orderNum} بنجاح وإدراجه في منظومة الطلبات`, 'success');
+    showToast(`تم إنشاء الطلب ${orderNum} بنجاح وإدراجه في قاعدة البيانات المركزية`, 'success');
   }
 
   renderOrdersCardsList();
@@ -5725,24 +5930,9 @@ function openOrderDetailsById(orderId) {
   if (numDisplay) numDisplay.textContent = orderNum;
 
   // Status mapping
-  const rawStatus = order.status || 'قيد التجهيز';
-  let statusClass = 'preparing';
-  let statusLabel = rawStatus;
-  if (rawStatus.includes('انتظار') || rawStatus === 'جديد') {
-    statusClass = 'pending'; statusLabel = 'في انتظار المراجعة';
-  } else if (rawStatus.includes('قبول')) {
-    statusClass = 'accepted'; statusLabel = 'تم قبول الطلب';
-  } else if (rawStatus.includes('تجهيز')) {
-    statusClass = 'preparing'; statusLabel = 'قيد التجهيز';
-  } else if (rawStatus.includes('جاهز')) {
-    statusClass = 'ready'; statusLabel = 'جاهز للتوصيل';
-  } else if (rawStatus.includes('خرج') || rawStatus.includes('توصيل')) {
-    statusClass = 'shipping'; statusLabel = 'خرج للتوصيل';
-  } else if (rawStatus.includes('تسليم') || rawStatus.includes('مكتمل')) {
-    statusClass = 'delivered'; statusLabel = 'تم التسليم';
-  } else if (rawStatus.includes('ملغ') || rawStatus.includes('مرفوض')) {
-    statusClass = 'cancelled'; statusLabel = rawStatus.includes('مرفوض') ? 'مرفوض' : 'ملغاة';
-  }
+  const meta = getOrderStatusMeta(order.status);
+  const statusClass = meta.badgeClass;
+  const statusLabel = meta.label;
 
   if (statusBadge) {
     statusBadge.className = 'order-status-badge ' + statusClass;
@@ -5919,26 +6109,29 @@ function openOrderDetailsById(orderId) {
       </p>
 
       <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
-        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'في انتظار المراجعة')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'pending_review')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
           في انتظار المراجعة
         </button>
-        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'تم قبول الطلب')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'accepted')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
           تم قبول الطلب
         </button>
-        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'قيد التجهيز')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'preparing')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
           قيد التجهيز
         </button>
-        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'جاهز للتوصيل')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'ready_for_delivery')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
           جاهز للتوصيل
         </button>
-        <button type="button" class="btn-primary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'خرج للتوصيل')" style="font-weight: 700; background: #7C3AED; color: #FFFFFF; border: none; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
+        <button type="button" class="btn-primary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'out_for_delivery')" style="font-weight: 700; background: #7C3AED; color: #FFFFFF; border: none; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
           🚚 خرج للتوصيل (خصم المخزون)
         </button>
-        <button type="button" class="btn-primary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'تم التسليم')" style="font-weight: 700; background: #10B981; color: #FFFFFF; border: none; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
+        <button type="button" class="btn-primary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'delivered')" style="font-weight: 700; background: #10B981; color: #FFFFFF; border: none; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
           ✓ تم التسليم (اعتماد البيع)
         </button>
-        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'ملغى')" style="font-weight: 700; background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'cancelled')" style="font-weight: 700; background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
           ✕ إلغاء الطلب (إرجاع المخزون)
+        </button>
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'rejected')" style="font-weight: 700; background: #FEF2F2; color: #B91C1C; border: 1px solid #FCA5A5; padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
+          ⛔ رفض الطلب
         </button>
       </div>
 
@@ -5967,149 +6160,8 @@ function closeOrderDetailsDrawer() {
   document.body.style.overflow = '';
 }
 
-function changeOrderStatusFromDrawer(orderId, newStatus) {
-  const order = (ERP_STATE.orders || []).find(o => o.id === orderId || o.orderNumber === orderId);
-  if (!order) return;
-
-  const oldStatus = order.status || 'في انتظار المراجعة';
-  const currentUser = getCurrentUser() || sessionStorage.getItem('abs_erp_active_user') || 'طه';
-  const now = new Date();
-  const dateFormatted = now.toLocaleDateString('ar-LY', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' + now.toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' });
-
-  // Record in statusHistory
-  if (!Array.isArray(order.statusHistory)) order.statusHistory = [];
-  order.statusHistory.push({
-    from: oldStatus,
-    to: newStatus,
-    date: dateFormatted,
-    user: currentUser
-  });
-
-  order.status = newStatus;
-
-  // 1. INVENTORY DEDUCTION ON 'خرج للتوصيل'
-  if (newStatus === 'خرج للتوصيل' && !order.inventoryDeducted) {
-    (order.items || []).forEach(it => {
-      const prod = (ERP_STATE.products || []).find(p => p.id === it.id || p.nameAr === it.name || p.nameEn === it.name);
-      if (prod) {
-        const qtyToDeduct = Number(it.qty) || 1;
-        prod.stock = Math.max(0, (Number(prod.stock) || 0) - qtyToDeduct);
-      }
-    });
-
-    order.inventoryDeducted = true;
-    order.inventoryDeduction = 'applied';
-
-    // Log Inventory Movement
-    if (!Array.isArray(ERP_STATE.inventoryTransactions)) ERP_STATE.inventoryTransactions = [];
-    ERP_STATE.inventoryTransactions.unshift({
-      id: 'tx-' + Date.now(),
-      type: 'out',
-      date: dateFormatted,
-      orderNumber: order.orderNumber,
-      customer: order.customerName,
-      user: currentUser,
-      itemsCount: (order.items || []).reduce((s, it) => s + (Number(it.qty) || 1), 0),
-      reason: 'صرف بضاعة وخرج للتوصيل للطلب ' + order.orderNumber
-    });
-
-    if (typeof logOperation === 'function') {
-      logOperation({
-        user: currentUser,
-        action: 'خصم مخزون (خرج للتوصيل)',
-        target: order.orderNumber,
-        details: `تم خصم منتجات الطلب ${order.orderNumber} تلقائياً لخروجه للتوصيل للعميل ${order.customerName}`
-      });
-    }
-
-    if (typeof showToast === 'function') {
-      showToast(`تم تحويل الطلب إلى خرج للتوصيل وخصم الكميات من المخزون بنجاح`, 'success');
-    }
-  }
-  // 2. INVENTORY RESTORATION ON CANCELLATION
-  else if ((newStatus === 'ملغى' || newStatus === 'ملغاة' || newStatus === 'مرفوض') && order.inventoryDeducted) {
-    (order.items || []).forEach(it => {
-      const prod = (ERP_STATE.products || []).find(p => p.id === it.id || p.nameAr === it.name || p.nameEn === it.name);
-      if (prod) {
-        const qtyToRestore = Number(it.qty) || 1;
-        prod.stock = (Number(prod.stock) || 0) + qtyToRestore;
-      }
-    });
-
-    order.inventoryDeducted = false;
-    order.inventoryDeduction = 'reversed';
-
-    if (!Array.isArray(ERP_STATE.inventoryTransactions)) ERP_STATE.inventoryTransactions = [];
-    ERP_STATE.inventoryTransactions.unshift({
-      id: 'tx-rev-' + Date.now(),
-      type: 'return',
-      date: dateFormatted,
-      orderNumber: order.orderNumber,
-      customer: order.customerName,
-      user: currentUser,
-      itemsCount: (order.items || []).reduce((s, it) => s + (Number(it.qty) || 1), 0),
-      reason: 'إرجاع بضاعة للمخزن لإلغاء الطلب ' + order.orderNumber
-    });
-
-    if (typeof logOperation === 'function') {
-      logOperation({
-        user: currentUser,
-        action: 'إرجاع مخزون (إلغاء طلب)',
-        target: order.orderNumber,
-        details: `تم إرجاع كميات الطلب ${order.orderNumber} إلى المخزن بعد إلغائه`
-      });
-    }
-
-    if (typeof showToast === 'function') {
-      showToast('تم إلغاء الطلب وإرجاع كميات المنتجات إلى المخزن بنجاح', 'info');
-    }
-  }
-  // 3. DELIVERY COMPLETION & SALES FINALIZATION
-  else if (newStatus === 'تم التسليم') {
-    order.saleFinalized = true;
-
-    // If for any reason stock was not deducted before (e.g. direct delivered), deduct it safely
-    if (!order.inventoryDeducted) {
-      (order.items || []).forEach(it => {
-        const prod = (ERP_STATE.products || []).find(p => p.id === it.id || p.nameAr === it.name || p.nameEn === it.name);
-        if (prod) {
-          const qtyToDeduct = Number(it.qty) || 1;
-          prod.stock = Math.max(0, (Number(prod.stock) || 0) - qtyToDeduct);
-        }
-      });
-      order.inventoryDeducted = true;
-    }
-
-    if (typeof logOperation === 'function') {
-      logOperation({
-        user: currentUser,
-        action: 'اعتماد تسليم ومبيعات نهائية',
-        target: order.orderNumber,
-        details: `تم اعتماد تسليم الطلب ${order.orderNumber} للعميل ${order.customerName} وتثبيت المبيعات بقيمة ${order.total} د.ل`
-      });
-    }
-
-    if (typeof showToast === 'function') {
-      showToast(`تم تسليم الطلب ${order.orderNumber} وتثبيت البيع بنجاح 💰`, 'success');
-    }
-  } else {
-    if (typeof showToast === 'function') {
-      showToast(`تم تحديث حالة الطلب إلى «${newStatus}»`, 'info');
-    }
-  }
-
-  // Persist State
-  try {
-    localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
-    localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
-    localStorage.setItem('abs_erp_inventory_transactions', JSON.stringify(ERP_STATE.inventoryTransactions));
-  } catch (_) {}
-
-  renderOrdersCardsList();
-  openOrderDetailsById(order.id);
-  updateDashboardRealUI();
-  if (typeof renderProductsTable === 'function') renderProductsTable();
-  if (typeof renderInventoryTable === 'function') renderInventoryTable();
+async function changeOrderStatusFromDrawer(orderId, newStatus) {
+  return await persistOrderStatusChange(orderId, newStatus);
 }
 
 function printOrderInvoiceFromDrawer() {
@@ -6467,22 +6519,35 @@ function formatTelegramUrl(usernameOrPhone) {
 
 // 4. ORDER WORKFLOW STEPPER GENERATOR
 function renderOrderWorkflowStepperHTML(currentStatus) {
+  const canonical = normalizeOrderStatus(currentStatus);
+
+  if (canonical === 'cancelled' || canonical === 'rejected') {
+    return `
+      <div style="padding: 0.65rem 1rem; background: #FEE2E2; border: 1px solid #FECACA; border-radius: 8px; color: #991B1B; font-weight: 700; text-align: center; font-size: 0.85rem;">
+        ${canonical === 'rejected' ? '❌ الطلب مرفوض' : '⚠️ الطلب ملغى'}
+      </div>
+    `;
+  }
+
   const steps = [
-    { id: 'review', label: 'في انتظار المراجعة', match: ['انتظار', 'جديد'] },
-    { id: 'accepted', label: 'تم قبول الطلب', match: ['قبول'] },
-    { id: 'preparing', label: 'قيد التجهيز', match: ['تجهيز'] },
-    { id: 'ready', label: 'جاهز للتوصيل', match: ['جاهز'] },
-    { id: 'shipping', label: 'خرج للتوصيل', match: ['خرج', 'توصيل'] },
-    { id: 'delivered', label: 'تم التسليم', match: ['تسليم', 'مكتمل'] }
+    { key: 'pending_review', label: 'في انتظار المراجعة' },
+    { key: 'accepted', label: 'تم قبول الطلب' },
+    { key: 'preparing', label: 'جاري التجهيز' },
+    { key: 'ready_for_delivery', label: 'جاهز للتوصيل' },
+    { key: 'out_for_delivery', label: 'خرج للتوصيل' },
+    { key: 'delivered', label: 'تم التسليم' }
   ];
 
-  let activeIdx = 0;
-  for (let i = 0; i < steps.length; i++) {
-    if (steps[i].match.some(m => (currentStatus || '').includes(m))) {
-      activeIdx = i;
-      break;
-    }
-  }
+  const orderMap = {
+    'pending_review': 0,
+    'accepted': 1,
+    'preparing': 2,
+    'ready_for_delivery': 3,
+    'out_for_delivery': 4,
+    'delivered': 5
+  };
+
+  const activeIdx = orderMap[canonical] !== undefined ? orderMap[canonical] : 0;
 
   return `
     <div class="order-workflow-stepper">

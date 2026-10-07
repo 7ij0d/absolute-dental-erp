@@ -999,12 +999,14 @@
             <!-- Order Status filter -->
             <select id="ordersStatusFilterSelect" class="orders-filter-select" onchange="handleOrdersFilterChange()">
               <option value="all">كل الحالات</option>
-              <option value="pending">في انتظار المراجعة</option>
+              <option value="pending_review">في انتظار المراجعة</option>
               <option value="accepted">تم قبول الطلب</option>
               <option value="preparing">قيد التجهيز</option>
-              <option value="shipping">خرج للتوصيل</option>
+              <option value="ready_for_delivery">جاهز للتوصيل</option>
+              <option value="out_for_delivery">خرج للتوصيل</option>
               <option value="delivered">تم التسليم</option>
-              <option value="cancelled">ملغاة</option>
+              <option value="cancelled">ملغى</option>
+              <option value="rejected">مرفوض</option>
             </select>
 
             <!-- Date filter -->
@@ -1673,6 +1675,7 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <!-- Data & Engine Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="seed.js?v=20261007-v8"></script>
 <script src="app.js?v=20261007-v8"></script>
 
