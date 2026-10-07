@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.07_HISTORICAL_ARCHIVE_V8';
+const ERP_DATABASE_VERSION = '2026.10.07_CYCLE_ZERO_TORCH_V1';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
@@ -305,46 +305,21 @@ const ERP_STATE = {
   currentPartner: 'مؤمن',
   currentOrderInModal: null,
 
-  // Products from Seed (39 Real Items - Fully Synced)
+  // Operational Products Catalog (Starts fresh with Torch)
   products: (() => {
-    let list = (typeof INITIAL_PRODUCTS !== 'undefined' && Array.isArray(INITIAL_PRODUCTS)) ? JSON.parse(JSON.stringify(INITIAL_PRODUCTS)) : ((typeof window !== 'undefined' && Array.isArray(window.ERP_SEEDED_PRODUCTS)) ? JSON.parse(JSON.stringify(window.ERP_SEEDED_PRODUCTS)) : []);
+    let list = (typeof INITIAL_PRODUCTS !== 'undefined' && Array.isArray(INITIAL_PRODUCTS) && INITIAL_PRODUCTS.length > 0)
+      ? JSON.parse(JSON.stringify(INITIAL_PRODUCTS))
+      : ((typeof window !== 'undefined' && Array.isArray(window.ERP_SEEDED_PRODUCTS)) ? JSON.parse(JSON.stringify(window.ERP_SEEDED_PRODUCTS)) : []);
     const cached = localStorage.getItem('abs_erp_products');
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          parsed.forEach(cp => {
-            const matchIdx = list.findIndex(p => p.id === cp.id);
-            if (matchIdx !== -1) {
-              list[matchIdx] = { ...list[matchIdx], ...cp };
-            } else {
-              if (!String(cp.id).startsWith('prod-')) list.push(cp);
-            }
-          });
+          list = parsed;
         }
       } catch (_) {}
     }
-
-    // Strict Enforcement of 100% verified procurement costs, suppliers, subjects, images
-    list.forEach(p => {
-      const v = VERIFIED_PRODUCT_CATALOG_DATA[p.id];
-      if (v) {
-        p.costPrice = Number(v.cost).toFixed(2);
-        if (v.sellingPrice !== undefined) {
-          p.sellingPrice = v.sellingPrice;
-          p.price = v.sellingPrice;
-        }
-        p.supplier = v.supplier;
-        p.category = v.category;
-        p.subject = v.subject;
-      }
-      if (p.image && p.image.includes('102-203-202-115.sslip.io')) {
-        p.image = p.image.replace('102-203-202-115.sslip.io', 'api.kurofangs.id.ly');
-      }
-    });
-
     try { localStorage.setItem('abs_erp_products', JSON.stringify(list)); } catch (_) {}
-    list = list.filter(p => !['prod-box-trans-165', 'prod-box-mauve', 'prod-box-pink', 'prod-bag-17', 'prod-bag-16-col', 'prod-scrub-black', 'prod-toy-tooth'].includes(p.id));
     return list;
   })(),
 
@@ -479,34 +454,33 @@ function calculateRealMetrics() {
 function updateDashboardRealUI() {
   const m = calculateRealMetrics();
 
-  // 1. Update 4 Top KPI Cards (Matching Reference: الطلبات 258, المبيعات 5,885 د.ل, المنتجات 1,240, العملاء 386)
+  // 1. Update 4 Top KPI Cards (Zero Baseline for New Operational Cycle)
   const kpiOrdersEl = document.getElementById('kpiOrdersVal');
-  if (kpiOrdersEl) kpiOrdersEl.textContent = m.ordersCount || 258;
+  if (kpiOrdersEl) kpiOrdersEl.textContent = m.ordersCount;
 
   const kpiSalesEl = document.getElementById('kpiSalesVal');
-  if (kpiSalesEl) kpiSalesEl.innerHTML = `${(m.totalSales || 5885).toLocaleString()} <span class="currency-unit">د.ل</span>`;
+  if (kpiSalesEl) kpiSalesEl.innerHTML = `${m.totalSales} <span class="currency-unit">د.ل</span>`;
 
   const kpiProductsEl = document.getElementById('kpiProductsVal');
-  if (kpiProductsEl) kpiProductsEl.textContent = ERP_STATE.products.length ? ERP_STATE.products.length.toLocaleString() : '1,240';
+  if (kpiProductsEl) kpiProductsEl.textContent = ERP_STATE.products.length;
 
   const kpiCustomersEl = document.getElementById('kpiCustomersVal');
-  if (kpiCustomersEl) kpiCustomersEl.textContent = '386';
+  if (kpiCustomersEl) kpiCustomersEl.textContent = '0';
 
   const kpiProfitEl = document.getElementById('kpiProfitVal');
-  if (kpiProfitEl) kpiProfitEl.innerHTML = `${m.netProfit.toLocaleString()} <span class="currency-unit">د.ل</span>`;
+  if (kpiProfitEl) kpiProfitEl.innerHTML = `${m.netProfit} <span class="currency-unit">د.ل</span>`;
 
   const kpiExpensesEl = document.getElementById('kpiExpensesVal');
-  if (kpiExpensesEl) kpiExpensesEl.innerHTML = `${m.totalExpenses.toLocaleString()} <span class="currency-unit">د.ل</span>`;
+  if (kpiExpensesEl) kpiExpensesEl.innerHTML = `${m.totalExpenses} <span class="currency-unit">د.ل</span>`;
 
   const sideNavOrdersCount = document.getElementById('sideNavOrdersCount');
   if (sideNavOrdersCount) {
-    const pendingCount = ERP_STATE.orders.filter(o => o.status === 'جديد' || o.status === 'قيد التجهيز').length;
-    sideNavOrdersCount.textContent = pendingCount || 3;
+    sideNavOrdersCount.textContent = m.ordersCount || 0;
   }
 
   // 2. Chart Total Display
   const chartTotalEl = document.getElementById('chartTotalDisplay');
-  if (chartTotalEl) chartTotalEl.textContent = `${(m.totalSales || 5885).toLocaleString()} د.ل`;
+  if (chartTotalEl) chartTotalEl.textContent = `${m.totalSales} د.ل إجمالي الفترة`;
 
   // 3. Render Middle Row Bento Recent Orders Table
   renderDashboardRecentOrdersTable();
@@ -514,7 +488,7 @@ function updateDashboardRealUI() {
     renderDashboardActionOrdersTable();
   }
 
-  // 4. Render Bottom Row Bento: Low Stock Items
+  // 4. Render Bottom Row Bento: Low Stock Items (Torch)
   renderDashboardLowStockList();
 
   // 5. Render Bottom Row Bento: Top Selling Products
@@ -538,9 +512,22 @@ function renderDashboardRecentOrdersTable() {
   const tbody = document.getElementById('dashRecentOrdersTableBody') || document.getElementById('dashboardActionOrdersTableBody');
   if (!tbody) return;
 
-  const orders = [...ERP_STATE.orders].slice(0, 5);
+  const cutoffTime = ERP_CUTOFF_TIMESTAMP;
+  const newOrders = ERP_STATE.orders.filter(o => !o.isHistorical && o.orderType !== 'historical' && (new Date(o.created_at || Date.now()).getTime() >= cutoffTime));
 
-  tbody.innerHTML = orders.map(order => {
+  if (newOrders.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 2.25rem 1rem; color: var(--text-muted);">
+          <div style="font-weight: 700; font-size: 0.875rem; color: var(--text-main); margin-bottom: 0.25rem;">لا توجد طلبات في الدورة الحالية بعد</div>
+          <div style="font-size: 0.775rem;">الطلبات السابقة محفوظة في الأرشيف التاريخي، وستظهر هنا أي طلبات جديدة يتم إنشاؤها بعد 07 أكتوبر.</div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = newOrders.slice(0, 5).map(order => {
     const itemsCount = (order.items && order.items.length) || order.itemsCount || 1;
     const itemsText = itemsCount === 1 ? (order.items?.[0]?.name || 'منتج واحد') : `${itemsCount} منتجات`;
     const cleanDate = order.date ? order.date.replace(' ص', '').replace(' م', '').slice(0, 10) : '07/10';
@@ -563,14 +550,15 @@ function renderDashboardActionOrdersTable() {
   const tbody = document.getElementById('dashboardActionOrdersTableBody');
   if (!tbody) return;
 
-  let actionOrders = ERP_STATE.orders.filter(o => o.status === 'جديد' || o.status === 'قيد التجهيز');
-  if (actionOrders.length === 0) {
-    actionOrders = ERP_STATE.orders.slice(0, 5);
-  } else {
-    actionOrders = actionOrders.slice(0, 6);
+  const cutoffTime = ERP_CUTOFF_TIMESTAMP;
+  const newOrders = ERP_STATE.orders.filter(o => !o.isHistorical && o.orderType !== 'historical' && (new Date(o.created_at || Date.now()).getTime() >= cutoffTime) && (o.status === 'جديد' || o.status === 'قيد التجهيز'));
+
+  if (newOrders.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1rem;">لا توجد طلبات تحتاج إجراء حالياً</td></tr>`;
+    return;
   }
 
-  tbody.innerHTML = actionOrders.map(order => `
+  tbody.innerHTML = newOrders.slice(0, 6).map(order => `
     <tr onclick="openOrderDetailsById('${order.id}')" title="انقر لعرض تفاصيل الطلب">
       <td class="num-mono" style="font-weight: 800; color: var(--primary);">${order.orderNumber}</td>
       <td style="font-weight: 700; color: var(--text-main);">${order.customerName}</td>
@@ -590,25 +578,29 @@ function renderDashboardLowStockList() {
   const container = document.getElementById('dashboardLowStockList');
   if (!container) return;
 
-  // Products with lowest stock
-  const lowItems = [...ERP_STATE.products]
-    .sort((a, b) => (Number(a.stock) || 0) - (Number(b.stock) || 0))
-    .slice(0, 4);
+  if (!ERP_STATE.products || ERP_STATE.products.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.8rem;">
+        لا توجد منتجات مسجلة في المخزون
+      </div>
+    `;
+    return;
+  }
 
-  container.innerHTML = lowItems.map(p => {
+  container.innerHTML = ERP_STATE.products.map(p => {
     const stock = Number(p.stock) || 0;
     const isOut = stock === 0;
-    const badgeClass = isOut ? 'stock-badge out' : (stock <= 5 ? 'stock-badge low' : 'stock-badge');
-    const badgeText = isOut ? 'نافد (0)' : `${stock} قطع`;
-    const imgSrc = p.image || resolveProductImage(p);
+    const badgeClass = isOut ? 'stock-badge out' : (stock <= (p.minStock || 1) ? 'stock-badge low' : 'stock-badge');
+    const badgeText = `${stock} قطع`;
+    const imgSrc = p.image || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=80&q=80';
 
     return `
-      <div class="dash-mini-item" onclick="navigateToScreen('inventory')">
+      <div class="dash-mini-item" onclick="navigateToScreen('inventory')" style="cursor: pointer;">
         <div class="dash-mini-item-left">
           <img class="dash-mini-thumb" src="${imgSrc}" alt="${p.nameAr}" onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=80&q=80'">
           <div class="dash-mini-titles">
             <span class="dash-mini-name">${p.nameAr}</span>
-            <span class="dash-mini-meta">${p.category || 'أدوات أسنان'} • ${p.sku || '-'}</span>
+            <span class="dash-mini-meta">${p.category || 'مستلزمات تشغيلية'} • جملة: ${p.wholesalePrice || p.costPrice} د.ل | قطاعي: ${p.retailPrice || p.sellingPrice} د.ل</span>
           </div>
         </div>
         <div class="dash-mini-item-right">
@@ -623,9 +615,19 @@ function renderActionOrdersList() {
   const container = document.getElementById('actionOrdersList');
   if (!container) return;
 
-  const displayOrders = [...ERP_STATE.orders].slice(0, 5);
+  const cutoffTime = ERP_CUTOFF_TIMESTAMP;
+  const newOrders = ERP_STATE.orders.filter(o => !o.isHistorical && o.orderType !== 'historical' && (new Date(o.created_at || Date.now()).getTime() >= cutoffTime));
 
-  container.innerHTML = displayOrders.map(order => `
+  if (newOrders.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 1.5rem 1rem; color: var(--text-muted); font-size: 0.8rem;">
+        لا توجد طلبات جديدة تتطلب اتخاذ إجراء
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = newOrders.slice(0, 5).map(order => `
     <div class="order-row-item">
       <div class="order-row-meta">
         <span class="order-row-id num-mono">${order.orderNumber}</span>
@@ -649,22 +651,25 @@ function renderTopProductsReal() {
   const container = document.getElementById('topProductsContainer');
   if (!container) return;
 
+  const cutoffTime = ERP_CUTOFF_TIMESTAMP;
+  const operationalOrders = ERP_STATE.orders.filter(o => !o.isHistorical && o.orderType !== 'historical' && (new Date(o.created_at || Date.now()).getTime() >= cutoffTime));
   const counts = {};
-  ERP_STATE.orders.forEach(o => {
+  operationalOrders.forEach(o => {
     (o.items || []).forEach(item => {
       const name = item.name || 'أداة طبية';
       counts[name] = (counts[name] || 0) + (Number(item.qty) || 1);
     });
   });
 
-  let sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
   if (sorted.length === 0) {
-    sorted = [
-      ['طقم رابر بول + بلاستيك سباتيولا', 35],
-      ['هاندبيس NSK توربين عالي السرعة', 18],
-      ['كارفر ليتشرون من الستانلس ستيل', 14],
-      ['واكس سيت أسناني', 12]
-    ];
+    container.innerHTML = `
+      <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+        <div style="font-weight: 700; font-size: 0.875rem; color: var(--text-main); margin-bottom: 0.35rem;">لا توجد مبيعات في الدورة الحالية</div>
+        <div style="font-size: 0.775rem;">ستظهر إحصائيات المنتجات الأكثر طلباً عند بدء تسجيل المبيعات الجديدة.</div>
+      </div>
+    `;
+    return;
   }
 
   container.innerHTML = sorted.map(([name, qty], idx) => `
@@ -689,12 +694,18 @@ function renderPosWidgetMiniCart() {
   const totalEl = document.getElementById('posWidgetTotal');
   if (!cartList) return;
 
-  const items = (ERP_STATE.posCart && ERP_STATE.posCart.length > 0)
-    ? ERP_STATE.posCart
-    : [
-        { name: 'هاندبيس NSK توربين عالي السرعة', qty: 1, price: 115 },
-        { name: 'كارفر ليتشرون من الستانلس ستيل', qty: 1, price: 15 }
-      ];
+  const items = ERP_STATE.posCart || [];
+
+  if (items.length === 0) {
+    cartList.innerHTML = `
+      <div style="text-align: center; padding: 1.5rem 1rem; color: var(--text-muted); font-size: 0.8rem;">
+        السلة فارغة — جاهزة لتسجيل طلبية جديدة
+      </div>
+    `;
+    if (subtotalEl) subtotalEl.textContent = '0 د.ل';
+    if (totalEl) totalEl.textContent = '0 د.ل';
+    return;
+  }
 
   const total = items.reduce((sum, item) => sum + (Number(item.price) * Number(item.qty || 1)), 0);
 

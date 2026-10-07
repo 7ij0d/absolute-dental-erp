@@ -305,7 +305,7 @@
           </div>
         </div>
 
-        <!-- 1. Top 4 KPI Cards (Matching Image 1) -->
+        <!-- 1. Top 4 KPI Cards (Zero Baseline for New Operational Cycle) -->
         <div class="kpi-grid">
           <!-- Card 1: إجمالي الطلبات -->
           <div class="kpi-card">
@@ -315,10 +315,10 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
               </div>
             </div>
-            <div class="kpi-value num-mono" id="kpiOrdersVal">258</div>
-            <div class="kpi-trend-pill up">
-              <span>↑ 12%</span>
-              <span class="trend-sub">من الأسبوع الماضي</span>
+            <div class="kpi-value num-mono" id="kpiOrdersVal">0</div>
+            <div class="kpi-trend-pill" style="color: var(--text-muted);">
+              <span>● دورة جديدة</span>
+              <span class="trend-sub">0 طلب مسجل</span>
             </div>
           </div>
 
@@ -330,10 +330,10 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
             </div>
-            <div class="kpi-value num-mono" id="kpiSalesVal">5,885 <span class="currency-unit">د.ل</span></div>
-            <div class="kpi-trend-pill up">
-              <span>↑ 18%</span>
-              <span class="trend-sub">من الأسبوع الماضي</span>
+            <div class="kpi-value num-mono" id="kpiSalesVal">0 <span class="currency-unit">د.ل</span></div>
+            <div class="kpi-trend-pill" style="color: var(--text-muted);">
+              <span>● الإيرادات</span>
+              <span class="trend-sub">0 د.ل مبيعات</span>
             </div>
           </div>
 
@@ -345,10 +345,10 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
               </div>
             </div>
-            <div class="kpi-value num-mono" id="kpiProductsVal">1,240</div>
-            <div class="kpi-trend-pill up">
-              <span>↑ 5%</span>
-              <span class="trend-sub">منتج نشط</span>
+            <div class="kpi-value num-mono" id="kpiProductsVal">1</div>
+            <div class="kpi-trend-pill" style="color: #2563EB;">
+              <span>1 صنف نشط</span>
+              <span class="trend-sub">(Torch)</span>
             </div>
           </div>
 
@@ -360,24 +360,24 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
             </div>
-            <div class="kpi-value num-mono" id="kpiCustomersVal">386</div>
-            <div class="kpi-trend-pill up">
-              <span>↑ 9%</span>
-              <span class="trend-sub">عميل نشط</span>
+            <div class="kpi-value num-mono" id="kpiCustomersVal">0</div>
+            <div class="kpi-trend-pill" style="color: var(--text-muted);">
+              <span>● دورة جديدة</span>
+              <span class="trend-sub">0 عميل حالي</span>
             </div>
           </div>
         </div>
 
-        <!-- 2. Middle Row: Sales Chart + Recent Orders (Matching Image 1) -->
+        <!-- 2. Middle Row: Sales Chart + Recent Orders -->
         <div class="dashboard-mid-grid">
           <!-- Right: أحدث الطلبات -->
           <div class="bento-card">
             <div class="bento-header">
               <div class="bento-title-group">
                 <h3 class="bento-title">أحدث الطلبات</h3>
-                <span class="bento-subtitle">آخر العمليات المضافة للمنظومة</span>
+                <span class="bento-subtitle">الطلبات المسجلة في الدورة الحالية</span>
               </div>
-              <button type="button" class="bento-action-btn" onclick="navigateToScreen('orders')">عرض الكل</button>
+              <button type="button" class="bento-action-btn" onclick="navigateToScreen('orders')">سجل الطلبات</button>
             </div>
 
             <div class="table-responsive">
@@ -405,7 +405,7 @@
             <div class="bento-header">
               <div class="bento-title-group">
                 <h3 class="bento-title">المبيعات خلال آخر 7 أيام</h3>
-                <span class="bento-subtitle" id="chartTotalDisplay">3,818 د.ل إجمالي الفترة</span>
+                <span class="bento-subtitle" id="chartTotalDisplay">0 د.ل إجمالي الفترة</span>
               </div>
               <select class="form-select-sm" onchange="filterChartPeriod(this.value, this)">
                 <option value="week" selected>آخر 7 أيام</option>
@@ -416,46 +416,46 @@
 
             <div class="dash-chart-container">
               <div class="dash-bar-chart" id="dashSalesBarChart">
-                <!-- 7 interactive bars -->
+                <!-- 7 baseline bars (0 LYD start) -->
                 <div class="chart-col">
                   <div class="chart-bar-wrap">
-                    <div class="chart-bar" style="height: 30%;" data-val="850 د.ل"></div>
+                    <div class="chart-bar" style="height: 4px;" data-val="0 د.ل"></div>
                   </div>
                   <span class="chart-label">1 أكتوبر</span>
                 </div>
                 <div class="chart-col">
                   <div class="chart-bar-wrap">
-                    <div class="chart-bar" style="height: 45%;" data-val="1,350 د.ل"></div>
+                    <div class="chart-bar" style="height: 4px;" data-val="0 د.ل"></div>
                   </div>
                   <span class="chart-label">2 أكتوبر</span>
                 </div>
                 <div class="chart-col">
                   <div class="chart-bar-wrap">
-                    <div class="chart-bar" style="height: 55%;" data-val="1,680 د.ل"></div>
+                    <div class="chart-bar" style="height: 4px;" data-val="0 د.ل"></div>
                   </div>
                   <span class="chart-label">3 أكتوبر</span>
                 </div>
                 <div class="chart-col">
                   <div class="chart-bar-wrap">
-                    <div class="chart-bar" style="height: 65%;" data-val="1,950 د.ل"></div>
+                    <div class="chart-bar" style="height: 4px;" data-val="0 د.ل"></div>
                   </div>
                   <span class="chart-label">4 أكتوبر</span>
                 </div>
                 <div class="chart-col">
                   <div class="chart-bar-wrap">
-                    <div class="chart-bar" style="height: 85%;" data-val="2,560 د.ل"></div>
+                    <div class="chart-bar" style="height: 4px;" data-val="0 د.ل"></div>
                   </div>
                   <span class="chart-label">5 أكتوبر</span>
                 </div>
                 <div class="chart-col">
                   <div class="chart-bar-wrap">
-                    <div class="chart-bar" style="height: 35%;" data-val="1,050 د.ل"></div>
+                    <div class="chart-bar" style="height: 4px;" data-val="0 د.ل"></div>
                   </div>
                   <span class="chart-label">6 أكتوبر</span>
                 </div>
                 <div class="chart-col">
                   <div class="chart-bar-wrap">
-                    <div class="chart-bar active" style="height: 75%;" data-val="2,280 د.ل"></div>
+                    <div class="chart-bar active" style="height: 4px;" data-val="0 د.ل"></div>
                   </div>
                   <span class="chart-label">7 أكتوبر</span>
                 </div>
@@ -464,16 +464,16 @@
           </div>
         </div>
 
-        <!-- 3. Bottom Row: 3 Bento Cards (Matching Image 1) -->
+        <!-- 3. Bottom Row: 3 Bento Cards -->
         <div class="dashboard-bottom-grid">
           <!-- Card 1: حالة المخزون -->
           <div class="bento-card">
             <div class="bento-header">
               <div class="bento-title-group">
                 <h3 class="bento-title">حالة المخزون</h3>
-                <span class="bento-subtitle">أصناف بحاجة لإعادة طلب</span>
+                <span class="bento-subtitle">المخزون المتوفر في الدورة الحالية</span>
               </div>
-              <button type="button" class="bento-action-btn" onclick="navigateToScreen('inventory')">عرض الكل</button>
+              <button type="button" class="bento-action-btn" onclick="navigateToScreen('inventory')">عرض المخزون</button>
             </div>
 
             <div class="dash-mini-list" id="dashboardLowStockList">
@@ -486,9 +486,9 @@
             <div class="bento-header">
               <div class="bento-title-group">
                 <h3 class="bento-title">المنتجات الأكثر طلباً</h3>
-                <span class="bento-subtitle">الأعلى مبيعاً هذا الشهر</span>
+                <span class="bento-subtitle">حركة المبيعات في الدورة الحالية</span>
               </div>
-              <button type="button" class="bento-action-btn" onclick="navigateToScreen('products')">عرض الكل</button>
+              <button type="button" class="bento-action-btn" onclick="navigateToScreen('products')">المنتجات</button>
             </div>
 
             <div class="dash-mini-list" id="topProductsContainer">
@@ -518,11 +518,11 @@
             <div class="pos-widget-summary">
               <div class="pos-widget-summary-row">
                 <span>المجموع الفرعي:</span>
-                <span class="num-mono" id="posWidgetSubtotal">115 د.ل</span>
+                <span class="num-mono" id="posWidgetSubtotal">0 د.ل</span>
               </div>
               <div class="pos-widget-summary-row total">
                 <span>الإجمالي:</span>
-                <span class="num-mono" id="posWidgetTotal">115 د.ل</span>
+                <span class="num-mono" id="posWidgetTotal">0 د.ل</span>
               </div>
             </div>
 
