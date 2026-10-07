@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.07_CYCLE_ZERO_TORCH_V1';
+const ERP_DATABASE_VERSION = '2026.10.07_CATALOG_FULL_CYCLE_ZERO_V2';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
@@ -56,7 +56,7 @@ const VERIFIED_PRODUCT_CATALOG_DATA = {
   "75fb4e12-d06f-4a0e-b7ac-d571b9e996ab": { cost: 11, sellingPrice: 15, supplier: "شركة اللامعة للأدوية والمعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
   "0c18deeb-a571-419b-adf2-8060db42d8cf": { cost: 1, sellingPrice: 3, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
   "fa042791-6d8d-48c1-8f60-f1a103162a1e": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء ومورد معتمد", category: "كاستات وقبضات (سنة 2)", subject: "fixed-prosthodontics" },
-  "c9442057-a22f-4ce8-a237-d37f2024146f": { cost: 0, sellingPrice: 0, supplier: "شركة سندس لمعدات طب الأسنان", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "c9442057-a22f-4ce8-a237-d37f2024146f": { cost: 55, sellingPrice: 60, wholesalePrice: 55, retailPrice: 60, supplier: "شركة سندس لمعدات طب الأسنان", category: "تشريح ومواد (سنة 1)", subject: "dental-anatomy" },
   "e009eaf4-f041-4706-b27d-daa394e512d3": { cost: 12, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
   "c554e6ff-3a55-4e36-aed6-562f70601342": { cost: 12, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
   "72e1069c-4319-42ff-a38c-2af8f8e4e546": { cost: 0, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
@@ -587,12 +587,23 @@ function renderDashboardLowStockList() {
     return;
   }
 
-  container.innerHTML = ERP_STATE.products.map(p => {
+  // Show lowest stock items (prioritize available low stock first, then out of stock)
+  const lowItems = [...ERP_STATE.products]
+    .sort((a, b) => {
+      const sA = Number(a.stock) || 0;
+      const sB = Number(b.stock) || 0;
+      if (sA > 0 && sB === 0) return -1;
+      if (sA === 0 && sB > 0) return 1;
+      return sA - sB;
+    })
+    .slice(0, 5);
+
+  container.innerHTML = lowItems.map(p => {
     const stock = Number(p.stock) || 0;
     const isOut = stock === 0;
-    const badgeClass = isOut ? 'stock-badge out' : (stock <= (p.minStock || 1) ? 'stock-badge low' : 'stock-badge');
-    const badgeText = `${stock} قطع`;
-    const imgSrc = p.image || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=80&q=80';
+    const badgeClass = isOut ? 'stock-badge out' : (stock <= (p.minStock || 5) ? 'stock-badge low' : 'stock-badge');
+    const badgeText = isOut ? 'نافد (0)' : `${stock} قطع`;
+    const imgSrc = p.image || (typeof resolveProductImage === 'function' ? resolveProductImage(p) : 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=80&q=80');
 
     return `
       <div class="dash-mini-item" onclick="navigateToScreen('inventory')" style="cursor: pointer;">
@@ -600,7 +611,7 @@ function renderDashboardLowStockList() {
           <img class="dash-mini-thumb" src="${imgSrc}" alt="${p.nameAr}" onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=80&q=80'">
           <div class="dash-mini-titles">
             <span class="dash-mini-name">${p.nameAr}</span>
-            <span class="dash-mini-meta">${p.category || 'مستلزمات تشغيلية'} • جملة: ${p.wholesalePrice || p.costPrice} د.ل | قطاعي: ${p.retailPrice || p.sellingPrice} د.ل</span>
+            <span class="dash-mini-meta">${p.category || 'مستلزمات تشغيلية'} • جملة: ${p.wholesalePrice || p.costPrice || 0} د.ل | قطاعي: ${p.retailPrice || p.sellingPrice || 0} د.ل</span>
           </div>
         </div>
         <div class="dash-mini-item-right">
