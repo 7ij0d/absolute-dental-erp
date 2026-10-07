@@ -1403,6 +1403,8 @@ a {
 
 .status-pill.status-completed,
 .status-pill.status-delivered,
+.status-pill.completed,
+.status-pill.delivered,
 .status-pill.available,
 .status-pill.active {
   background-color: var(--status-success-bg);

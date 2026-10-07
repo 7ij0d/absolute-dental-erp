@@ -36,7 +36,9 @@ const SUPABASE_CONFIG = {
 // -------------------------------------------------------------
 const VERIFIED_PRODUCT_CATALOG_DATA = {
   "item-penlight-clear": { cost: 1.75, sellingPrice: 4, supplier: "مورد أدوات فحص", category: "أدوات الفحص والعيادة", subject: "fixed-prosthodontics" },
+  "7e990001-0000-4000-8000-000000000001": { cost: 1.75, sellingPrice: 4, supplier: "مورد أدوات فحص", category: "أدوات الفحص والعيادة", subject: "fixed-prosthodontics" },
   "item-penlight-led": { cost: 2.50, sellingPrice: 5, supplier: "مورد أدوات فحص", category: "أدوات الفحص والعيادة", subject: "fixed-prosthodontics" },
+  "7e990002-0000-4000-8000-000000000002": { cost: 2.50, sellingPrice: 5, supplier: "مورد أدوات فحص", category: "أدوات الفحص والعيادة", subject: "fixed-prosthodontics" },
   "d02e821e-91e3-4ed4-869e-f636142d8247": { cost: 1.15, sellingPrice: 2, supplier: "شركة السند المتين للمعدات الطبية", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
   "5528000b-cde4-4b27-8745-7956dc0e4b78": { cost: 1.15, sellingPrice: 2, supplier: "شركة السند المتين للمعدات الطبية", category: "علاج الأسنان التحفظي (سنة 2)", subject: "restorative-dentistry" },
   "6c359465-a522-4654-933f-a64c627c6b38": { cost: 4, sellingPrice: 5, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
@@ -326,6 +328,8 @@ const ERP_STATE = {
     sourceSeed.forEach(sp => seedMap.set(sp.id, sp));
 
     list.forEach(p => {
+      if (p.id === 'item-penlight-clear') p.id = '7e990001-0000-4000-8000-000000000001';
+      if (p.id === 'item-penlight-led') p.id = '7e990002-0000-4000-8000-000000000002';
       const sp = seedMap.get(p.id);
       if (sp) {
         if (sp.stock > 0 && (!p.stock || p.stock === 0)) {
@@ -371,6 +375,23 @@ const ERP_STATE = {
         list = JSON.parse(JSON.stringify(window.ERP_SEEDED_ORDERS));
       }
     }
+
+    // Explicit business rules:
+    // 1. Harbi was received in previous system: exclude completely from ERP orders
+    list = list.filter(o => o.orderNumber !== '#90558069' && o.rawOrderNumber !== '90558069' && o.id !== '82ffe49b-489d-421d-ab22-576974e090f4' && !(o.customerName || '').includes('حربي'));
+
+    // 2. Orders from screenshot and Shaima: mark as delivered (تم التسليم)
+    const deliveredRawNumbers = new Set(['94946101', '96055340', '42351493', '32085048', '62960319']);
+    list.forEach(o => {
+      const rawNum = o.rawOrderNumber || o.orderNumber?.replace('#', '');
+      if (deliveredRawNumbers.has(rawNum) || (o.customerName && (o.customerName.includes('نبيله الخير') || o.customerName.includes('بشرى بورو') || o.customerName.includes('سريج') || o.customerName.includes('سريح') || o.customerName.includes('مودة إبراهيم') || (o.customerName.includes('شيماء') && Number(o.total) === 370)))) {
+        o.status = 'تم التسليم';
+        o.originalStatus = 'delivered';
+        o.saleFinalized = true;
+      }
+    });
+
+    try { localStorage.setItem('abs_erp_orders', JSON.stringify(list)); } catch (_) {}
     return list;
   })(),
 
@@ -896,15 +917,16 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
   // 2. Status Filter
   if (filterStatus && filterStatus !== 'all') {
     const statusMap = {
-      'new': 'جديد',
-      'preparing': 'قيد التجهيز',
-      'shipping': 'جاهز للتوصيل',
-      'ready': 'جاهز للتوصيل',
-      'completed': 'مكتمل',
-      'cancelled': 'ملغي'
+      'new': ['جديد'],
+      'preparing': ['قيد التجهيز', 'تم قبول الطلب'],
+      'shipping': ['جاهز للتوصيل', 'خرج للتوصيل'],
+      'ready': ['جاهز للتوصيل', 'خرج للتوصيل'],
+      'completed': ['مكتمل', 'تم التسليم'],
+      'delivered': ['مكتمل', 'تم التسليم'],
+      'cancelled': ['ملغي', 'ملغى']
     };
-    const targetStatus = statusMap[filterStatus] || filterStatus;
-    filtered = filtered.filter(o => o.status === targetStatus);
+    const targetStatuses = statusMap[filterStatus] || [filterStatus];
+    filtered = filtered.filter(o => targetStatuses.includes(o.status));
   }
 
   // 3. Search Query Filter
@@ -941,9 +963,9 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
   const tabCounts = {
     all: activeScopeOrders.length,
     new: activeScopeOrders.filter(o => o.status === 'جديد').length,
-    prep: activeScopeOrders.filter(o => o.status === 'قيد التجهيز').length,
-    comp: activeScopeOrders.filter(o => o.status === 'مكتمل').length,
-    canc: activeScopeOrders.filter(o => o.status === 'ملغي').length
+    prep: activeScopeOrders.filter(o => o.status === 'قيد التجهيز' || o.status === 'تم قبول الطلب').length,
+    comp: activeScopeOrders.filter(o => o.status === 'مكتمل' || o.status === 'تم التسليم').length,
+    canc: activeScopeOrders.filter(o => o.status === 'ملغي' || o.status === 'ملغى').length
   };
 
   const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
@@ -1032,12 +1054,16 @@ function handleOrdersSearch(val) {
 
 function getOrderStatusClass(status) {
   switch (status) {
-    case 'جديد': return 'new';
-    case 'قيد التجهيز': return 'preparing';
-    case 'جاهز للتوصيل': return 'ready';
-    case 'مكتمل': return 'completed';
-    case 'ملغي': return 'cancelled';
-    default: return 'new';
+    case 'جديد': return 'new status-new';
+    case 'قيد التجهيز':
+    case 'تم قبول الطلب': return 'preparing status-preparing';
+    case 'جاهز للتوصيل':
+    case 'خرج للتوصيل': return 'ready';
+    case 'مكتمل': return 'completed status-completed';
+    case 'تم التسليم': return 'delivered status-delivered';
+    case 'ملغي':
+    case 'ملغى': return 'cancelled status-cancelled';
+    default: return 'new status-new';
   }
 }
 
@@ -3113,15 +3139,20 @@ async function syncWithUserServer() {
     let stateChanged = false;
 
     serverOrders.forEach(ord => {
+      // Exclude Harbi: received in previous system
+      if (ord.order_number === '90558069' || ord.id === '82ffe49b-489d-421d-ab22-576974e090f4' || (ord.customer_name || '').includes('حربي')) {
+        return;
+      }
+
       const createdAtTime = new Date(ord.created_at).getTime();
       const isHistorical = createdAtTime < cutoffTime;
 
       // Map status from English to Arabic standard
       let statusAr = 'جديد';
-      if (ord.status === 'delivered') statusAr = 'مكتمل';
+      if (ord.status === 'delivered') statusAr = 'تم التسليم';
       else if (ord.status === 'preparing' || ord.status === 'under_review' || ord.status === 'editing') statusAr = 'قيد التجهيز';
       else if (ord.status === 'out_for_delivery' || ord.status === 'accepted') statusAr = 'جاهز للتوصيل';
-      else if (ord.status === 'cancelled') statusAr = 'ملغي';
+      else if (ord.status === 'cancelled') statusAr = 'ملغى';
       else if (ord.status === 'new') statusAr = 'جديد';
 
       // Check if order already exists in ERP_STATE.orders
@@ -3135,7 +3166,12 @@ async function syncWithUserServer() {
       if (existingIdx >= 0) {
         // Order exists: only update status if modified remotely
         const existing = ERP_STATE.orders[existingIdx];
-        if (existing.originalStatus !== ord.status && ord.status) {
+        if (ord.status === 'delivered' || existing.status === 'تم التسليم') {
+          existing.status = 'تم التسليم';
+          existing.originalStatus = 'delivered';
+          existing.saleFinalized = true;
+          stateChanged = true;
+        } else if (existing.originalStatus !== ord.status && ord.status) {
           existing.status = statusAr;
           existing.originalStatus = ord.status;
           stateChanged = true;

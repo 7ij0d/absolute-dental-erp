@@ -499,7 +499,7 @@ const INITIAL_PRODUCTS = [
     "subject": "fixed-prosthodontics"
   },
   {
-    "id": "item-penlight-clear",
+    "id": "7e990001-0000-4000-8000-000000000001",
     "nameAr": "مفك فحص شفاف (قلم فحص قياسي)",
     "nameEn": "Transparent Examination Penlight",
     "sku": "DEN-MFK-01",
@@ -516,7 +516,7 @@ const INITIAL_PRODUCTS = [
     "subject": "fixed-prosthodontics"
   },
   {
-    "id": "item-penlight-led",
+    "id": "7e990002-0000-4000-8000-000000000002",
     "nameAr": "مفك فحص مع ضوء (Medical LED)",
     "nameEn": "Medical LED Penlight",
     "sku": "DEN-MFK-02",
@@ -534,52 +534,6 @@ const INITIAL_PRODUCTS = [
   }
 ];
 const INITIAL_ORDERS = [
-  {
-    "id": "82ffe49b-489d-421d-ab22-576974e090f4",
-    "orderNumber": "#90558069",
-    "rawOrderNumber": "90558069",
-    "invoiceNumber": "#INV-HIST-90558069",
-    "orderType": "operational",
-    "isHistorical": false,
-    "inventoryDeduction": "historical_exempt",
-    "customerName": "حربي",
-    "phone": "000000",
-    "secondaryPhone": null,
-    "email": "admin@smylodent.com",
-    "university": "جامعة طرابلس",
-    "college": "كلية طب الأسنان",
-    "address": "طرابلس",
-    "itemsCount": 1,
-    "items": [
-      {
-        "id": "fa042791-6d8d-48c1-8f60-f1a103162a1e",
-        "name": "Study cast + high-speed NSK hand piece",
-        "qty": 1,
-        "price": 250,
-        "imageUrl": "https://102-203-202-115.sslip.io/storage/v1/object/public/pdf-sheets/smylodent-products/fa042791-6d8d-48c1-8f60-f1a103162a1e.jpg"
-      }
-    ],
-    "total": 250,
-    "discountAmount": 0,
-    "shippingFee": 0,
-    "status": "تم قبول الطلب",
-    "originalStatus": "new",
-    "date": "07‏/10‏/2026 01:48 ص",
-    "created_at": "2026-10-06T23:48:14.396+00:00",
-    "notes": null,
-    "source": "Admin / Storefront",
-    "system_scope": "NEW",
-    "inventoryDeducted": false,
-    "saleFinalized": false,
-    "statusHistory": [
-      {
-        "from": "في انتظار المراجعة",
-        "to": "تم قبول الطلب",
-        "date": "07‏/10‏/2026 01:48 ص",
-        "user": "طه"
-      }
-    ]
-  },
   {
     "id": "fe94040b-13d5-4839-8da9-800456c4e122",
     "orderNumber": "#81046301",
@@ -1374,19 +1328,19 @@ const INITIAL_ORDERS = [
     "total": 33,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "تم قبول الطلب",
-    "originalStatus": "new",
+    "status": "تم التسليم",
+    "originalStatus": "delivered",
     "date": "06‏/10‏/2026 11:38 ص",
     "created_at": "2026-10-06T09:38:00.69+00:00",
     "notes": null,
     "source": "Admin / Storefront",
     "system_scope": "NEW",
     "inventoryDeducted": false,
-    "saleFinalized": false,
+    "saleFinalized": true,
     "statusHistory": [
       {
         "from": "في انتظار المراجعة",
-        "to": "تم قبول الطلب",
+        "to": "تم التسليم",
         "date": "06‏/10‏/2026 11:38 ص",
         "user": "طه"
       }
@@ -1420,19 +1374,19 @@ const INITIAL_ORDERS = [
     "total": 95,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "تم قبول الطلب",
-    "originalStatus": "preparing",
+    "status": "تم التسليم",
+    "originalStatus": "delivered",
     "date": "05‏/10‏/2026 10:57 م",
     "created_at": "2026-10-05T20:57:39.146+00:00",
     "notes": null,
     "source": "Admin / Storefront",
     "system_scope": "NEW",
     "inventoryDeducted": false,
-    "saleFinalized": false,
+    "saleFinalized": true,
     "statusHistory": [
       {
         "from": "في انتظار المراجعة",
-        "to": "تم قبول الطلب",
+        "to": "تم التسليم",
         "date": "05‏/10‏/2026 10:57 م",
         "user": "طه"
       }
@@ -1466,19 +1420,19 @@ const INITIAL_ORDERS = [
     "total": 75,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "تم قبول الطلب",
-    "originalStatus": "preparing",
+    "status": "تم التسليم",
+    "originalStatus": "delivered",
     "date": "05‏/10‏/2026 08:24 م",
     "created_at": "2026-10-05T18:24:38.551+00:00",
     "notes": null,
     "source": "Admin / Storefront",
     "system_scope": "NEW",
     "inventoryDeducted": false,
-    "saleFinalized": false,
+    "saleFinalized": true,
     "statusHistory": [
       {
         "from": "في انتظار المراجعة",
-        "to": "تم قبول الطلب",
+        "to": "تم التسليم",
         "date": "05‏/10‏/2026 08:24 م",
         "user": "طه"
       }
@@ -1512,19 +1466,19 @@ const INITIAL_ORDERS = [
     "total": 95,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "تم قبول الطلب",
-    "originalStatus": "preparing",
+    "status": "تم التسليم",
+    "originalStatus": "delivered",
     "date": "05‏/10‏/2026 04:49 م",
     "created_at": "2026-10-05T14:49:15.296+00:00",
     "notes": null,
     "source": "Admin / Storefront",
     "system_scope": "NEW",
     "inventoryDeducted": false,
-    "saleFinalized": false,
+    "saleFinalized": true,
     "statusHistory": [
       {
         "from": "في انتظار المراجعة",
-        "to": "تم قبول الطلب",
+        "to": "تم التسليم",
         "date": "05‏/10‏/2026 04:49 م",
         "user": "طه"
       }
@@ -1702,19 +1656,19 @@ const INITIAL_ORDERS = [
     "total": 370,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "تم قبول الطلب",
-    "originalStatus": "preparing",
+    "status": "تم التسليم",
+    "originalStatus": "delivered",
     "date": "05‏/10‏/2026 01:40 م",
     "created_at": "2026-10-05T11:40:26.217+00:00",
     "notes": null,
     "source": "Admin / Storefront",
     "system_scope": "NEW",
     "inventoryDeducted": false,
-    "saleFinalized": false,
+    "saleFinalized": true,
     "statusHistory": [
       {
         "from": "في انتظار المراجعة",
-        "to": "تم قبول الطلب",
+        "to": "تم التسليم",
         "date": "05‏/10‏/2026 01:40 م",
         "user": "طه"
       }
