@@ -539,8 +539,8 @@ const INITIAL_ORDERS = [
     "orderNumber": "#90558069",
     "rawOrderNumber": "90558069",
     "invoiceNumber": "#INV-HIST-90558069",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "حربي",
     "phone": "000000",
@@ -562,20 +562,31 @@ const INITIAL_ORDERS = [
     "total": 250,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "جديد",
+    "status": "تم قبول الطلب",
     "originalStatus": "new",
     "date": "07‏/10‏/2026 01:48 ص",
     "created_at": "2026-10-06T23:48:14.396+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "07‏/10‏/2026 01:48 ص",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "fe94040b-13d5-4839-8da9-800456c4e122",
     "orderNumber": "#81046301",
     "rawOrderNumber": "81046301",
     "invoiceNumber": "#INV-HIST-81046301",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "وليد ماهر ",
     "phone": "0920722126",
@@ -702,20 +713,31 @@ const INITIAL_ORDERS = [
     "total": 470,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "جديد",
+    "status": "تم قبول الطلب",
     "originalStatus": "new",
     "date": "07‏/10‏/2026 12:17 ص",
     "created_at": "2026-10-06T22:17:03.413+00:00",
     "notes": "في الكليه الساعه 10",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "07‏/10‏/2026 12:17 ص",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "17692a27-f4db-4baf-bb35-a10e23903a76",
     "orderNumber": "#15123876",
     "rawOrderNumber": "15123876",
     "invoiceNumber": "#INV-HIST-15123876",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "محمد صلاح ",
     "phone": "0920722126",
@@ -828,20 +850,31 @@ const INITIAL_ORDERS = [
     "total": 205,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "جديد",
+    "status": "تم قبول الطلب",
     "originalStatus": "new",
     "date": "06‏/10‏/2026 10:38 م",
     "created_at": "2026-10-06T20:38:52.753+00:00",
     "notes": "في الكليه الساعه 10",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "06‏/10‏/2026 10:38 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "988cfbdd-0a01-48b1-85b8-531e81fdfc96",
     "orderNumber": "#68183543",
     "rawOrderNumber": "68183543",
     "invoiceNumber": "#INV-HIST-68183543",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "عبد الرحمن عراب ",
     "phone": "0920722126",
@@ -982,20 +1015,31 @@ const INITIAL_ORDERS = [
     "total": 512,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "جديد",
+    "status": "تم قبول الطلب",
     "originalStatus": "new",
     "date": "06‏/10‏/2026 10:26 م",
     "created_at": "2026-10-06T20:26:30.771+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "06‏/10‏/2026 10:26 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "0bea565a-49d5-4395-93b8-5efc37692b5b",
     "orderNumber": "#12307487",
     "rawOrderNumber": "12307487",
     "invoiceNumber": "#INV-HIST-12307487",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "ندى فتحي ",
     "phone": "0926619222",
@@ -1052,20 +1096,31 @@ const INITIAL_ORDERS = [
     "total": 70,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "جديد",
+    "status": "تم قبول الطلب",
     "originalStatus": "new",
     "date": "06‏/10‏/2026 09:46 م",
     "created_at": "2026-10-06T19:46:41.098+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "06‏/10‏/2026 09:46 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "42ef9a61-bf00-4976-9563-561956f3b4e3",
     "orderNumber": "#13788292",
     "rawOrderNumber": "13788292",
     "invoiceNumber": "#INV-HIST-13788292",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "تسنيم أبوبكر يونس",
     "phone": "0929325929",
@@ -1101,20 +1156,31 @@ const INITIAL_ORDERS = [
     "total": 95,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "قيد التجهيز",
+    "status": "تم قبول الطلب",
     "originalStatus": "editing",
     "date": "06‏/10‏/2026 06:36 م",
     "created_at": "2026-10-06T16:36:12.891+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "06‏/10‏/2026 06:36 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "225ff4a3-fd89-4e3d-81e6-68237d69de0b",
     "orderNumber": "#90439970",
     "rawOrderNumber": "90439970",
     "invoiceNumber": "#INV-HIST-90439970",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "رواسي حافظ محمد ",
     "phone": "0930231262",
@@ -1248,20 +1314,31 @@ const INITIAL_ORDERS = [
     "total": 439,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "جديد",
+    "status": "تم قبول الطلب",
     "originalStatus": "new",
     "date": "06‏/10‏/2026 02:57 م",
     "created_at": "2026-10-06T12:57:52.405+00:00",
     "notes": "مجموعة A مكان الاستلام أمام الواجهة ",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "06‏/10‏/2026 02:57 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "3923c272-2aaa-4b58-b0be-db9307d7ef69",
     "orderNumber": "#94946101",
     "rawOrderNumber": "94946101",
     "invoiceNumber": "#INV-HIST-94946101",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "نبيله الخير ",
     "phone": "0929007341",
@@ -1297,20 +1374,31 @@ const INITIAL_ORDERS = [
     "total": 33,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "جديد",
+    "status": "تم قبول الطلب",
     "originalStatus": "new",
     "date": "06‏/10‏/2026 11:38 ص",
     "created_at": "2026-10-06T09:38:00.69+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "06‏/10‏/2026 11:38 ص",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "fa6d3f6a-a675-42ba-9480-abbb706faa49",
     "orderNumber": "#96055340",
     "rawOrderNumber": "96055340",
     "invoiceNumber": "#INV-HIST-96055340",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "بشرى بورو",
     "phone": "0930157721",
@@ -1332,20 +1420,31 @@ const INITIAL_ORDERS = [
     "total": 95,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "قيد التجهيز",
+    "status": "تم قبول الطلب",
     "originalStatus": "preparing",
     "date": "05‏/10‏/2026 10:57 م",
     "created_at": "2026-10-05T20:57:39.146+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "05‏/10‏/2026 10:57 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "2662b41a-c32c-4e4f-a2cd-444776731c1f",
     "orderNumber": "#42351493",
     "rawOrderNumber": "42351493",
     "invoiceNumber": "#INV-HIST-42351493",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "سريج خالد خليل",
     "phone": "0930348671",
@@ -1367,20 +1466,31 @@ const INITIAL_ORDERS = [
     "total": 75,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "قيد التجهيز",
+    "status": "تم قبول الطلب",
     "originalStatus": "preparing",
     "date": "05‏/10‏/2026 08:24 م",
     "created_at": "2026-10-05T18:24:38.551+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "05‏/10‏/2026 08:24 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "a8c98dbb-f60f-4d43-bb64-41f22ca27d06",
     "orderNumber": "#32085048",
     "rawOrderNumber": "32085048",
     "invoiceNumber": "#INV-HIST-32085048",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "مودة إبراهيم",
     "phone": "0910891947",
@@ -1402,20 +1512,31 @@ const INITIAL_ORDERS = [
     "total": 95,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "قيد التجهيز",
+    "status": "تم قبول الطلب",
     "originalStatus": "preparing",
     "date": "05‏/10‏/2026 04:49 م",
     "created_at": "2026-10-05T14:49:15.296+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "05‏/10‏/2026 04:49 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "436ea0c6-329b-483c-b207-991f2be48e23",
     "orderNumber": "#90656550",
     "rawOrderNumber": "90656550",
     "invoiceNumber": "#INV-HIST-90656550",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "تغريد حسام ادريبي",
     "phone": "0920174154",
@@ -1437,20 +1558,31 @@ const INITIAL_ORDERS = [
     "total": 75,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "قيد التجهيز",
+    "status": "تم قبول الطلب",
     "originalStatus": "under_review",
     "date": "05‏/10‏/2026 04:48 م",
     "created_at": "2026-10-05T14:48:48.964+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "05‏/10‏/2026 04:48 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "f23685a4-97b8-41d9-a872-0abb26960c34",
     "orderNumber": "#62960319",
     "rawOrderNumber": "62960319",
     "invoiceNumber": "#INV-HIST-62960319",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "شيماء",
     "phone": "0922570806",
@@ -1570,12 +1702,23 @@ const INITIAL_ORDERS = [
     "total": 370,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "قيد التجهيز",
+    "status": "تم قبول الطلب",
     "originalStatus": "preparing",
     "date": "05‏/10‏/2026 01:40 م",
     "created_at": "2026-10-05T11:40:26.217+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "05‏/10‏/2026 01:40 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "2b2dc4bc-365d-4ebe-b3ba-40670119466a",
@@ -1703,12 +1846,15 @@ const INITIAL_ORDERS = [
     "total": 471,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "05‏/10‏/2026 08:38 ص",
     "created_at": "2026-10-05T06:38:36.773+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "30676b98-6b0f-4945-9650-504d4d7a5c9e",
@@ -1836,12 +1982,15 @@ const INITIAL_ORDERS = [
     "total": 366,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "05‏/10‏/2026 07:52 ص",
     "created_at": "2026-10-05T05:52:56.936+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "2a672633-b2f8-4e51-a825-7158a460e100",
@@ -1969,12 +2118,15 @@ const INITIAL_ORDERS = [
     "total": 401,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "05‏/10‏/2026 07:45 ص",
     "created_at": "2026-10-05T05:45:27.2+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "497c699b-2f17-42f3-9b11-d50fe367e40d",
@@ -2102,20 +2254,23 @@ const INITIAL_ORDERS = [
     "total": 374,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "05‏/10‏/2026 07:41 ص",
     "created_at": "2026-10-05T05:41:12.475+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "2b32fb65-3910-4fa3-941c-d99eca8b9e6d",
     "orderNumber": "#23987899",
     "rawOrderNumber": "23987899",
     "invoiceNumber": "#INV-HIST-23987899",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "ساجدة ماضي ",
     "phone": "0930528488",
@@ -2242,12 +2397,23 @@ const INITIAL_ORDERS = [
     "total": 453,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "قيد التجهيز",
+    "status": "تم قبول الطلب",
     "originalStatus": "under_review",
     "date": "05‏/10‏/2026 07:33 ص",
     "created_at": "2026-10-05T05:33:12.359+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "05‏/10‏/2026 07:33 ص",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "db6488a0-b5f8-43f8-af73-7b06e591a047",
@@ -2319,12 +2485,15 @@ const INITIAL_ORDERS = [
     "total": 72,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "04‏/10‏/2026 08:58 م",
     "created_at": "2026-10-04T18:58:24.174+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "d0687c4a-453e-427f-b2cb-97d179cf247c",
@@ -2354,12 +2523,15 @@ const INITIAL_ORDERS = [
     "total": 75,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "04‏/10‏/2026 08:25 م",
     "created_at": "2026-10-04T18:25:36.917+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "a5fa2b9c-6bec-4c2c-80bc-10238a93f435",
@@ -2494,12 +2666,15 @@ const INITIAL_ORDERS = [
     "total": 461,
     "discountAmount": 1,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "04‏/10‏/2026 05:55 م",
     "created_at": "2026-10-04T15:55:48.894+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "d63b2f65-dd4d-499c-bc17-e921354ada77",
@@ -2529,12 +2704,15 @@ const INITIAL_ORDERS = [
     "total": 250,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "04‏/10‏/2026 07:08 ص",
     "created_at": "2026-10-04T05:08:34.09+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "9dd939e1-e9fa-4d3e-aa61-deecdc0ecb4c",
@@ -2655,12 +2833,15 @@ const INITIAL_ORDERS = [
     "total": 205,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "04‏/10‏/2026 02:14 ص",
     "created_at": "2026-10-04T00:14:01.574+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "0f537dd3-2c81-417b-9d35-29dcc840c663",
@@ -2788,12 +2969,15 @@ const INITIAL_ORDERS = [
     "total": 362,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "04‏/10‏/2026 01:44 ص",
     "created_at": "2026-10-03T23:44:11.253+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "a897fdb8-53f2-4938-b5be-b7031aaf5ee1",
@@ -2872,12 +3056,15 @@ const INITIAL_ORDERS = [
     "total": 547,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "03‏/10‏/2026 06:58 م",
     "created_at": "2026-10-03T16:58:49.014+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "0142ed65-470b-4db0-bd83-0b98fc5ff7e9",
@@ -3012,12 +3199,15 @@ const INITIAL_ORDERS = [
     "total": 366,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "03‏/10‏/2026 02:15 م",
     "created_at": "2026-10-03T12:15:53.323+00:00",
     "notes": "يوم الاستلام الاحد او الاتنين حنتواصل معاكم بخصوص اليوم\n",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "a64faff6-c5a4-4bb2-a317-1a417791d7f0",
@@ -3152,12 +3342,15 @@ const INITIAL_ORDERS = [
     "total": 295,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "03‏/10‏/2026 01:37 ص",
     "created_at": "2026-10-02T23:37:27.08+00:00",
     "notes": "الاستلام الساعة 10صباحا يوم الأحد كلية طب وجراحة الفم والأسنان جامعة طرابلس ",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "f195124c-f076-41d4-9b2f-44da30f430a4",
@@ -3292,12 +3485,15 @@ const INITIAL_ORDERS = [
     "total": 340,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "03‏/10‏/2026 12:29 ص",
     "created_at": "2026-10-02T22:29:57.826+00:00",
     "notes": "الاستلام الساعه 10صباحا يوم الاحد \nفي كلية طب وجراحه الفم والاسنان ",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "fd7591d7-d481-44cb-b009-aa67698c23d0",
@@ -3432,12 +3628,15 @@ const INITIAL_ORDERS = [
     "total": 464,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "02‏/10‏/2026 09:40 م",
     "created_at": "2026-10-02T19:40:08.986+00:00",
     "notes": "[الشارع/المنطقة: الهاني, الهنشير, الهاني, طرابلس, ليبيا] [خرائط جوجل: https://www.google.com/maps?q=32.880795,13.23241]",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "a8091bac-2191-441a-b6e2-a833b6320b70",
@@ -3509,12 +3708,15 @@ const INITIAL_ORDERS = [
     "total": 72,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "ملغي",
+    "status": "ملغى",
     "originalStatus": "cancelled",
     "date": "02‏/10‏/2026 09:25 م",
     "created_at": "2026-10-02T19:25:32.722+00:00",
     "notes": "كليه الأسنان ابن المنظور ",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "a59e4da5-8474-48fb-978c-39c3de52a0a8",
@@ -3572,20 +3774,23 @@ const INITIAL_ORDERS = [
     "total": 110,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "02‏/10‏/2026 09:17 م",
     "created_at": "2026-10-02T19:17:08.286+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "036c1499-7e48-4b1e-bee7-55eb65eb1898",
     "orderNumber": "#86727631",
     "rawOrderNumber": "86727631",
     "invoiceNumber": "#INV-HIST-86727631",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "احمد امحمد شو ",
     "phone": "0926919100",
@@ -3698,12 +3903,23 @@ const INITIAL_ORDERS = [
     "total": 386,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "جاهز للتوصيل",
+    "status": "تم قبول الطلب",
     "originalStatus": "out_for_delivery",
     "date": "02‏/10‏/2026 09:13 م",
     "created_at": "2026-10-02T19:13:36.527+00:00",
     "notes": "يوم الاحد في الكلية قدام المدرجات ",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "02‏/10‏/2026 09:13 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "26350463-2a56-47f6-bd79-61d84c02f5a1",
@@ -3768,12 +3984,15 @@ const INITIAL_ORDERS = [
     "total": 70,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "02‏/10‏/2026 07:10 م",
     "created_at": "2026-10-02T17:10:46.038+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "3e16f1a0-31ff-413c-850f-0129cebce79a",
@@ -3908,20 +4127,23 @@ const INITIAL_ORDERS = [
     "total": 478,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "02‏/10‏/2026 05:01 م",
     "created_at": "2026-10-02T15:01:54.769+00:00",
     "notes": "+ بوكس لون وردي 75 الاجمالي 553",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "f2a9d748-4d33-42e2-bc39-c85a8a65fc8a",
     "orderNumber": "#56191275",
     "rawOrderNumber": "56191275",
     "invoiceNumber": "#INV-HIST-56191275",
-    "orderType": "historical",
-    "isHistorical": true,
+    "orderType": "operational",
+    "isHistorical": false,
     "inventoryDeduction": "historical_exempt",
     "customerName": "مبار",
     "phone": "0930679661",
@@ -4048,12 +4270,23 @@ const INITIAL_ORDERS = [
     "total": 478,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "جاهز للتوصيل",
+    "status": "تم قبول الطلب",
     "originalStatus": "accepted",
     "date": "02‏/10‏/2026 04:00 م",
     "created_at": "2026-10-02T14:00:50.74+00:00",
     "notes": "الاستلام يوم الثلاثاء ",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "NEW",
+    "inventoryDeducted": false,
+    "saleFinalized": false,
+    "statusHistory": [
+      {
+        "from": "في انتظار المراجعة",
+        "to": "تم قبول الطلب",
+        "date": "02‏/10‏/2026 04:00 م",
+        "user": "طه"
+      }
+    ]
   },
   {
     "id": "ad346160-9beb-4196-8ecb-fe25773910f6",
@@ -4181,12 +4414,15 @@ const INITIAL_ORDERS = [
     "total": 398,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "02‏/10‏/2026 09:18 ص",
     "created_at": "2026-10-02T07:18:36.386+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "88de2f8b-42bc-47de-9f96-6b22b8bba52c",
@@ -4251,12 +4487,15 @@ const INITIAL_ORDERS = [
     "total": 70,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "02‏/10‏/2026 08:42 ص",
     "created_at": "2026-10-02T06:42:53.198+00:00",
     "notes": "[الشارع/المنطقة: السراج, الجفارة, ليبيا] [خرائط جوجل: https://www.google.com/maps?q=32.834095,13.070485]",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "fcf67969-0909-4b43-a60a-663107d78850",
@@ -4384,12 +4623,15 @@ const INITIAL_ORDERS = [
     "total": 461,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "01‏/10‏/2026 09:08 م",
     "created_at": "2026-10-01T19:08:04.213+00:00",
     "notes": "الاستلام يوم الاحد في الكليه الساعه 12",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "1870cad0-534a-44e7-a4b7-18cce0db5054",
@@ -4454,12 +4696,15 @@ const INITIAL_ORDERS = [
     "total": 70,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "01‏/10‏/2026 07:46 م",
     "created_at": "2026-10-01T17:46:36.901+00:00",
     "notes": "الاستلام يوم الاحد الساعة 12\n",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "37425cc6-35ba-4521-af2f-b301a1c0889d",
@@ -4531,12 +4776,15 @@ const INITIAL_ORDERS = [
     "total": 72,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "01‏/10‏/2026 04:12 م",
     "created_at": "2026-10-01T14:12:53.135+00:00",
     "notes": "[الشارع/المنطقة: Suq Al-Jumla, شرفة الملاحة, طرابلس, ليبيا] [خرائط جوجل: https://www.google.com/maps?q=32.880156,13.278825]",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "430b5e0d-f0b9-48b2-a6e3-7712466345ea",
@@ -4657,12 +4905,15 @@ const INITIAL_ORDERS = [
     "total": 614,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "01‏/10‏/2026 12:29 م",
     "created_at": "2026-10-01T10:29:29.03+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "26e895e2-901c-41a5-8159-b87408b39b4d",
@@ -4720,12 +4971,15 @@ const INITIAL_ORDERS = [
     "total": 55,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "01‏/10‏/2026 10:58 ص",
     "created_at": "2026-10-01T08:58:57.523+00:00",
     "notes": "بدون rubber ",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "b4ecee79-0321-4b1e-a56a-2d7e80b40569",
@@ -4790,12 +5044,15 @@ const INITIAL_ORDERS = [
     "total": 70,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "01‏/10‏/2026 10:53 ص",
     "created_at": "2026-10-01T08:53:25.048+00:00",
     "notes": "يوم الأحد الساعة 10",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "cad2f971-7cd6-4e75-9f4b-71b0c6208126",
@@ -4825,12 +5082,15 @@ const INITIAL_ORDERS = [
     "total": 95,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "01‏/10‏/2026 10:49 ص",
     "created_at": "2026-10-01T08:49:10.099+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "f0aae1f0-0fe3-4e8d-a281-c0ec78d20b98",
@@ -4951,12 +5211,15 @@ const INITIAL_ORDERS = [
     "total": 362,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "01‏/10‏/2026 10:48 ص",
     "created_at": "2026-10-01T08:48:11.443+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "86e624cd-4896-4ce4-a235-9ac626ecb0e2",
@@ -5000,12 +5263,15 @@ const INITIAL_ORDERS = [
     "total": 280,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "01‏/10‏/2026 10:46 ص",
     "created_at": "2026-10-01T08:46:15.274+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "a94c9a07-9e86-4ffc-af3d-0a94fd0c985b",
@@ -5133,12 +5399,15 @@ const INITIAL_ORDERS = [
     "total": 378,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "30‏/09‏/2026 10:04 ص",
     "created_at": "2026-09-30T08:04:52.539+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "b56fe05a-7402-48a9-8935-dda89e3836bc",
@@ -5168,12 +5437,15 @@ const INITIAL_ORDERS = [
     "total": 75,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "29‏/09‏/2026 08:25 ص",
     "created_at": "2026-09-29T06:25:34.937+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "5506ee16-20e9-4a9b-822a-ae01e2fb6185",
@@ -5287,12 +5559,15 @@ const INITIAL_ORDERS = [
     "total": 175,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "ملغي",
+    "status": "ملغى",
     "originalStatus": "cancelled",
     "date": "28‏/09‏/2026 11:15 م",
     "created_at": "2026-09-28T21:15:52.516+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "05931b46-d235-481c-9f87-c4e7fe2eb31a",
@@ -5406,12 +5681,15 @@ const INITIAL_ORDERS = [
     "total": 316,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "28‏/09‏/2026 06:14 م",
     "created_at": "2026-09-28T16:14:15.549+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "75e62757-807a-42e6-9188-c108c87c647c",
@@ -5441,12 +5719,15 @@ const INITIAL_ORDERS = [
     "total": 15,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "28‏/09‏/2026 10:23 ص",
     "created_at": "2026-09-28T08:23:33.676+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "13f784bf-3548-4a4f-935b-31c978796dd1",
@@ -5504,12 +5785,15 @@ const INITIAL_ORDERS = [
     "total": 67,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "28‏/09‏/2026 10:22 ص",
     "created_at": "2026-09-28T08:22:37.252+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "fcd63be4-8878-46a1-8c0c-eda07264f482",
@@ -5637,12 +5921,15 @@ const INITIAL_ORDERS = [
     "total": 130,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "28‏/09‏/2026 10:15 ص",
     "created_at": "2026-09-28T08:15:56.647+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "88c6a6b1-b54f-4619-85ea-c16004ecdd01",
@@ -5763,12 +6050,15 @@ const INITIAL_ORDERS = [
     "total": 376,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "28‏/09‏/2026 09:50 ص",
     "created_at": "2026-09-28T07:50:08.419+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "58bc7f92-bd4c-4bea-943d-0aa01251d5e5",
@@ -5889,12 +6179,15 @@ const INITIAL_ORDERS = [
     "total": 318,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "28‏/09‏/2026 09:44 ص",
     "created_at": "2026-09-28T07:44:42.403+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "de4fc5f2-e11c-4b27-81a3-85e1970ae0cb",
@@ -5938,12 +6231,15 @@ const INITIAL_ORDERS = [
     "total": 260,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "28‏/09‏/2026 06:12 ص",
     "created_at": "2026-09-28T04:12:10.206+00:00",
     "notes": "نبيه يوم الثلاثاء الساعه 10 صباحاً ",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "73307d5b-2244-4aba-93c7-a881ee00d899",
@@ -6078,12 +6374,15 @@ const INITIAL_ORDERS = [
     "total": 480,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "28‏/09‏/2026 12:11 ص",
     "created_at": "2026-09-27T22:11:29.015+00:00",
     "notes": "مجموعة A\nالاستلام يوم الأحد 3 - 10 \n أمام مدرج 1\nالساعة 12 ",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "aa0c075f-9531-4eb3-882a-7ac84ca31d46",
@@ -6155,12 +6454,15 @@ const INITIAL_ORDERS = [
     "total": 72,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "27‏/09‏/2026 06:53 م",
     "created_at": "2026-09-27T16:53:46.488+00:00",
     "notes": "[الشارع/المنطقة: السراج, الجفارة, ليبيا] [خرائط جوجل: https://www.google.com/maps?q=32.83403,13.075493]",
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "bb56a7ed-beef-4ac8-93e4-029af2edf35a",
@@ -6190,12 +6492,15 @@ const INITIAL_ORDERS = [
     "total": 250,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "26‏/09‏/2026 04:26 م",
     "created_at": "2026-09-26T14:26:07.003+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "12a624e6-a84b-49f5-8d84-68672b02b699",
@@ -6225,12 +6530,15 @@ const INITIAL_ORDERS = [
     "total": 135,
     "discountAmount": 5,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "23‏/09‏/2026 09:41 ص",
     "created_at": "2026-09-23T07:41:20.312+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "1f96ef0d-b798-45d2-9763-c77f10290548",
@@ -6295,12 +6603,15 @@ const INITIAL_ORDERS = [
     "total": 80,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "23‏/09‏/2026 09:26 ص",
     "created_at": "2026-09-23T07:26:28.026+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   },
   {
     "id": "5cb3aba7-a3ff-4ce0-bad6-a1d352d6951f",
@@ -6435,12 +6746,15 @@ const INITIAL_ORDERS = [
     "total": 377,
     "discountAmount": 0,
     "shippingFee": 0,
-    "status": "مكتمل",
+    "status": "تم التسليم",
     "originalStatus": "delivered",
     "date": "23‏/09‏/2026 09:19 ص",
     "created_at": "2026-09-23T07:19:06.228+00:00",
     "notes": null,
-    "source": "Admin / Storefront"
+    "source": "Admin / Storefront",
+    "system_scope": "LEGACY",
+    "inventoryDeducted": false,
+    "saleFinalized": false
   }
 ];
 const INITIAL_PURCHASES = [];

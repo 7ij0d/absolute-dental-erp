@@ -5075,6 +5075,11 @@ function renderOrdersCardsList() {
 
   let orders = Array.isArray(ERP_STATE.orders) ? [...ERP_STATE.orders] : [];
 
+  // Filter out legacy archive orders unless explicitly toggled
+  if (!ERP_STATE.showLegacyArchive) {
+    orders = orders.filter(o => o.system_scope !== 'LEGACY');
+  }
+
   // Filter by Source
   if (sourceFilter === 'website') {
     orders = orders.filter(o => o.orderSource === 'website' || (!o.orderSource && o.source !== 'أنشأه الأدمن'));
@@ -5088,6 +5093,7 @@ function renderOrdersCardsList() {
       'pending': 'في انتظار المراجعة',
       'accepted': 'تم قبول الطلب',
       'preparing': 'قيد التجهيز',
+      'ready': 'جاهز للتوصيل',
       'shipping': 'خرج للتوصيل',
       'delivered': 'تم التسليم',
       'cancelled': 'ملغاة'
@@ -5096,9 +5102,10 @@ function renderOrdersCardsList() {
     orders = orders.filter(o => {
       const s = o.status || '';
       if (statusFilter === 'preparing') return s.includes('تجهيز');
+      if (statusFilter === 'ready') return s.includes('جاهز');
       if (statusFilter === 'shipping') return s.includes('توصيل');
       if (statusFilter === 'delivered') return s.includes('تسليم') || s.includes('مكتمل');
-      if (statusFilter === 'cancelled') return s.includes('ملغ');
+      if (statusFilter === 'cancelled') return s.includes('ملغ') || s.includes('مرفوض');
       if (statusFilter === 'pending') return s.includes('انتظار') || s.includes('جديد');
       return s === targetStatus;
     });
@@ -5137,6 +5144,10 @@ function renderOrdersCardsList() {
     const itemsText = `${itemsCount} ${itemsCount === 1 ? 'منتج' : (itemsCount === 2 ? 'منتجان' : 'منتجات')}`;
     const totalVal = order.total || 0;
 
+    // Contact URLs
+    const waUrl = formatLibyanWhatsAppUrl(custPhone, `مرحباً ${custName}، معك متجر Absolute Dental بخصوص طلبك رقم ${num} 🦷`);
+    const tgUrl = formatTelegramUrl(custPhone);
+
     // Thumbnails
     const thumbs = items.slice(0, 3).map(it => {
       const src = it.imageUrl || (typeof resolveProductImage === 'function' ? resolveProductImage(it) : 'assets/brand-logo-trimmed.png');
@@ -5159,22 +5170,28 @@ function renderOrdersCardsList() {
     } else if (rawStatus.includes('تجهيز')) {
       statusClass = 'preparing';
       statusLabel = 'قيد التجهيز';
-    } else if (rawStatus.includes('توصيل')) {
+    } else if (rawStatus.includes('جاهز')) {
+      statusClass = 'ready';
+      statusLabel = 'جاهز للتوصيل';
+    } else if (rawStatus.includes('خرج') || rawStatus.includes('توصيل')) {
       statusClass = 'shipping';
       statusLabel = 'خرج للتوصيل';
     } else if (rawStatus.includes('تسليم') || rawStatus.includes('مكتمل')) {
       statusClass = 'delivered';
       statusLabel = 'تم التسليم';
-    } else if (rawStatus.includes('ملغ')) {
+    } else if (rawStatus.includes('ملغ') || rawStatus.includes('مرفوض')) {
       statusClass = 'cancelled';
-      statusLabel = 'ملغاة';
+      statusLabel = rawStatus.includes('مرفوض') ? 'مرفوض' : 'ملغاة';
     }
 
-    // Source badge
+    // Source badge & scope badge
     const isAdminCreated = order.orderSource === 'admin' || order.source === 'أنشأه الأدمن';
     const sourceClass = isAdminCreated ? 'admin' : 'web';
     const sourceLabel = isAdminCreated ? 'أنشأه الأدمن' : 'من الموقع';
     const sourceIcon = isAdminCreated ? '👤' : '🌐';
+
+    const isLegacy = order.system_scope === 'LEGACY';
+    const legacyBadge = isLegacy ? '<span class="order-source-badge" style="background:#F1F5F9; color:#64748B; border-color:#CBD5E1;">📂 أرشيف سابق</span>' : '';
 
     return `
       <div class="order-card-row" onclick="openOrderDetailsById('${order.id}')" title="انقر لعرض تفاصيل الطلب">
@@ -5184,10 +5201,14 @@ function renderOrdersCardsList() {
           <span class="order-card-date">${dateStr}</span>
         </div>
 
-        <!-- Col 2: Customer Name & Phone -->
+        <!-- Col 2: Customer Name & Phone & Direct Contacts -->
         <div class="order-card-customer-col">
           <div class="order-card-cust-name">${custName}</div>
-          <div class="order-card-cust-phone">${custPhone}</div>
+          <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.2rem;">
+            <span class="order-card-cust-phone">${custPhone}</span>
+            <a href="${waUrl}" target="_blank" onclick="event.stopPropagation();" class="btn-contact-wa" style="padding: 0.15rem 0.35rem; font-size: 0.7rem; border-radius: 4px;" title="واتساب">💬</a>
+            <a href="${tgUrl}" target="_blank" onclick="event.stopPropagation();" class="btn-contact-tg" style="padding: 0.15rem 0.35rem; font-size: 0.7rem; border-radius: 4px;" title="تيليجرام">✈️</a>
+          </div>
         </div>
 
         <!-- Col 3: Items Count & Total -->
@@ -5205,6 +5226,7 @@ function renderOrdersCardsList() {
         <div class="order-card-badges-col">
           <span class="order-status-badge ${statusClass}">${statusLabel}</span>
           <span class="order-source-badge ${sourceClass}">${sourceIcon} ${sourceLabel}</span>
+          ${legacyBadge}
         </div>
 
         <!-- Col 6: Action Button -->
@@ -5637,48 +5659,108 @@ function openOrderDetailsById(orderId) {
     statusClass = 'accepted'; statusLabel = 'تم قبول الطلب';
   } else if (rawStatus.includes('تجهيز')) {
     statusClass = 'preparing'; statusLabel = 'قيد التجهيز';
-  } else if (rawStatus.includes('توصيل')) {
+  } else if (rawStatus.includes('جاهز')) {
+    statusClass = 'ready'; statusLabel = 'جاهز للتوصيل';
+  } else if (rawStatus.includes('خرج') || rawStatus.includes('توصيل')) {
     statusClass = 'shipping'; statusLabel = 'خرج للتوصيل';
   } else if (rawStatus.includes('تسليم') || rawStatus.includes('مكتمل')) {
     statusClass = 'delivered'; statusLabel = 'تم التسليم';
-  } else if (rawStatus.includes('ملغ')) {
-    statusClass = 'cancelled'; statusLabel = 'ملغاة';
+  } else if (rawStatus.includes('ملغ') || rawStatus.includes('مرفوض')) {
+    statusClass = 'cancelled'; statusLabel = rawStatus.includes('مرفوض') ? 'مرفوض' : 'ملغاة';
   }
 
   if (statusBadge) {
-    statusBadge.className = `order-status-badge ${statusClass}`;
+    statusBadge.className = 'order-status-badge ' + statusClass;
     statusBadge.textContent = statusLabel;
   }
 
   const items = Array.isArray(order.items) ? order.items : [];
   const subtotal = order.subtotal || items.reduce((s, it) => s + (Number(it.price) * Number(it.qty || 1)), 0) || order.total || 0;
-  const delivery = order.shippingFee || 0;
+  const delivery = order.shippingFee || (order.deliveryMethod === 'delivery' ? 10 : 0);
   const discount = order.discountAmount || 0;
   const total = order.total || (subtotal + delivery - discount);
 
+  // Stepper HTML
+  const stepperHTML = (typeof renderOrderWorkflowStepperHTML === 'function')
+    ? renderOrderWorkflowStepperHTML(order.status)
+    : '';
+
+  // WhatsApp & Telegram URLs
+  const custName = order.customerName || 'عميل';
+  const custPhone = order.phone || '-';
+  const defaultMsg = `مرحباً ${custName}، معك متجر Absolute Dental بخصوص طلبك رقم ${orderNum} 🦷`;
+  const waUrl = formatLibyanWhatsAppUrl(custPhone, defaultMsg);
+  const tgUrl = formatTelegramUrl(custPhone);
+
+  // Status History HTML
+  const historyList = Array.isArray(order.statusHistory) ? order.statusHistory : [];
+  const historyHTML = historyList.length > 0 ? `
+    <div class="order-detail-card-box" style="background: #FAF8F5;">
+      <div class="order-detail-title">
+        <span>📜 سجل تغييرات حالة الطلب</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.775rem;">
+        ${historyList.map(h => `
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-card); padding-bottom: 0.35rem;">
+            <div>
+              <span style="font-weight: 700; color: var(--text-main);">${h.to}</span>
+              <span style="color: var(--text-muted); font-size: 0.72rem;">(من: ${h.from})</span>
+            </div>
+            <div style="text-align: end; color: var(--text-muted);">
+              <span>بواسطة ${h.user || 'الأدمن'}</span> • <span class="num-mono">${h.date}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
   body.innerHTML = `
-    <!-- 1. Customer Info -->
+    <!-- 1. Workflow Visual Stepper -->
+    <div class="order-detail-card-box" style="padding: 1rem 0.75rem; background: #FAF8F5;">
+      <div class="order-detail-title" style="margin-bottom: 0.25rem;">
+        <span>🔄 مسار معالجة الطلب</span>
+      </div>
+      ${stepperHTML}
+    </div>
+
+    <!-- 2. Customer Info & Direct Contacts -->
     <div class="order-detail-card-box">
       <div class="order-detail-title">
-        <span>👤 بيانات العميل</span>
+        <span>👤 بيانات العميل والتواصل</span>
       </div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem;">
         <div>
           <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">الاسم:</span>
-          <span style="font-weight: 700; color: var(--text-main);">${order.customerName || 'عميل'}</span>
+          <span style="font-weight: 700; color: var(--text-main);">${custName}</span>
         </div>
         <div>
           <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">رقم الهاتف:</span>
-          <span style="font-weight: 700;" class="num-mono">${order.phone || '-'}</span>
+          <span style="font-weight: 700;" class="num-mono">${custPhone}</span>
         </div>
         <div style="grid-column: 1 / -1;">
           <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">العنوان / منطقة التوصيل:</span>
           <span style="font-weight: 600;">${order.address || order.city || 'طرابلس'}</span>
         </div>
       </div>
+
+      <!-- WhatsApp & Telegram Buttons -->
+      <div style="display: flex; gap: 0.65rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle); align-items: center;">
+        <a href="${waUrl}" target="_blank" class="btn-contact-wa" title="فتح محادثة واتساب فورية">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          <span>محادثة واتساب 💬</span>
+        </a>
+        <a href="${tgUrl}" target="_blank" class="btn-contact-tg" title="مراسلة عبر تيليجرام">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span>تيليجرام ✈️</span>
+        </a>
+        <button type="button" onclick="closeOrderDetailsDrawer(); openCustomerProfileDrawer('${custPhone}')" style="margin-inline-start: auto; background: none; border: 1px solid var(--border-card); border-radius: 6px; padding: 0.35rem 0.65rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; color: var(--brand-brown);">
+          ملف العميل 👤
+        </button>
+      </div>
     </div>
 
-    <!-- 2. Products List -->
+    <!-- 3. Products List -->
     <div class="order-detail-card-box">
       <div class="order-detail-title">
         <span>📦 المنتجات (${items.length || 1})</span>
@@ -5723,7 +5805,7 @@ function openOrderDetailsById(orderId) {
       </div>
     </div>
 
-    <!-- 3. Additional Details -->
+    <!-- 4. Additional Details -->
     <div class="order-detail-card-box">
       <div class="order-detail-title">
         <span>📋 معلومات إضافية</span>
@@ -5737,6 +5819,14 @@ function openOrderDetailsById(orderId) {
           <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">مصدر الطلب:</span>
           <span style="font-weight: 700;">${order.orderSource === 'admin' ? 'أنشأه الأدمن 👤' : 'من الموقع 🌐'}</span>
         </div>
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">تصنيف المنظومة:</span>
+          <span style="font-weight: 700; color: ${order.system_scope === 'LEGACY' ? '#94A3B8' : '#10B981'};">${order.system_scope === 'LEGACY' ? 'أرشيف قديم 📂' : 'المنظومة الجديدة ✨'}</span>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">حالة خصم المخزون:</span>
+          <span style="font-weight: 700; color: ${order.inventoryDeducted ? '#059669' : '#D97706'};">${order.inventoryDeducted ? 'تم الخصم فعلياً ✓' : 'معلق في المخزن ⏳'}</span>
+        </div>
         <div style="grid-column: 1 / -1;">
           <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">ملاحظات العميل:</span>
           <span style="font-weight: 500; color: var(--text-body);">${order.notes || 'لا توجد ملاحظات'}</span>
@@ -5744,33 +5834,36 @@ function openOrderDetailsById(orderId) {
       </div>
     </div>
 
-    <!-- 4. Interactive Order Status & Inventory Logic -->
+    <!-- 5. Interactive Order Status & Inventory Logic -->
     <div class="order-detail-card-box" style="background: #FAF8F5;">
       <div class="order-detail-title">
         <span>⚙️ تحديث حالة الطلب والمخزون</span>
       </div>
-      <p style="font-size: 0.775rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-        عند تحويل الحالة إلى «خرج للتوصيل»، يتم خصم كميات المنتجات من المخزون تلقائياً وتسجيل العملية في سجل العمليات.
+      <p style="font-size: 0.775rem; color: var(--text-muted); margin-bottom: 0.65rem;">
+        عند تحويل الحالة إلى «خرج للتوصيل»، يتم خصم كميات المنتجات من المخزون تلقائياً، وعند تحويله إلى «تم التسليم» يُعتمد البيع نهائياً.
       </p>
 
-      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'في انتظار المراجعة')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
+      <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'في انتظار المراجعة')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
           في انتظار المراجعة
         </button>
-        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'تم قبول الطلب')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'تم قبول الطلب')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
           تم قبول الطلب
         </button>
-        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'قيد التجهيز')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'قيد التجهيز')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
           قيد التجهيز
+        </button>
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'جاهز للتوصيل')" style="font-weight: 700; background: #FFFFFF; border: 1px solid var(--border-card); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
+          جاهز للتوصيل
         </button>
         <button type="button" class="btn-primary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'خرج للتوصيل')" style="font-weight: 700; background: #7C3AED; color: #FFFFFF; border: none; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
           🚚 خرج للتوصيل (خصم المخزون)
         </button>
         <button type="button" class="btn-primary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'تم التسليم')" style="font-weight: 700; background: #10B981; color: #FFFFFF; border: none; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
-          ✓ تم التسليم
+          ✓ تم التسليم (اعتماد البيع)
         </button>
-        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'ملغاة')" style="font-weight: 700; background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer;">
-          ✕ إلغاء الطلب
+        <button type="button" class="btn-secondary btn-sm" onclick="changeOrderStatusFromDrawer('${order.id}', 'ملغى')" style="font-weight: 700; background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;">
+          ✕ إلغاء الطلب (إرجاع المخزون)
         </button>
       </div>
 
@@ -5780,6 +5873,9 @@ function openOrderDetailsById(orderId) {
         </div>
       ` : ''}
     </div>
+
+    <!-- 6. History Timeline -->
+    ${historyHTML}
   `;
 
   window.CURRENT_DRAWER_ORDER_ID = order.id;
@@ -5800,10 +5896,23 @@ function changeOrderStatusFromDrawer(orderId, newStatus) {
   const order = (ERP_STATE.orders || []).find(o => o.id === orderId || o.orderNumber === orderId);
   if (!order) return;
 
-  const oldStatus = order.status;
+  const oldStatus = order.status || 'في انتظار المراجعة';
+  const currentUser = getCurrentUser() || sessionStorage.getItem('abs_erp_active_user') || 'طه';
+  const now = new Date();
+  const dateFormatted = now.toLocaleDateString('ar-LY', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' + now.toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' });
+
+  // Record in statusHistory
+  if (!Array.isArray(order.statusHistory)) order.statusHistory = [];
+  order.statusHistory.push({
+    from: oldStatus,
+    to: newStatus,
+    date: dateFormatted,
+    user: currentUser
+  });
+
   order.status = newStatus;
 
-  // INVENTORY DEDUCTION LOGIC ON 'خرج للتوصيل'
+  // 1. INVENTORY DEDUCTION ON 'خرج للتوصيل'
   if (newStatus === 'خرج للتوصيل' && !order.inventoryDeducted) {
     (order.items || []).forEach(it => {
       const prod = (ERP_STATE.products || []).find(p => p.id === it.id || p.nameAr === it.name || p.nameEn === it.name);
@@ -5816,21 +5925,97 @@ function changeOrderStatusFromDrawer(orderId, newStatus) {
     order.inventoryDeducted = true;
     order.inventoryDeduction = 'applied';
 
-    try {
-      localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
-    } catch (_) {}
+    // Log Inventory Movement
+    if (!Array.isArray(ERP_STATE.inventoryTransactions)) ERP_STATE.inventoryTransactions = [];
+    ERP_STATE.inventoryTransactions.unshift({
+      id: 'tx-' + Date.now(),
+      type: 'out',
+      date: dateFormatted,
+      orderNumber: order.orderNumber,
+      customer: order.customerName,
+      user: currentUser,
+      itemsCount: (order.items || []).reduce((s, it) => s + (Number(it.qty) || 1), 0),
+      reason: 'صرف بضاعة وخرج للتوصيل للطلب ' + order.orderNumber
+    });
 
     if (typeof logOperation === 'function') {
       logOperation({
-        user: getCurrentUser() || 'طه',
+        user: currentUser,
         action: 'خصم مخزون (خرج للتوصيل)',
         target: order.orderNumber,
-        details: `تم خصم منتجات الطلب ${order.orderNumber} تلقائياً لخروجه للتوصيل`
+        details: `تم خصم منتجات الطلب ${order.orderNumber} تلقائياً لخروجه للتوصيل للعميل ${order.customerName}`
       });
     }
 
     if (typeof showToast === 'function') {
       showToast(`تم تحويل الطلب إلى خرج للتوصيل وخصم الكميات من المخزون بنجاح`, 'success');
+    }
+  }
+  // 2. INVENTORY RESTORATION ON CANCELLATION
+  else if ((newStatus === 'ملغى' || newStatus === 'ملغاة' || newStatus === 'مرفوض') && order.inventoryDeducted) {
+    (order.items || []).forEach(it => {
+      const prod = (ERP_STATE.products || []).find(p => p.id === it.id || p.nameAr === it.name || p.nameEn === it.name);
+      if (prod) {
+        const qtyToRestore = Number(it.qty) || 1;
+        prod.stock = (Number(prod.stock) || 0) + qtyToRestore;
+      }
+    });
+
+    order.inventoryDeducted = false;
+    order.inventoryDeduction = 'reversed';
+
+    if (!Array.isArray(ERP_STATE.inventoryTransactions)) ERP_STATE.inventoryTransactions = [];
+    ERP_STATE.inventoryTransactions.unshift({
+      id: 'tx-rev-' + Date.now(),
+      type: 'return',
+      date: dateFormatted,
+      orderNumber: order.orderNumber,
+      customer: order.customerName,
+      user: currentUser,
+      itemsCount: (order.items || []).reduce((s, it) => s + (Number(it.qty) || 1), 0),
+      reason: 'إرجاع بضاعة للمخزن لإلغاء الطلب ' + order.orderNumber
+    });
+
+    if (typeof logOperation === 'function') {
+      logOperation({
+        user: currentUser,
+        action: 'إرجاع مخزون (إلغاء طلب)',
+        target: order.orderNumber,
+        details: `تم إرجاع كميات الطلب ${order.orderNumber} إلى المخزن بعد إلغائه`
+      });
+    }
+
+    if (typeof showToast === 'function') {
+      showToast('تم إلغاء الطلب وإرجاع كميات المنتجات إلى المخزن بنجاح', 'info');
+    }
+  }
+  // 3. DELIVERY COMPLETION & SALES FINALIZATION
+  else if (newStatus === 'تم التسليم') {
+    order.saleFinalized = true;
+
+    // If for any reason stock was not deducted before (e.g. direct delivered), deduct it safely
+    if (!order.inventoryDeducted) {
+      (order.items || []).forEach(it => {
+        const prod = (ERP_STATE.products || []).find(p => p.id === it.id || p.nameAr === it.name || p.nameEn === it.name);
+        if (prod) {
+          const qtyToDeduct = Number(it.qty) || 1;
+          prod.stock = Math.max(0, (Number(prod.stock) || 0) - qtyToDeduct);
+        }
+      });
+      order.inventoryDeducted = true;
+    }
+
+    if (typeof logOperation === 'function') {
+      logOperation({
+        user: currentUser,
+        action: 'اعتماد تسليم ومبيعات نهائية',
+        target: order.orderNumber,
+        details: `تم اعتماد تسليم الطلب ${order.orderNumber} للعميل ${order.customerName} وتثبيت المبيعات بقيمة ${order.total} د.ل`
+      });
+    }
+
+    if (typeof showToast === 'function') {
+      showToast(`تم تسليم الطلب ${order.orderNumber} وتثبيت البيع بنجاح 💰`, 'success');
     }
   } else {
     if (typeof showToast === 'function') {
@@ -5838,13 +6023,18 @@ function changeOrderStatusFromDrawer(orderId, newStatus) {
     }
   }
 
+  // Persist State
   try {
     localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+    localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
+    localStorage.setItem('abs_erp_inventory_transactions', JSON.stringify(ERP_STATE.inventoryTransactions));
   } catch (_) {}
 
   renderOrdersCardsList();
   openOrderDetailsById(order.id);
-  if (typeof updateDashboardRealUI === 'function') updateDashboardRealUI();
+  updateDashboardRealUI();
+  if (typeof renderProductsTable === 'function') renderProductsTable();
+  if (typeof renderInventoryTable === 'function') renderInventoryTable();
 }
 
 function printOrderInvoiceFromDrawer() {
@@ -5882,6 +6072,48 @@ function toggleMobileSidebar() {
 
 // Ensure navigateToScreen updates both Top Nav and Sidebar
 const _originalNavigateToScreen = (typeof navigateToScreen === 'function') ? navigateToScreen : null;
+// Render Sales Table connected directly to completed orders
+function renderSalesTable() {
+  const tbody = document.getElementById('salesTableBody');
+  const emptyState = document.getElementById('salesEmptyState');
+  if (!tbody) return;
+
+  const startAt = new Date(getSystemStartAt()).getTime();
+  let completedOrders = (ERP_STATE.orders || []).filter(o => (o.status || '').includes('تسليم') || (o.status || '').includes('مكتمل'));
+
+  if (!ERP_STATE.showLegacyArchive) {
+    completedOrders = completedOrders.filter(o => o.system_scope === 'NEW' || (new Date(o.created_at || o.date || 0).getTime() >= startAt));
+  }
+
+  if (completedOrders.length === 0) {
+    tbody.innerHTML = '';
+    if (emptyState) emptyState.style.display = 'block';
+    return;
+  }
+
+  if (emptyState) emptyState.style.display = 'none';
+
+  tbody.innerHTML = completedOrders.map(o => {
+    const num = o.orderNumber || ('#' + (o.rawOrderNumber || ''));
+    const isLegacy = o.system_scope === 'LEGACY';
+    return `
+      <tr onclick="openOrderDetailsById('${o.id}')" style="cursor: pointer;">
+        <td class="num-mono" style="font-weight: 800; color: #2563EB;">${num}</td>
+        <td>
+          <div style="font-weight: 700; color: var(--text-main);">${o.customerName || 'عميل'}</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" class="num-mono">${o.phone || '-'}</div>
+        </td>
+        <td class="num-mono" style="font-weight: 800; color: #10B981; font-size: 0.95rem;">${o.total} د.ل</td>
+        <td class="num-mono" style="color: var(--text-muted); font-size: 0.8rem;">${o.date || '-'}</td>
+        <td style="text-align: center;">
+          <span class="order-status-badge delivered">مكتمل ومسلّم ✓</span>
+          ${isLegacy ? '<span class="order-source-badge" style="background:#F1F5F9; color:#64748B;">أرشيف سابق</span>' : ''}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
 navigateToScreen = function(screenId, subSection = null) {
   // Alias POS to Add Order drawer in Orders page
   if (screenId === 'pos') {
@@ -5890,9 +6122,15 @@ navigateToScreen = function(screenId, subSection = null) {
     return;
   }
 
+  let targetScreen = screenId;
+  if (screenId === 'customers') {
+    targetScreen = 'partners';
+  }
+
   // Update Top Nav Tabs
   document.querySelectorAll('.top-nav-link').forEach(btn => {
-    if (btn.getAttribute('data-screen') === screenId) {
+    const s = btn.getAttribute('data-screen');
+    if (s === screenId || (screenId === 'partners' && s === 'customers') || (screenId === 'customers' && s === 'partners')) {
       btn.classList.add('active');
     } else {
       btn.classList.remove('active');
@@ -5901,12 +6139,20 @@ navigateToScreen = function(screenId, subSection = null) {
 
   // Call base screen switcher
   if (_originalNavigateToScreen) {
-    _originalNavigateToScreen(screenId, subSection);
+    _originalNavigateToScreen(targetScreen, subSection);
   }
 
-  // If opening orders, render cards list
-  if (screenId === 'orders') {
+  // Targeted re-renders on screen switch
+  if (targetScreen === 'orders') {
     setTimeout(() => renderOrdersCardsList(), 50);
+  } else if (targetScreen === 'partners' || screenId === 'customers') {
+    setTimeout(() => renderCustomersTable(), 50);
+  } else if (targetScreen === 'sales') {
+    setTimeout(() => renderSalesTable(), 50);
+  } else if (targetScreen === 'expenses') {
+    setTimeout(() => renderExpensesTable(), 50);
+  } else if (targetScreen === 'dashboard') {
+    setTimeout(() => updateDashboardRealUI(), 50);
   }
 };
 
@@ -5917,3 +6163,602 @@ window.addEventListener('DOMContentLoaded', () => {
 setTimeout(() => {
   renderOrdersCardsList();
 }, 200);
+
+
+// ==========================================================================
+// UNIFIED ABSOLUTE DENTAL BACK OFFICE CORE SYSTEM
+// (Netflix Profile Auth, Scopes, Workflow Stepper, Customer Profile, Contacts)
+// ==========================================================================
+
+// 1. SYSTEM START CONFIGURATION (Configurable, Not Hardcoded)
+function getSystemStartAt() {
+  const stored = localStorage.getItem('abs_erp_system_start_at');
+  return stored || '2026-10-07T00:00:00';
+}
+
+function openSystemStartConfigModal() {
+  const modal = document.getElementById('systemStartConfigModal');
+  const backdrop = document.getElementById('systemStartModalBackdrop');
+  const input = document.getElementById('systemStartAtInput');
+  if (input) input.value = getSystemStartAt().slice(0, 16);
+  if (modal) modal.style.display = 'block';
+  if (backdrop) backdrop.classList.add('active');
+}
+
+function closeSystemStartConfigModal() {
+  const modal = document.getElementById('systemStartConfigModal');
+  const backdrop = document.getElementById('systemStartModalBackdrop');
+  if (modal) modal.style.display = 'none';
+  if (backdrop) backdrop.classList.remove('active');
+}
+
+function saveSystemStartConfig() {
+  const input = document.getElementById('systemStartAtInput');
+  if (input && input.value) {
+    localStorage.setItem('abs_erp_system_start_at', input.value);
+    closeSystemStartConfigModal();
+    if (typeof showToast === 'function') {
+      showToast('تم تحديث تاريخ انطلاق المنظومة بنجاح', 'success');
+    }
+    updateDashboardRealUI();
+  }
+}
+
+// 2. NETFLIX-STYLE PROFILE SELECTION & CASE-INSENSITIVE AUTH
+const NETFLIX_PROFILES = {
+  'taha': {
+    id: 'usr_taha',
+    name: 'طه',
+    displayName: 'طه',
+    role: 'ADMIN',
+    roleLabel: 'مدير المنظومة (كامل الصلاحيات)',
+    avatarClass: 'avatar-taha',
+    avatarLetter: 'ط',
+    code: 'TAHA1122', // Case-insensitive: taha1122, TAHA1122, Taha1122
+    permissions: ['all']
+  },
+  'sasi': {
+    id: 'usr_sasi',
+    name: 'محمد ساسي',
+    displayName: 'محمد ساسي',
+    role: 'OPERATIONS',
+    roleLabel: 'مسؤول العمليات والطلبات',
+    avatarClass: 'avatar-sasi',
+    avatarLetter: 'س',
+    code: 'SASI1122', // Case-insensitive
+    permissions: ['orders', 'customers', 'inventory', 'reports']
+  },
+  'abdo': {
+    id: 'usr_abdo',
+    name: 'عبد المومن',
+    displayName: 'عبد المومن',
+    role: 'INVENTORY',
+    roleLabel: 'مسؤول المخزون والمشتريات',
+    avatarClass: 'avatar-abdo',
+    avatarLetter: 'م',
+    code: 'ABDO1122', // Case-insensitive
+    permissions: ['inventory', 'products', 'purchases', 'expenses', 'reports']
+  }
+};
+
+let CURRENT_SELECTED_NETFLIX_KEY = null;
+
+function selectNetflixProfile(profileKey) {
+  const profile = NETFLIX_PROFILES[profileKey];
+  if (!profile) return;
+  CURRENT_SELECTED_NETFLIX_KEY = profileKey;
+
+  const profilesView = document.getElementById('netflixProfilesView');
+  const codeView = document.getElementById('netflixCodeEntryView');
+  const avatarBox = document.getElementById('netflixSelectedAvatarBox');
+  const avatarLetter = document.getElementById('netflixSelectedAvatarLetter');
+  const userNameEl = document.getElementById('netflixSelectedUserName');
+  const codeInput = document.getElementById('netflixCodeInput');
+  const codeError = document.getElementById('netflixCodeError');
+
+  if (avatarBox) {
+    avatarBox.className = 'netflix-avatar-box ' + profile.avatarClass;
+  }
+  if (avatarLetter) avatarLetter.textContent = profile.avatarLetter;
+  if (userNameEl) userNameEl.textContent = profile.displayName;
+  if (codeInput) {
+    codeInput.value = '';
+    codeInput.classList.remove('shake');
+  }
+  if (codeError) codeError.style.display = 'none';
+
+  if (profilesView) profilesView.style.display = 'none';
+  if (codeView) {
+    codeView.style.display = 'flex';
+    setTimeout(() => { if (codeInput) codeInput.focus(); }, 150);
+  }
+}
+
+function cancelNetflixProfileSelection() {
+  CURRENT_SELECTED_NETFLIX_KEY = null;
+  const profilesView = document.getElementById('netflixProfilesView');
+  const codeView = document.getElementById('netflixCodeEntryView');
+  if (profilesView) profilesView.style.display = 'flex';
+  if (codeView) codeView.style.display = 'none';
+}
+
+function handleNetflixCodeKeydown(event) {
+  if (event.key === 'Enter') {
+    submitNetflixProfileCode();
+  }
+}
+
+function submitNetflixProfileCode() {
+  if (!CURRENT_SELECTED_NETFLIX_KEY) return;
+  const profile = NETFLIX_PROFILES[CURRENT_SELECTED_NETFLIX_KEY];
+  const codeInput = document.getElementById('netflixCodeInput');
+  const codeError = document.getElementById('netflixCodeError');
+  const enteredCode = (codeInput ? codeInput.value : '').trim().toUpperCase();
+
+  // Strict case-insensitive code verification
+  if (enteredCode !== profile.code.toUpperCase()) {
+    if (codeInput) {
+      codeInput.classList.add('shake');
+      setTimeout(() => codeInput.classList.remove('shake'), 400);
+    }
+    if (codeError) {
+      codeError.textContent = 'رمز الدخول غير صحيح، يرجى إعادة المحاولة';
+      codeError.style.display = 'block';
+    }
+    return;
+  }
+
+  // Authentication Succeeded
+  sessionStorage.setItem('abs_erp_active_user', profile.name);
+  localStorage.setItem('abs_erp_last_user', profile.name);
+  sessionStorage.setItem('abs_erp_user_role', profile.role);
+
+  if (typeof ERP_STATE !== 'undefined') {
+    ERP_STATE.currentPartner = profile.name;
+    ERP_STATE.currentUserRole = profile.role;
+  }
+
+  // Hide Netflix Overlay
+  const overlay = document.getElementById('netflixProfileOverlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+
+  // Update Top Header UI
+  updateSessionUserUI(profile.name);
+
+  // Log in Audit
+  if (typeof logOperation === 'function') {
+    logOperation({
+      user: profile.name,
+      action: 'تسجيل دخول ناجح (ملف Netflix)',
+      target: 'لوحة تحكم Absolute Dental',
+      details: `قام ${profile.name} بتسجيل الدخول برتبة ${profile.roleLabel}`
+    });
+  }
+
+  if (typeof showToast === 'function') {
+    showToast(`مرحباً بك يا ${profile.name} 👋 — تم تسجيل الدخول بنجاح`, 'success');
+  }
+}
+
+function switchNetflixUser() {
+  sessionStorage.removeItem('abs_erp_active_user');
+  const overlay = document.getElementById('netflixProfileOverlay');
+  if (overlay) {
+    overlay.classList.remove('hidden');
+  }
+  cancelNetflixProfileSelection();
+}
+
+// Window init for Netflix overlay
+function checkNetflixSessionInit() {
+  const savedUser = sessionStorage.getItem('abs_erp_active_user');
+  const overlay = document.getElementById('netflixProfileOverlay');
+  if (savedUser && overlay) {
+    overlay.classList.add('hidden');
+    updateSessionUserUI(savedUser);
+  } else if (overlay) {
+    overlay.classList.remove('hidden');
+  }
+}
+
+// 3. WHATSAPP & TELEGRAM CONTACT HELPERS
+function formatLibyanWhatsAppUrl(phone, defaultMsg = '') {
+  if (!phone) return '#';
+  let cleaned = phone.replace(/[^0-9]/g, '');
+  if (cleaned.startsWith('09')) {
+    cleaned = '218' + cleaned.substring(1);
+  } else if (cleaned.startsWith('9')) {
+    cleaned = '218' + cleaned;
+  } else if (!cleaned.startsWith('218') && cleaned.length >= 9) {
+    cleaned = '218' + cleaned;
+  }
+  const textParam = defaultMsg ? ('?text=' + encodeURIComponent(defaultMsg)) : '';
+  return 'https://wa.me/' + cleaned + textParam;
+}
+
+function formatTelegramUrl(usernameOrPhone) {
+  if (!usernameOrPhone) return '#';
+  const trimmed = usernameOrPhone.trim();
+  if (trimmed.startsWith('@')) {
+    return 'https://t.me/' + trimmed.substring(1);
+  }
+  if (!trimmed.startsWith('+') && !/^\d+$/.test(trimmed)) {
+    return 'https://t.me/' + trimmed;
+  }
+  return 'https://t.me/+' + trimmed.replace(/[^0-9]/g, '');
+}
+
+// 4. ORDER WORKFLOW STEPPER GENERATOR
+function renderOrderWorkflowStepperHTML(currentStatus) {
+  const steps = [
+    { id: 'review', label: 'في انتظار المراجعة', match: ['انتظار', 'جديد'] },
+    { id: 'accepted', label: 'تم قبول الطلب', match: ['قبول'] },
+    { id: 'preparing', label: 'قيد التجهيز', match: ['تجهيز'] },
+    { id: 'ready', label: 'جاهز للتوصيل', match: ['جاهز'] },
+    { id: 'shipping', label: 'خرج للتوصيل', match: ['خرج', 'توصيل'] },
+    { id: 'delivered', label: 'تم التسليم', match: ['تسليم', 'مكتمل'] }
+  ];
+
+  let activeIdx = 0;
+  for (let i = 0; i < steps.length; i++) {
+    if (steps[i].match.some(m => (currentStatus || '').includes(m))) {
+      activeIdx = i;
+      break;
+    }
+  }
+
+  return `
+    <div class="order-workflow-stepper">
+      ${steps.map((st, i) => {
+        let cls = '';
+        let nodeContent = (i + 1);
+        if (i < activeIdx) {
+          cls = 'completed';
+          nodeContent = '✓';
+        } else if (i === activeIdx) {
+          cls = 'active';
+          nodeContent = '●';
+        }
+        return `
+          <div class="stepper-step ${cls}">
+            <div class="stepper-node">${nodeContent}</div>
+            <span class="stepper-label">${st.label}</span>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+// 5. CUSTOMER PROFILE DRAWER
+function openCustomerProfileDrawer(customerPhone) {
+  const drawer = document.getElementById('customerProfileDrawer');
+  const backdrop = document.getElementById('customerProfileDrawerBackdrop');
+  const body = document.getElementById('customerProfileDrawerBody');
+  const phoneDisplay = document.getElementById('customerProfilePhoneDisplay');
+  if (!drawer || !body) return;
+
+  const orders = (ERP_STATE.orders || []).filter(o => o.phone === customerPhone || o.customerName === customerPhone);
+  if (orders.length === 0) return;
+
+  const custName = orders[0].customerName || 'عميل';
+  const custPhone = orders[0].phone || customerPhone;
+  const custAddress = orders[0].address || orders[0].city || 'طرابلس';
+  const custUniv = orders[0].university || 'جامعة طرابلس';
+  const custCollege = orders[0].college || 'كلية طب الأسنان';
+
+  const completedOrders = orders.filter(o => (o.status || '').includes('تسليم') || (o.status || '').includes('مكتمل'));
+  const cancelledOrders = orders.filter(o => (o.status || '').includes('ملغ'));
+  const totalSpend = completedOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
+  const waUrl = formatLibyanWhatsAppUrl(custPhone, `مرحباً ${custName}، معك متجر Absolute Dental لمستلزمات طب الأسنان 🦷`);
+  const tgUrl = formatTelegramUrl(custPhone);
+
+  if (phoneDisplay) phoneDisplay.textContent = `${custName} • ${custPhone}`;
+
+  body.innerHTML = `
+    <!-- 1. Customer Info Box -->
+    <div class="order-detail-card-box">
+      <div class="order-detail-title">
+        <span>👤 معلومات العميل والتواصل</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem;">
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">الاسم الكامل:</span>
+          <span style="font-weight: 700; color: var(--text-main);">${custName}</span>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">رقم الهاتف:</span>
+          <span style="font-weight: 700;" class="num-mono">${custPhone}</span>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">الجامعة والكلية:</span>
+          <span style="font-weight: 600;">${custUniv} • ${custCollege}</span>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">منطقة السكن / التوصيل:</span>
+          <span style="font-weight: 600;">${custAddress}</span>
+        </div>
+      </div>
+
+      <!-- Quick Contact Buttons -->
+      <div style="display: flex; gap: 0.65rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle);">
+        <a href="${waUrl}" target="_blank" class="btn-contact-wa" title="فتح محادثة واتساب فورية">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          <span>واتساب 💬</span>
+        </a>
+        <a href="${tgUrl}" target="_blank" class="btn-contact-tg" title="مراسلة عبر تيليجرام">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span>تيليجرام ✈️</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 2. Customer Quick Stats -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 0.5rem;">
+      <div style="background: #FFFFFF; border: 1px solid var(--border-card); border-radius: 8px; padding: 0.65rem; text-align: center;">
+        <div style="font-size: 0.7rem; color: var(--text-muted);">إجمالي الطلبات</div>
+        <div style="font-size: 1.15rem; font-weight: 800; color: var(--brand-brown);" class="num-mono">${orders.length}</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--border-card); border-radius: 8px; padding: 0.65rem; text-align: center;">
+        <div style="font-size: 0.7rem; color: var(--text-muted);">المسلّمة</div>
+        <div style="font-size: 1.15rem; font-weight: 800; color: #10B981;" class="num-mono">${completedOrders.length}</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--border-card); border-radius: 8px; padding: 0.65rem; text-align: center;">
+        <div style="font-size: 0.7rem; color: var(--text-muted);">الملغاة</div>
+        <div style="font-size: 1.15rem; font-weight: 800; color: #EF4444;" class="num-mono">${cancelledOrders.length}</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid var(--border-card); border-radius: 8px; padding: 0.65rem; text-align: center;">
+        <div style="font-size: 0.7rem; color: var(--text-muted);">إجمالي الشراء</div>
+        <div style="font-size: 1.15rem; font-weight: 800; color: #2563EB;" class="num-mono">${totalSpend} د.ل</div>
+      </div>
+    </div>
+
+    <!-- 3. Full Order History -->
+    <div class="order-detail-card-box">
+      <div class="order-detail-title">
+        <span>📦 سجل طلبات العميل (${orders.length})</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        ${orders.map(o => `
+          <div onclick="closeCustomerProfileDrawer(); openOrderDetailsById('${o.id}')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 0.85rem; background: #FAF8F5; border-radius: 8px; border: 1px solid var(--border-card); cursor: pointer; transition: background 0.15s ease;" onmouseover="this.style.background='#FFFFFF'" onmouseout="this.style.background='#FAF8F5'">
+            <div>
+              <div style="font-weight: 800; font-size: 0.85rem; color: #2563EB;" class="num-mono">${o.orderNumber || '#' + o.rawOrderNumber}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${o.date || '-'} • ${(o.items || []).length} منتج</div>
+            </div>
+            <div style="text-align: end;">
+              <div style="font-weight: 800; font-size: 0.9rem; color: var(--brand-brown);" class="num-mono">${o.total} د.ل</div>
+              <span class="order-status-badge ${(o.status || '').includes('تسليم') ? 'delivered' : ((o.status || '').includes('ملغ') ? 'cancelled' : 'preparing')}" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">${o.status || 'قيد التجهيز'}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  drawer.classList.add('open');
+  if (backdrop) backdrop.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCustomerProfileDrawer() {
+  const drawer = document.getElementById('customerProfileDrawer');
+  const backdrop = document.getElementById('customerProfileDrawerBackdrop');
+  if (drawer) drawer.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// 6. CUSTOMERS DIRECTORY TABLE
+function renderCustomersTable(query = '') {
+  const tbody = document.getElementById('customersTableBody');
+  if (!tbody) return;
+
+  const q = (query || '').toLowerCase().trim();
+  const customerMap = new Map();
+
+  (ERP_STATE.orders || []).forEach(o => {
+    const key = o.phone || o.customerName;
+    if (!key) return;
+    if (!customerMap.has(key)) {
+      customerMap.set(key, {
+        name: o.customerName || 'عميل',
+        phone: o.phone || '-',
+        university: o.university || 'جامعة طرابلس',
+        college: o.college || 'كلية طب الأسنان',
+        ordersCount: 0,
+        completedCount: 0,
+        totalPurchases: 0
+      });
+    }
+    const c = customerMap.get(key);
+    c.ordersCount++;
+    if ((o.status || '').includes('تسليم') || (o.status || '').includes('مكتمل')) {
+      c.completedCount++;
+      c.totalPurchases += Number(o.total) || 0;
+    }
+  });
+
+  let list = Array.from(customerMap.values());
+  if (q) {
+    list = list.filter(c => c.name.toLowerCase().includes(q) || c.phone.includes(q) || c.university.toLowerCase().includes(q));
+  }
+
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">لا يوجد عملاء مطابقين</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(c => {
+    const waUrl = formatLibyanWhatsAppUrl(c.phone, `مرحباً ${c.name}، معك متجر Absolute Dental 🦷`);
+    const tgUrl = formatTelegramUrl(c.phone);
+
+    return `
+      <tr>
+        <td style="font-weight: 700; color: var(--text-main);">${c.name}</td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="num-mono" style="font-weight: 600;">${c.phone}</span>
+            <a href="${waUrl}" target="_blank" class="btn-contact-wa" title="واتساب">💬</a>
+            <a href="${tgUrl}" target="_blank" class="btn-contact-tg" title="تيليجرام">✈️</a>
+          </div>
+        </td>
+        <td style="color: var(--text-muted); font-size: 0.8rem;">${c.university} • ${c.college}</td>
+        <td class="num-mono" style="font-weight: 700;">${c.ordersCount} طلب</td>
+        <td class="num-mono" style="font-weight: 800; color: var(--brand-brown);">${c.totalPurchases} د.ل</td>
+        <td style="text-align: center;">
+          <button type="button" class="btn-secondary btn-sm" onclick="openCustomerProfileDrawer('${c.phone}')" style="padding: 0.35rem 0.65rem; font-size: 0.775rem;">
+            👤 ملف العميل
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function handleCustomersSearch(q) {
+  renderCustomersTable(q);
+}
+
+// 7. ARCHIVE TOGGLE & DASHBOARD REAL UI UPDATER
+ERP_STATE.showLegacyArchive = false;
+
+function toggleLegacyArchiveView() {
+  ERP_STATE.showLegacyArchive = !ERP_STATE.showLegacyArchive;
+  const btn = document.getElementById('btnToggleLegacyArchive');
+  if (btn) {
+    btn.classList.toggle('active', ERP_STATE.showLegacyArchive);
+    btn.innerHTML = ERP_STATE.showLegacyArchive
+      ? '<span>✓ عرض الأرشيف مفعل</span>'
+      : '<span>📂 عرض الأرشيف القديم</span>';
+  }
+  updateDashboardRealUI();
+  if (typeof showToast === 'function') {
+    showToast(ERP_STATE.showLegacyArchive ? 'تم تفعيل عرض كافة البيانات والأرشيف التاريخي' : 'تم الرجوع إلى عرض بيانات الدورة التشغيلية الحالية فقط', 'info');
+  }
+}
+
+// Ensure calculateRealMetrics respects system_scope and SYSTEM_START_AT
+const _originalCalculateRealMetrics = (typeof calculateRealMetrics === 'function') ? calculateRealMetrics : null;
+calculateRealMetrics = function() {
+  const startAt = new Date(getSystemStartAt()).getTime();
+  const allOrders = ERP_STATE.orders || [];
+
+  // Filter New Operational Orders (scope === 'NEW' or created >= startAt)
+  const newOperationalOrders = allOrders.filter(o => {
+    if (o.system_scope === 'LEGACY') return false;
+    if (o.system_scope === 'NEW') return true;
+    const t = new Date(o.created_at || o.date || 0).getTime();
+    return t >= startAt;
+  });
+
+  // Historical Archive Orders
+  const legacyOrders = allOrders.filter(o => o.system_scope === 'LEGACY' || (o.isHistorical && o.system_scope !== 'NEW'));
+
+  // Delivered / Completed sales
+  const finalizedNewOrders = newOperationalOrders.filter(o => (o.status || '').includes('تسليم') || (o.status || '').includes('مكتمل'));
+  const finalizedLegacyOrders = legacyOrders.filter(o => (o.status || '').includes('تسليم') || (o.status || '').includes('مكتمل'));
+
+  const newSales = finalizedNewOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  const legacySales = finalizedLegacyOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  const totalSales = ERP_STATE.showLegacyArchive ? (newSales + legacySales) : newSales;
+
+  // Expenses
+  const allExpenses = ERP_STATE.expenses || [];
+  const newExpenses = allExpenses.filter(e => new Date(e.created_at || e.date || 0).getTime() >= startAt).reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  const totalExpenses = ERP_STATE.showLegacyArchive ? allExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0) : newExpenses;
+
+  // Net Revenue = Sales - Expenses
+  const netRevenue = Math.max(0, totalSales - totalExpenses);
+
+  // Stock
+  const totalStock = (ERP_STATE.products || []).reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
+
+  // Orders counts
+  const activeOrdersCount = ERP_STATE.showLegacyArchive ? allOrders.length : newOperationalOrders.length;
+  const preparingCount = (ERP_STATE.showLegacyArchive ? allOrders : newOperationalOrders).filter(o => (o.status || '').includes('تجهيز')).length;
+  const shippingCount = (ERP_STATE.showLegacyArchive ? allOrders : newOperationalOrders).filter(o => (o.status || '').includes('توصيل')).length;
+  const deliveredCount = (ERP_STATE.showLegacyArchive ? allOrders : newOperationalOrders).filter(o => (o.status || '').includes('تسليم') || (o.status || '').includes('مكتمل')).length;
+
+  return {
+    newSales,
+    legacySales,
+    totalSales,
+    totalExpenses,
+    netRevenue,
+    totalStock,
+    activeOrdersCount,
+    preparingCount,
+    shippingCount,
+    deliveredCount
+  };
+};
+
+function updateDashboardRealUI() {
+  const m = calculateRealMetrics();
+
+  const ordersEl = document.getElementById('kpiOrdersVal');
+  const salesEl = document.getElementById('kpiSalesVal');
+  const prodsEl = document.getElementById('kpiProductsVal');
+  const custsEl = document.getElementById('kpiCustomersVal');
+  const startEl = document.getElementById('displaySystemStartAt');
+
+  if (startEl) {
+    const s = getSystemStartAt();
+    startEl.textContent = s.replace('T', ' ');
+  }
+
+  if (ordersEl) ordersEl.textContent = m.activeOrdersCount;
+  if (salesEl) salesEl.innerHTML = `${m.totalSales.toLocaleString()} <span class="currency-unit">د.ل</span>`;
+  if (prodsEl) prodsEl.textContent = (ERP_STATE.products || []).length;
+  if (custsEl) {
+    const uniquePhones = new Set((ERP_STATE.orders || []).map(o => o.phone).filter(Boolean));
+    custsEl.textContent = uniquePhones.size;
+  }
+
+  // Also render recent orders table in dashboard
+  renderDashboardRecentOrders();
+}
+
+function renderDashboardRecentOrders() {
+  const tbody = document.getElementById('dashRecentOrdersTableBody');
+  if (!tbody) return;
+
+  const orders = (ERP_STATE.orders || []).filter(o => {
+    if (!ERP_STATE.showLegacyArchive && o.system_scope === 'LEGACY') return false;
+    return true;
+  }).slice(0, 5);
+
+  if (orders.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">لا توجد طلبات جديدة في هذه الدورة</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = orders.map(o => {
+    const num = o.orderNumber || ('#' + (o.rawOrderNumber || ''));
+    return `
+      <tr onclick="openOrderDetailsById('${o.id}')" style="cursor: pointer;">
+        <td class="num-mono" style="font-weight: 700; color: #2563EB;">${num}</td>
+        <td style="font-weight: 600;">${o.customerName || 'عميل'}</td>
+        <td>${(o.items || []).length} منتج</td>
+        <td class="num-mono" style="font-weight: 800; color: var(--brand-brown);">${o.total} د.ل</td>
+        <td><span class="order-status-badge preparing">${o.status || 'قيد التجهيز'}</span></td>
+        <td class="num-mono" style="color: var(--text-muted); font-size: 0.75rem;">${o.date || '-'}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// 8. HOOK INITIALIZATION
+window.addEventListener('DOMContentLoaded', () => {
+  checkNetflixSessionInit();
+  renderCustomersTable();
+  updateDashboardRealUI();
+});
+setTimeout(() => {
+  checkNetflixSessionInit();
+  renderCustomersTable();
+  updateDashboardRealUI();
+}, 250);
