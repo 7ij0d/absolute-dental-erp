@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.07_CATALOG_BURS_INVENTORY_V3';
+const ERP_DATABASE_VERSION = '2026.10.07_CATALOG_BURS_INVENTORY_V4';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
@@ -377,14 +377,55 @@ const ERP_STATE = {
     }
 
     // Explicit business rules:
-    // 1. Harbi was received in previous system: exclude completely from ERP orders
-    list = list.filter(o => o.orderNumber !== '#90558069' && o.rawOrderNumber !== '90558069' && o.id !== '82ffe49b-489d-421d-ab22-576974e090f4' && !(o.customerName || '').includes('حربي'));
+    // ALL orders from before the new system start date (including Harbi, Nabila, Bushra, Sarih, Mawaddah, Shaima)
+    // belong strictly to the OLD SYSTEM and OLD INVENTORY (المنظومة القديمة وجرد قديم).
+    const deliveredRawNumbers = new Set(['90558069', '94946101', '96055340', '42351493', '32085048', '62960319']);
+    const cutoffTime = ERP_CUTOFF_TIMESTAMP;
 
-    // 2. Orders from screenshot and Shaima: mark as delivered (تم التسليم)
-    const deliveredRawNumbers = new Set(['94946101', '96055340', '42351493', '32085048', '62960319']);
+    // Ensure Harbi is in the historical list
+    let harbi = list.find(o => o.rawOrderNumber === '90558069' || (o.customerName || '').includes('حربي'));
+    if (!harbi) {
+      list.unshift({
+        id: '82ffe49b-489d-421d-ab22-576974e090f4',
+        orderNumber: '#90558069',
+        rawOrderNumber: '90558069',
+        invoiceNumber: '#INV-HIST-90558069',
+        orderType: 'historical',
+        isHistorical: true,
+        inventoryDeduction: 'historical_exempt',
+        customerName: 'حربي',
+        phone: '000000',
+        university: 'جامعة طرابلس',
+        college: 'كلية طب الأسنان',
+        total: 250,
+        status: 'تم التسليم',
+        originalStatus: 'delivered',
+        date: '07‏/10‏/2026 01:48 ص',
+        created_at: '2026-10-06T23:48:14.396+00:00',
+        notes: 'طلب مستلم من المنظومة السابقة (جرد قديم)',
+        source: 'Admin الأرشيف التاريخي (جرد قديم)',
+        system_scope: 'LEGACY',
+        inventoryDeducted: false,
+        saleFinalized: true
+      });
+    }
+
     list.forEach(o => {
+      const createdTime = new Date(o.created_at || o.date || 0).getTime();
       const rawNum = o.rawOrderNumber || o.orderNumber?.replace('#', '');
-      if (deliveredRawNumbers.has(rawNum) || (o.customerName && (o.customerName.includes('نبيله الخير') || o.customerName.includes('بشرى بورو') || o.customerName.includes('سريج') || o.customerName.includes('سريح') || o.customerName.includes('مودة إبراهيم') || (o.customerName.includes('شيماء') && Number(o.total) === 370)))) {
+      const isTargetDelivered = deliveredRawNumbers.has(rawNum) || 
+        (o.customerName && (o.customerName.includes('حربي') || o.customerName.includes('نبيله الخير') || o.customerName.includes('بشرى بورو') || o.customerName.includes('سريج') || o.customerName.includes('سريح') || o.customerName.includes('مودة إبراهيم') || o.customerName.includes('شيماء')));
+
+      // Pre-cutoff orders belong strictly to the historical archive
+      if (createdTime < cutoffTime || isTargetDelivered || o.isHistorical || o.system_scope === 'LEGACY') {
+        o.isHistorical = true;
+        o.orderType = 'historical';
+        o.system_scope = 'LEGACY';
+        o.inventoryDeduction = 'historical_exempt';
+        o.source = 'Admin الأرشيف التاريخي (جرد قديم)';
+      }
+
+      if (isTargetDelivered) {
         o.status = 'تم التسليم';
         o.originalStatus = 'delivered';
         o.saleFinalized = true;
@@ -909,9 +950,9 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
 
   // 1. Primary Scope Filter (New vs Historical vs All)
   if (CURRENT_ORDERS_SCOPE === 'new') {
-    filtered = filtered.filter(o => !o.isHistorical && o.orderType !== 'historical');
+    filtered = filtered.filter(o => !o.isHistorical && o.orderType !== 'historical' && o.system_scope !== 'LEGACY');
   } else if (CURRENT_ORDERS_SCOPE === 'historical') {
-    filtered = filtered.filter(o => o.isHistorical || o.orderType === 'historical');
+    filtered = filtered.filter(o => o.isHistorical || o.orderType === 'historical' || o.system_scope === 'LEGACY');
   }
 
   // 2. Status Filter
@@ -943,8 +984,8 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
 
   // Update Scope Badges
   const totalCount = ERP_STATE.orders.length;
-  const newCount = ERP_STATE.orders.filter(o => !o.isHistorical && o.orderType !== 'historical').length;
-  const histCount = ERP_STATE.orders.filter(o => o.isHistorical || o.orderType === 'historical').length;
+  const newCount = ERP_STATE.orders.filter(o => !o.isHistorical && o.orderType !== 'historical' && o.system_scope !== 'LEGACY').length;
+  const histCount = ERP_STATE.orders.filter(o => o.isHistorical || o.orderType === 'historical' || o.system_scope === 'LEGACY').length;
 
   const scopeCountAll = document.getElementById('scopeCountAll');
   const scopeCountNew = document.getElementById('scopeCountNew');
@@ -955,9 +996,9 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
 
   // Update Status Tab Counts according to current scope
   const activeScopeOrders = (CURRENT_ORDERS_SCOPE === 'new')
-    ? ERP_STATE.orders.filter(o => !o.isHistorical && o.orderType !== 'historical')
+    ? ERP_STATE.orders.filter(o => !o.isHistorical && o.orderType !== 'historical' && o.system_scope !== 'LEGACY')
     : (CURRENT_ORDERS_SCOPE === 'historical')
-      ? ERP_STATE.orders.filter(o => o.isHistorical || o.orderType === 'historical')
+      ? ERP_STATE.orders.filter(o => o.isHistorical || o.orderType === 'historical' || o.system_scope === 'LEGACY')
       : ERP_STATE.orders;
 
   const tabCounts = {
@@ -3139,11 +3180,6 @@ async function syncWithUserServer() {
     let stateChanged = false;
 
     serverOrders.forEach(ord => {
-      // Exclude Harbi: received in previous system
-      if (ord.order_number === '90558069' || ord.id === '82ffe49b-489d-421d-ab22-576974e090f4' || (ord.customer_name || '').includes('حربي')) {
-        return;
-      }
-
       const createdAtTime = new Date(ord.created_at).getTime();
       const isHistorical = createdAtTime < cutoffTime;
 
@@ -3232,7 +3268,8 @@ async function syncWithUserServer() {
           date: dateFormatted,
           created_at: ord.created_at,
           notes: ord.notes || null,
-          source: isHistorical ? 'Admin الأرشيف التاريخي' : 'متجر Absolute Dental'
+          system_scope: isHistorical ? 'LEGACY' : 'NEW',
+          source: isHistorical ? 'Admin الأرشيف التاريخي (جرد قديم)' : 'متجر Absolute Dental'
         };
 
         // If order was created AFTER cutoff, auto-deduct stock immediately!
@@ -5118,9 +5155,11 @@ function renderOrdersCardsList() {
 
   // Filter by Source
   if (sourceFilter === 'website') {
-    orders = orders.filter(o => o.orderSource === 'website' || (!o.orderSource && o.source !== 'أنشأه الأدمن'));
+    orders = orders.filter(o => (o.orderSource === 'website' || (!o.orderSource && o.source !== 'أنشأه الأدمن')) && o.system_scope !== 'LEGACY');
   } else if (sourceFilter === 'admin') {
-    orders = orders.filter(o => o.orderSource === 'admin' || o.source === 'أنشأه الأدمن');
+    orders = orders.filter(o => (o.orderSource === 'admin' || o.source === 'أنشأه الأدمن') && o.system_scope !== 'LEGACY');
+  } else if (sourceFilter === 'legacy') {
+    orders = (Array.isArray(ERP_STATE.orders) ? [...ERP_STATE.orders] : []).filter(o => o.system_scope === 'LEGACY');
   }
 
   // Filter by Status
@@ -6682,16 +6721,15 @@ calculateRealMetrics = function() {
   const startAt = new Date(getSystemStartAt()).getTime();
   const allOrders = ERP_STATE.orders || [];
 
-  // Filter New Operational Orders (scope === 'NEW' or created >= startAt)
+  // Filter New Operational Orders (ONLY non-legacy and created strictly >= startAt)
   const newOperationalOrders = allOrders.filter(o => {
-    if (o.system_scope === 'LEGACY') return false;
-    if (o.system_scope === 'NEW') return true;
+    if (o.system_scope === 'LEGACY' || o.isHistorical || o.orderType === 'historical') return false;
     const t = new Date(o.created_at || o.date || 0).getTime();
     return t >= startAt;
   });
 
-  // Historical Archive Orders
-  const legacyOrders = allOrders.filter(o => o.system_scope === 'LEGACY' || (o.isHistorical && o.system_scope !== 'NEW'));
+  // Historical Archive Orders (all pre-cutoff / legacy orders)
+  const legacyOrders = allOrders.filter(o => o.system_scope === 'LEGACY' || o.isHistorical || o.orderType === 'historical' || new Date(o.created_at || o.date || 0).getTime() < startAt);
 
   // Delivered / Completed sales
   const finalizedNewOrders = newOperationalOrders.filter(o => (o.status || '').includes('تسليم') || (o.status || '').includes('مكتمل'));
@@ -6750,7 +6788,10 @@ function updateDashboardRealUI() {
   if (salesEl) salesEl.innerHTML = `${m.totalSales.toLocaleString()} <span class="currency-unit">د.ل</span>`;
   if (prodsEl) prodsEl.textContent = (ERP_STATE.products || []).length;
   if (custsEl) {
-    const uniquePhones = new Set((ERP_STATE.orders || []).map(o => o.phone).filter(Boolean));
+    const activeScopeOrders = ERP_STATE.showLegacyArchive
+      ? (ERP_STATE.orders || [])
+      : (ERP_STATE.orders || []).filter(o => !o.isHistorical && o.orderType !== 'historical' && o.system_scope !== 'LEGACY');
+    const uniquePhones = new Set(activeScopeOrders.map(o => o.phone).filter(Boolean));
     custsEl.textContent = uniquePhones.size;
   }
 
@@ -6763,12 +6804,12 @@ function renderDashboardRecentOrders() {
   if (!tbody) return;
 
   const orders = (ERP_STATE.orders || []).filter(o => {
-    if (!ERP_STATE.showLegacyArchive && o.system_scope === 'LEGACY') return false;
+    if (!ERP_STATE.showLegacyArchive && (o.system_scope === 'LEGACY' || o.isHistorical || o.orderType === 'historical')) return false;
     return true;
   }).slice(0, 5);
 
   if (orders.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">لا توجد طلبات جديدة في هذه الدورة</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem;">لا توجد طلبات جديدة في هذه الدورة التشغيلية (تبدأ من الصفر)</td></tr>';
     return;
   }
 
