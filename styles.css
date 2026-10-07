@@ -2233,3 +2233,132 @@ a {
   font-weight: 700;
   color: var(--text-muted);
 }
+
+/* ==========================================================================
+   ORDERS CUT-OFF & HISTORICAL VS NEW SYSTEM ARCHITECTURE
+   ========================================================================== */
+.system-cutover-banner {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.orders-scope-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.15rem;
+  border-bottom: 1px solid var(--border-card);
+  padding-bottom: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.orders-scope-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.95rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-sm);
+  color: var(--text-body);
+  font-family: inherit;
+  font-size: 0.825rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.orders-scope-btn:hover {
+  background: var(--bg-subtle);
+  border-color: #CBD5E1;
+  color: var(--text-main);
+}
+
+.orders-scope-btn:active {
+  transform: scale(0.98);
+}
+
+.orders-scope-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #FFFFFF;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.orders-scope-btn .scope-count {
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 0.725rem;
+  font-family: var(--font-mono, monospace);
+  font-weight: 800;
+}
+
+.orders-scope-btn.active .scope-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+}
+
+/* Order Classification Badges */
+.order-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.725rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.order-badge.historical {
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #CBD5E1;
+}
+
+.order-badge.new-system {
+  background: #EFF6FF;
+  color: #1E40AF;
+  border: 1px solid #BFDBFE;
+}
+
+/* Stock Impact Badges */
+.stock-impact-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.stock-impact-badge.exempt {
+  background: #F8FAFC;
+  color: #64748B;
+  border: 1px dashed #94A3B8;
+}
+
+.stock-impact-badge.deducted {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+}
+
+.stock-impact-badge.pending {
+  background: #FFFBEB;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+

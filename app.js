@@ -1,7 +1,9 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.07_BATCH_PRICING_V6';
+const ERP_DATABASE_VERSION = '2026.10.07_HISTORICAL_ARCHIVE_V7';
+const ERP_CUTOFF_DATE = (typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) ? window.ERP_CUTOFF_DATE : '2026-10-07T01:55:00+02:00';
+const ERP_CUTOFF_TIMESTAMP = new Date(ERP_CUTOFF_DATE).getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
     localStorage.removeItem('abs_erp_products');
@@ -287,7 +289,24 @@ const ERP_STATE = {
   purchases: (typeof localStorage !== 'undefined' && JSON.parse(localStorage.getItem('abs_erp_purchases'))) || [],
 
   // Orders from Seed (18 Real Orders) with LocalStorage fallback & safe property harmonization
-  orders: (typeof localStorage !== 'undefined' && JSON.parse(localStorage.getItem('abs_erp_orders'))) || [],
+  orders: (() => {
+    let list = [];
+    const cached = (typeof localStorage !== 'undefined') ? localStorage.getItem('abs_erp_orders') : null;
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) list = parsed;
+      } catch (_) {}
+    }
+    if (list.length === 0) {
+      if (typeof INITIAL_ORDERS !== 'undefined' && Array.isArray(INITIAL_ORDERS) && INITIAL_ORDERS.length > 0) {
+        list = JSON.parse(JSON.stringify(INITIAL_ORDERS));
+      } else if (typeof window !== 'undefined' && Array.isArray(window.ERP_SEEDED_ORDERS) && window.ERP_SEEDED_ORDERS.length > 0) {
+        list = JSON.parse(JSON.stringify(window.ERP_SEEDED_ORDERS));
+      }
+    }
+    return list;
+  })(),
 
   // Integrated Inventory Deduction Ledger (3-Way Reconciliation Store)
   inventoryTransactions: (() => {
@@ -351,50 +370,40 @@ const ERP_STATE = {
 // 2. DYNAMIC REAL DATA METRICS CALCULATION & RENDERING
 // -------------------------------------------------------------
 function calculateRealMetrics() {
-  const activeOrders = ERP_STATE.orders.filter(o => o.status !== 'ملغي');
-  
-  // Gross sales = sum of subtotal or (total + discountAmount)
-  const grossSales = activeOrders.reduce((sum, o) => {
-    const sub = o.subtotal ? Number(o.subtotal) : (Number(o.total) + (Number(o.discountAmount) || 0));
-    return sum + (sub || 0);
-  }, 0);
+  const cutoffTime = ERP_CUTOFF_TIMESTAMP;
+  const newOrders = ERP_STATE.orders.filter(o => !o.isHistorical && o.orderType !== 'historical' && (new Date(o.created_at || Date.now()).getTime() >= cutoffTime));
+  const historicalOrders = ERP_STATE.orders.filter(o => o.isHistorical || o.orderType === 'historical' || (new Date(o.created_at || 0).getTime() < cutoffTime));
 
-  // Total commercial discounts granted (discounts are reductions in sales, NOT expenses)
-  const totalDiscounts = activeOrders.reduce((sum, o) => sum + (Number(o.discountAmount) || 0), 0);
+  const activeNewOrders = newOrders.filter(o => o.status !== 'ملغي');
+  const activeHistoricalOrders = historicalOrders.filter(o => o.status !== 'ملغي');
 
-  // Net sales = Gross Sales - Total Discounts = sum of order total
-  const netSales = activeOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  // Operational metrics for new system (starts at zero baseline for new ledger)
+  const newSales = activeNewOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  const historicalSales = activeHistoricalOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
   const totalExpenses = ERP_STATE.expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   
-  // Real COGS estimated at 44% of net sales
-  const cogs = Math.round(netSales * 0.44);
-  const netProfit = Math.max(0, netSales - cogs - totalExpenses);
+  // Real COGS for new system
+  const cogs = Math.round(newSales * 0.44);
+  const netProfit = Math.max(0, newSales - cogs - totalExpenses);
   const profitPerPartner = Math.round(netProfit / 3);
 
-  // Inventory stats
+  // Inventory stats (active batch opening balance: 258 pieces)
   const totalStock = ERP_STATE.products.reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
   const lowStockCount = ERP_STATE.products.filter(p => p.stock > 0 && p.stock <= 10).length;
   const outStockCount = ERP_STATE.products.filter(p => p.stock === 0).length;
 
-  const purchasesList = Array.isArray(ERP_STATE.purchases) ? ERP_STATE.purchases : [];
-  const totalProcurementCost = purchasesList.reduce((sum, p) => sum + (Number(p.totalCost) || 0), 0);
-  const totalProcurementRevenue = purchasesList.reduce((sum, p) => sum + (Number(p.expectedRevenue) || 0), 0);
-  const totalProcurementProfit = purchasesList.reduce((sum, p) => sum + (Number(p.expectedProfit) || 0), 0);
-
   return {
-    totalProcurementCost,
-    totalProcurementRevenue,
-    totalProcurementProfit,
-    grossSales,
-    totalDiscounts,
-    netSales,
-    totalSales: netSales,
+    newSales,
+    historicalSales,
+    totalSales: newSales,
+    newOrdersCount: newOrders.length,
+    historicalOrdersCount: historicalOrders.length,
+    ordersCount: newOrders.length,
+    totalOrdersCount: ERP_STATE.orders.length,
     totalExpenses,
     cogs,
     netProfit,
     profitPerPartner,
-    ordersCount: ERP_STATE.orders.length,
-    activeOrdersCount: activeOrders.length,
     totalStock,
     lowStockCount,
     outStockCount
@@ -669,15 +678,39 @@ function filterChartPeriod(period, btn) {
   }
 }
 
+let CURRENT_ORDERS_SCOPE = 'all';
+
+function setOrdersScope(scope, btn) {
+  CURRENT_ORDERS_SCOPE = scope;
+  document.querySelectorAll('.orders-scope-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const searchInput = document.getElementById('ordersSearchInput') || document.getElementById('ordersTableSearchInput');
+  const query = searchInput ? searchInput.value : '';
+  const activeTab = document.querySelector('.order-filter-btn.active');
+  let status = 'all';
+  if (activeTab) {
+    status = activeTab.getAttribute('data-filter') || 'all';
+  }
+  renderOrdersTable(status, query);
+}
+
 // -------------------------------------------------------------
-// 5. ORDERS MANAGEMENT (100% Real Supabase Orders)
+// 5. ORDERS MANAGEMENT (Dual Scope: New Operations vs Historical Archive)
 // -------------------------------------------------------------
 function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
-  const tbody = document.getElementById('fullOrdersTableBody');
+  const tbody = document.getElementById('ordersTableBody') || document.getElementById('fullOrdersTableBody');
   if (!tbody) return;
 
   let filtered = [...ERP_STATE.orders];
 
+  // 1. Primary Scope Filter (New vs Historical vs All)
+  if (CURRENT_ORDERS_SCOPE === 'new') {
+    filtered = filtered.filter(o => !o.isHistorical && o.orderType !== 'historical');
+  } else if (CURRENT_ORDERS_SCOPE === 'historical') {
+    filtered = filtered.filter(o => o.isHistorical || o.orderType === 'historical');
+  }
+
+  // 2. Status Filter
   if (filterStatus && filterStatus !== 'all') {
     const statusMap = {
       'new': 'جديد',
@@ -691,40 +724,60 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
     filtered = filtered.filter(o => o.status === targetStatus);
   }
 
+  // 3. Search Query Filter
   if (searchQuery) {
     const q = searchQuery.toLowerCase().trim();
     filtered = filtered.filter(o =>
       (o.customerName && o.customerName.toLowerCase().includes(q)) ||
       (o.orderNumber && o.orderNumber.toLowerCase().includes(q)) ||
+      (o.rawOrderNumber && o.rawOrderNumber.toLowerCase().includes(q)) ||
       (o.phone && o.phone.includes(q)) ||
       (o.college && o.college.toLowerCase().includes(q))
     );
   }
 
-  // Update tab counts
+  // Update Scope Badges
   const totalCount = ERP_STATE.orders.length;
-  const newCount = ERP_STATE.orders.filter(o => o.status === 'جديد').length;
-  const prepCount = ERP_STATE.orders.filter(o => o.status === 'قيد التجهيز').length;
-  const compCount = ERP_STATE.orders.filter(o => o.status === 'مكتمل').length;
-  const cancCount = ERP_STATE.orders.filter(o => o.status === 'ملغي').length;
+  const newCount = ERP_STATE.orders.filter(o => !o.isHistorical && o.orderType !== 'historical').length;
+  const histCount = ERP_STATE.orders.filter(o => o.isHistorical || o.orderType === 'historical').length;
 
-  const totalTabEl = document.getElementById('ordersTotalTabCount');
-  const newTabEl = document.getElementById('ordersNewTabCount');
-  const prepTabEl = document.getElementById('ordersPrepTabCount');
-  const compTabEl = document.getElementById('ordersCompTabCount');
-  const cancTabEl = document.getElementById('ordersCancTabCount');
+  const scopeCountAll = document.getElementById('scopeCountAll');
+  const scopeCountNew = document.getElementById('scopeCountNew');
+  const scopeCountHist = document.getElementById('scopeCountHistorical');
+  if (scopeCountAll) scopeCountAll.textContent = totalCount;
+  if (scopeCountNew) scopeCountNew.textContent = newCount;
+  if (scopeCountHist) scopeCountHist.textContent = histCount;
 
-  if (totalTabEl) totalTabEl.textContent = totalCount;
-  if (newTabEl) newTabEl.textContent = newCount;
-  if (prepTabEl) prepTabEl.textContent = prepCount;
-  if (compTabEl) compTabEl.textContent = compCount;
-  if (cancTabEl) cancTabEl.textContent = cancCount;
+  // Update Status Tab Counts according to current scope
+  const activeScopeOrders = (CURRENT_ORDERS_SCOPE === 'new')
+    ? ERP_STATE.orders.filter(o => !o.isHistorical && o.orderType !== 'historical')
+    : (CURRENT_ORDERS_SCOPE === 'historical')
+      ? ERP_STATE.orders.filter(o => o.isHistorical || o.orderType === 'historical')
+      : ERP_STATE.orders;
+
+  const tabCounts = {
+    all: activeScopeOrders.length,
+    new: activeScopeOrders.filter(o => o.status === 'جديد').length,
+    prep: activeScopeOrders.filter(o => o.status === 'قيد التجهيز').length,
+    comp: activeScopeOrders.filter(o => o.status === 'مكتمل').length,
+    canc: activeScopeOrders.filter(o => o.status === 'ملغي').length
+  };
+
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl('tabCountAll', tabCounts.all); setEl('ordersTotalTabCount', tabCounts.all);
+  setEl('tabCountNew', tabCounts.new); setEl('ordersNewTabCount', tabCounts.new);
+  setEl('tabCountPrep', tabCounts.prep); setEl('ordersPrepTabCount', tabCounts.prep);
+  setEl('tabCountComp', tabCounts.comp); setEl('ordersCompTabCount', tabCounts.comp);
+  setEl('tabCountCanc', tabCounts.canc); setEl('ordersCancTabCount', tabCounts.canc);
 
   if (filtered.length === 0) {
+    const emptyMsg = CURRENT_ORDERS_SCOPE === 'new' 
+      ? 'لا توجد طلبات جديدة بعد (نقطة بداية المنظومة: 7 أكتوبر 2026 — 1:55 ص)' 
+      : 'لا توجد طلبات تطابق هذا التصنيف';
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
-          لا توجد طلبات تطابق هذا التصنيف
+        <td colspan="9" style="text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 0.85rem;">
+          ${emptyMsg}
         </td>
       </tr>
     `;
@@ -736,9 +789,20 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
       ? `${order.itemsCount} قطعة`
       : (order.items ? `${order.items.length} صنف` : '1 صنف');
 
+    const typeBadge = order.isHistorical || order.orderType === 'historical'
+      ? '<span class="order-badge historical" title="تم استيراده من الـ Admin قبل نقطة البداية (1:55 ص)">📦 طلب سابق</span>'
+      : '<span class="order-badge new-system" title="أُنشئ في المنظومة بعد نقطة البداية (1:55 ص)">✨ جديد بالمنظومة</span>';
+
+    const stockBadge = order.isHistorical || order.orderType === 'historical'
+      ? '<span class="stock-impact-badge exempt" title="طلب تاريخي سابق لا يمس رصيد البداية">🛡️ معفى (تاريخي)</span>'
+      : (order.inventoryDeduction === 'applied'
+          ? `<span class="stock-impact-badge deducted" title="مخصوم من المخزون">📦 مخصوم</span>`
+          : `<span class="stock-impact-badge pending" title="بانتظار الخصم">⏳ قيد الخصم</span>`);
+
     return `
       <tr>
         <td class="num-mono" style="font-weight: 800; color: var(--primary);">${order.orderNumber}</td>
+        <td>${typeBadge}</td>
         <td>
           <div style="font-weight: 700; color: var(--text-main); line-height: 1.3;">${order.customerName}</div>
           <div class="num-mono" style="font-size: 0.75rem; color: var(--text-muted);">${order.phone || ''}</div>
@@ -747,14 +811,12 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
         <td class="num-mono" style="font-weight: 800; color: var(--text-main);">${order.total} د.ل</td>
         <td>
           <span class="status-pill ${getOrderStatusClass(order.status)}">${order.status}</span>
-          <div style="margin-top: 3px;">
-            ${typeof getOrderDeductionBadge === 'function' ? getOrderDeductionBadge(order) : ''}
-          </div>
         </td>
+        <td>${stockBadge}</td>
         <td class="num-mono" style="color: var(--text-muted); font-size: 0.775rem;">${order.date ? order.date.replace(' ص', '').replace(' م', '') : '-'}</td>
         <td style="text-align: center;">
           <div style="display: flex; gap: 4px; justify-content: center; align-items: center;">
-            <button class="dash-arrow-btn" onclick="openOrderDetailsById('${order.id}')" title="عرض تفاصيل الطلب">›</button>
+            <button class="dash-arrow-btn" onclick="openInvoiceModal('${order.id}')" title="عرض تفاصيل الطلب والفاتورة">›</button>
             <button class="btn-secondary btn-sm" onclick="openInvoiceModal('${order.id}')" title="فاتورة مبيعات معتمدة">🧾</button>
             <button class="btn-secondary btn-sm" onclick="openWhatsAppForOrder('${order.id}')" title="واتساب">💬</button>
           </div>
@@ -767,7 +829,7 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
 function filterOrdersTable(status, btn) {
   document.querySelectorAll('.order-filter-btn, .table-filter-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  const searchInput = document.getElementById('ordersTableSearchInput');
+  const searchInput = document.getElementById('ordersSearchInput') || document.getElementById('ordersTableSearchInput');
   const query = searchInput ? searchInput.value : '';
   renderOrdersTable(status, query);
 }
@@ -776,8 +838,11 @@ function handleOrdersSearch(val) {
   const activeTab = document.querySelector('.order-filter-btn.active, .table-filter-tab.active');
   let status = 'all';
   if (activeTab) {
-    const m = activeTab.getAttribute('onclick')?.match(/'([^']+)'/);
-    if (m) status = m[1];
+    status = activeTab.getAttribute('data-filter') || 'all';
+    if (!status || status === 'all') {
+      const m = activeTab.getAttribute('onclick')?.match(/'([^']+)'/);
+      if (m) status = m[1];
+    }
   }
   renderOrdersTable(status, val);
 }
@@ -818,7 +883,13 @@ function openOrderDetailsById(orderId) {
 
   ERP_STATE.currentOrderInModal = order;
 
-  document.getElementById('modalOrderNum').textContent = order.orderNumber;
+  const modalOrderNum = document.getElementById('modalOrderNum');
+  if (!modalOrderNum) {
+    openInvoiceModal(order.id);
+    return;
+  }
+
+  modalOrderNum.textContent = order.orderNumber;
   document.getElementById('modalCustomerName').textContent = order.customerName;
   document.getElementById('modalCustomerPhone').textContent = order.phone;
   document.getElementById('modalCustomerCollege').textContent = `${order.university || 'جامعة طرابلس'} — ${order.college || 'كلية طب الأسنان'}`;
@@ -1911,6 +1982,9 @@ let CURRENT_INVENTORY_SUBVIEW = 'stock';
 let CURRENT_RECON_FILTER = 'all';
 
 function getOrderDeductionBadge(order) {
+  if (order.isHistorical || order.orderType === 'historical' || order.inventoryDeduction === 'historical_exempt') {
+    return '<span class="inv-deduct-pill protected" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;" title="طلب تاريخي سابق لبدء المنظومة — رصيد البداية محمي">🛡️ معفى (تاريخي)</span>';
+  }
   if (order.status === 'مكتمل') {
     if (order.inventoryDeduction === 'applied') {
       return '<span class="inv-deduct-pill deducted" title="تم خصم الأصناف من المخزون">📦 تم الخصم</span>';
@@ -1926,6 +2000,11 @@ function getOrderDeductionBadge(order) {
 
 function applyOrderInventoryDeduction(order, user) {
   if (!order) return { success: false, reason: 'order_not_found' };
+  
+  // Guard 0: Historical orders are strictly exempt from inventory deductions
+  if (order.isHistorical || order.orderType === 'historical' || order.inventoryDeduction === 'historical_exempt') {
+    return { success: false, reason: 'historical_order_exempt', orderNumber: order.orderNumber };
+  }
   
   // Guard 1: Double deduction prevention
   if (order.inventoryDeduction === 'applied') {
@@ -2779,16 +2858,162 @@ function showToast(message, type = 'info') {
 // -------------------------------------------------------------
 // 16. LIVE SERVER SYNC (api.kurofangs.id.ly)
 // -------------------------------------------------------------
+// 16. LIVE SERVER SYNC (api.kurofangs.id.ly — Dual System Sync)
+// -------------------------------------------------------------
 async function syncWithUserServer() {
-  // Clean slate mode: Respect user wipe of historical orders and pricing
-  // Only maintain product structure from clean catalog
   try {
-    if (ERP_STATE.orders && ERP_STATE.orders.length > 0) {
-      // If there are newly created local orders, preserve them
-    } else {
-      ERP_STATE.orders = [];
+    const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders?select=*,order_items(*,products(*))&order=created_at.desc`, {
+      headers: {
+        'apikey': SUPABASE_CONFIG.anonKey,
+        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+      }
+    });
+    if (!res.ok) return;
+    const serverOrders = await res.json();
+    if (!Array.isArray(serverOrders)) return;
+
+    const cutoffTime = ERP_CUTOFF_TIMESTAMP;
+    let stateChanged = false;
+
+    serverOrders.forEach(ord => {
+      const createdAtTime = new Date(ord.created_at).getTime();
+      const isHistorical = createdAtTime < cutoffTime;
+
+      // Map status from English to Arabic standard
+      let statusAr = 'جديد';
+      if (ord.status === 'delivered') statusAr = 'مكتمل';
+      else if (ord.status === 'preparing' || ord.status === 'under_review' || ord.status === 'editing') statusAr = 'قيد التجهيز';
+      else if (ord.status === 'out_for_delivery' || ord.status === 'accepted') statusAr = 'جاهز للتوصيل';
+      else if (ord.status === 'cancelled') statusAr = 'ملغي';
+      else if (ord.status === 'new') statusAr = 'جديد';
+
+      // Check if order already exists in ERP_STATE.orders
+      const existingIdx = ERP_STATE.orders.findIndex(o => 
+        o.id === ord.id || 
+        o.rawOrderNumber === ord.order_number || 
+        o.orderNumber === `#${ord.order_number}` ||
+        o.orderNumber === ord.order_number
+      );
+
+      if (existingIdx >= 0) {
+        // Order exists: only update status if modified remotely
+        const existing = ERP_STATE.orders[existingIdx];
+        if (existing.originalStatus !== ord.status && ord.status) {
+          existing.status = statusAr;
+          existing.originalStatus = ord.status;
+          stateChanged = true;
+        }
+      } else {
+        // New order from server: parse and integrate
+        const d = new Date(ord.created_at);
+        const dateFormatted = d.toLocaleDateString('ar-LY', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' +
+                              d.toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' });
+
+        let items = [];
+        if (Array.isArray(ord.items) && ord.items.length > 0) {
+          items = ord.items.map(it => ({
+            id: it.id || null,
+            name: it.name_ar || it.name_en || 'منتج طبي',
+            nameEn: it.name_en || it.name_ar,
+            qty: Number(it.quantity || 1),
+            price: Number(it.price || 0),
+            imageUrl: it.image_url || null
+          }));
+        } else if (Array.isArray(ord.order_items) && ord.order_items.length > 0) {
+          items = ord.order_items.map(it => ({
+            id: it.product_id || (it.products ? it.products.id : null),
+            name: (it.products ? (it.products.name_ar || it.products.name_en) : null) || it.name_ar || it.name_en || 'منتج طبي',
+            nameEn: (it.products ? it.products.name_en : null) || it.name_en,
+            qty: Number(it.quantity || 1),
+            price: Number(it.price || 0),
+            imageUrl: it.products ? it.products.image_url : null
+          }));
+        }
+
+        const totalQty = items.reduce((sum, it) => sum + it.qty, 0);
+
+        const newOrdObj = {
+          id: ord.id,
+          orderNumber: '#' + (ord.order_number ? ord.order_number.replace(/\D/g, '') : ord.id.slice(0, 8)),
+          rawOrderNumber: ord.order_number,
+          invoiceNumber: isHistorical 
+            ? ('#INV-HIST-' + (ord.order_number ? ord.order_number.replace(/\D/g, '') : ord.id.slice(0, 8)))
+            : ('#INV-2026-' + (ord.order_number ? ord.order_number.replace(/\D/g, '') : ord.id.slice(0, 8))),
+          orderType: isHistorical ? 'historical' : 'new',
+          isHistorical: isHistorical,
+          inventoryDeduction: isHistorical ? 'historical_exempt' : 'applied',
+          customerName: ord.customer_name || 'عميل المتجر',
+          phone: ord.customer_phone || '-',
+          secondaryPhone: ord.customer_phone_secondary || null,
+          email: ord.customer_email || null,
+          university: ord.university || 'جامعة طرابلس',
+          college: ord.college || 'كلية طب الأسنان',
+          address: ord.address_text || 'طرابلس',
+          itemsCount: totalQty,
+          items: items,
+          total: Number(ord.total_price || 0),
+          discountAmount: Number(ord.discount_amount || 0),
+          shippingFee: Number(ord.shipping_fee || 0),
+          status: statusAr,
+          originalStatus: ord.status,
+          date: dateFormatted,
+          created_at: ord.created_at,
+          notes: ord.notes || null,
+          source: isHistorical ? 'Admin الأرشيف التاريخي' : 'متجر Absolute Dental'
+        };
+
+        // If order was created AFTER cutoff, auto-deduct stock immediately!
+        if (!isHistorical) {
+          items.forEach(it => {
+            const prod = ERP_STATE.products.find(p => p.id === it.id || (p.nameAr && p.nameAr === it.name));
+            if (prod) {
+              const oldStock = Number(prod.stock) || 0;
+              const newStock = Math.max(0, oldStock - it.qty);
+              prod.stock = newStock;
+              if (newStock === 0) prod.status = 'نافد';
+              else if (newStock <= 10) prod.status = 'منخفض';
+              else prod.status = 'متوفر';
+            }
+          });
+
+          const txId = `TX-${newOrdObj.rawOrderNumber || newOrdObj.id.slice(0, 8)}`;
+          const invTx = {
+            id: txId,
+            orderId: newOrdObj.id,
+            orderNumber: newOrdObj.orderNumber,
+            invoiceNumber: newOrdObj.invoiceNumber,
+            customerName: newOrdObj.customerName,
+            status: 'applied',
+            date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }),
+            time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
+            user: 'سيرفر المتجر المباشر',
+            items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+            totalQty: totalQty,
+            notes: 'خصم تلقائي لمخزون طلب جديد وارد بعد نقطة البداية'
+          };
+          ERP_STATE.inventoryTransactions.unshift(invTx);
+          newOrdObj.inventoryTxId = txId;
+        }
+
+        ERP_STATE.orders.unshift(newOrdObj);
+        stateChanged = true;
+      }
+    });
+
+    if (stateChanged) {
+      try {
+        localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+        localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
+        localStorage.setItem('abs_erp_inventory_transactions', JSON.stringify(ERP_STATE.inventoryTransactions));
+      } catch (_) {}
+      updateDashboardRealUI();
+      if (ERP_STATE.activeScreen === 'orders') renderOrdersTable();
+      if (ERP_STATE.activeScreen === 'inventory') renderInventoryTable();
+      if (ERP_STATE.activeScreen === 'products') renderProductsTable();
     }
-  } catch (_) {}
+  } catch (err) {
+    console.warn('Sync with user server notice:', err);
+  }
 }
 
 // -------------------------------------------------------------
@@ -3193,11 +3418,57 @@ async function submitStudentOrder() {
 
   // 3. Fallback or Local Order Object
   const orderId = serverOrderId || `order-${Date.now()}`;
+  const nowIso = new Date().toISOString();
+  const txId = `TX-${orderNum}`;
+
+  // Automatically deduct stock and log inventory transaction immediately
+  STUDENT_ORDER_STATE.cart.forEach(item => {
+    const prod = ERP_STATE.products.find(p => p.id === item.productId || (p.nameAr && p.nameAr === item.name));
+    if (prod) {
+      const oldStock = Number(prod.stock) || 0;
+      const qty = Number(item.qty) || 1;
+      const newStock = Math.max(0, oldStock - qty);
+      prod.stock = newStock;
+      if (newStock === 0) prod.status = 'نافد';
+      else if (newStock <= 10) prod.status = 'منخفض';
+      else prod.status = 'متوفر';
+
+      logOperation({
+        user: partnerName,
+        action: 'خصم مخزون لطلب جديد',
+        target: `${prod.nameAr} (#${orderNum})`,
+        oldVal: `${oldStock} قطعة`,
+        newVal: `${newStock} قطعة (-${qty})`,
+        details: `«خصم كمية (-${qty}) من ${prod.nameAr} للطلب الجديد #${orderNum} للطالب ${name} (المخزون: ${oldStock} ➔ ${newStock})»`
+      });
+    }
+  });
+
+  const invTx = {
+    id: txId,
+    orderId: orderId,
+    orderNumber: `#${orderNum}`,
+    invoiceNumber: `#INV-2026-${orderNum}`,
+    customerName: name,
+    status: 'applied',
+    date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }),
+    time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
+    user: partnerName,
+    items: STUDENT_ORDER_STATE.cart.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+    totalQty: STUDENT_ORDER_STATE.cart.reduce((sum, i) => sum + i.qty, 0),
+    notes: 'خصم تلقائي فوري لمخزون طلب جديد بالمنظومة'
+  };
+  ERP_STATE.inventoryTransactions.unshift(invTx);
+
   const newOrder = {
     id: orderId,
     orderNumber: `#${orderNum}`,
+    rawOrderNumber: String(orderNum),
     invoiceNumber: `#INV-2026-${orderNum}`,
-    inventoryDeduction: 'not_applied',
+    orderType: 'new',
+    isHistorical: false,
+    inventoryDeduction: 'applied',
+    inventoryTxId: txId,
     customerName: name,
     phone: phone,
     university: 'جامعة طرابلس',
@@ -3211,6 +3482,8 @@ async function submitStudentOrder() {
     status: 'جديد',
     assignedTo: partnerName,
     date: 'الآن (مباشر)',
+    createdAt: nowIso,
+    created_at: nowIso,
     notes: userNotes,
     paymentMethod: paymentMethod
   };
@@ -3218,16 +3491,14 @@ async function submitStudentOrder() {
   // Prepend to ERP State orders
   ERP_STATE.orders.unshift(newOrder);
 
-  // Note: Inventory stock is NOT deducted on creation; protected until status becomes 'مكتمل'
-
   // Log to Audit Trail
   ERP_STATE.auditLogs.unshift({
     id: `#${1100 + ERP_STATE.auditLogs.length}`,
     time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
     date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }),
     user: partnerName,
-    action: 'إنشاء طلب طالب (بالنيابة)',
-    details: `تم إنشاء الطلب #${orderNum} للطالب/ة ${name} (${newOrder.itemsCount} صنفاً) بقيمة ${totalPrice} د.ل — المخزون محمي حتى اكتمال الطلب`,
+    action: 'إنشاء طلب طالب جديد بالمنظومة',
+    details: `تم إنشاء الطلب الجديد #${orderNum} للطالب/ة ${name} (${newOrder.itemsCount} صنفاً) بقيمة ${totalPrice} د.ل — تم خصم الكميات من المخزون وتوثيق حركة التوريد`,
     oldVal: '-',
     newVal: `${totalPrice} د.ل`
   });
@@ -3235,6 +3506,8 @@ async function submitStudentOrder() {
   try {
     localStorage.setItem('abs_erp_audit', JSON.stringify(ERP_STATE.auditLogs));
     localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+    localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
+    localStorage.setItem('abs_erp_inventory_transactions', JSON.stringify(ERP_STATE.inventoryTransactions));
   } catch (_) {}
 
   // Store last created order for WhatsApp and print
@@ -3927,15 +4200,57 @@ function submitNewOrderWithInvoice() {
     shippingFee: shippingFee,
     total: total,
     status: 'جديد',
-    inventoryDeduction: 'not_applied',
+    orderType: 'new',
+    isHistorical: false,
+    inventoryDeduction: 'applied',
     paymentMethod: 'cash_on_delivery',
     paymentStatus: 'كاش عند الاستلام',
     assignedTo: activeUser,
     date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }) + ' ' + new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    created_at: new Date().toISOString()
   };
 
-  // 6. Inventory Protection: Stock is NOT deducted on creation; deducted ONLY upon reaching 'مكتمل'
+  // 6. Automatic Stock Deduction & Movement Recording
+  POS_ORDER_STATE.cart.forEach(item => {
+    const prod = ERP_STATE.products.find(p => p.id === item.id || p.sku === item.sku || p.nameAr === item.nameAr);
+    if (prod) {
+      const oldStock = Number(prod.stock) || 0;
+      const qty = Number(item.qty) || 1;
+      const newStock = Math.max(0, oldStock - qty);
+      prod.stock = newStock;
+      if (newStock === 0) prod.status = 'نافد';
+      else if (newStock <= 10) prod.status = 'منخفض';
+      else prod.status = 'متوفر';
+
+      logOperation({
+        user: activeUser,
+        action: 'خصم مخزون لطلب POS جديد',
+        target: `${prod.nameAr} (${orderNumber})`,
+        oldVal: `${oldStock} قطعة`,
+        newVal: `${newStock} قطعة (-${qty})`,
+        details: `«خصم كمية (-${qty}) من ${prod.nameAr} لطلب البيع الجديد ${orderNumber} للعميل ${name}»`
+      });
+    }
+  });
+
+  const txId = `TX-${orderNumber.replace('#', '')}`;
+  const invTx = {
+    id: txId,
+    orderId: orderId,
+    orderNumber: orderNumber,
+    invoiceNumber: invNumber,
+    customerName: name,
+    status: 'applied',
+    date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }),
+    time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
+    user: activeUser,
+    items: POS_ORDER_STATE.cart.map(i => ({ name: i.nameAr, qty: i.qty, price: i.price })),
+    totalQty: POS_ORDER_STATE.cart.reduce((s, i) => s + i.qty, 0),
+    notes: 'خصم تلقائي فوري لمخزون طلب POS جديد بالمنظومة'
+  };
+  ERP_STATE.inventoryTransactions.unshift(invTx);
+  newOrder.inventoryTxId = txId;
 
   // 7. Add to Global Orders List
   ERP_STATE.orders.unshift(newOrder);
@@ -3951,12 +4266,14 @@ function submitNewOrderWithInvoice() {
     target: `${newOrder.orderNumber} (${newOrder.invoiceNumber})`,
     oldVal: '-',
     newVal: `${newOrder.total} د.ل`,
-    details: `«${activeUser} قام بإنشاء الطلب ${newOrder.orderNumber} والفاتورة ${newOrder.invoiceNumber} للطالب ${newOrder.customerName} ${discountDetails} — المخزون محمي حتى اكتمال الطلب»`
+    details: `«${activeUser} قام بإنشاء الطلب ${newOrder.orderNumber} والفاتورة ${newOrder.invoiceNumber} للعميل ${newOrder.customerName} ${discountDetails} — تم خصم الكميات من المخزون وتوثيق الحركة بنجاح»`
   });
 
   // 9. Persist to LocalStorage
   try {
     localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
+    localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
+    localStorage.setItem('abs_erp_inventory_transactions', JSON.stringify(ERP_STATE.inventoryTransactions));
   } catch (_) {}
 
   // 10. Update Dashboard and App Metrics
@@ -3992,6 +4309,42 @@ function openInvoiceModal(orderId) {
 
   const headerStatusPill = document.getElementById('invHeaderStatusPill');
   if (headerStatusPill) headerStatusPill.textContent = status;
+
+  const typeBadgeEl = document.getElementById('invHeaderTypeBadge');
+  if (typeBadgeEl) {
+    if (order.isHistorical || order.orderType === 'historical') {
+      typeBadgeEl.textContent = '📦 طلب سابق (أرشيف الـ Admin)';
+      typeBadgeEl.className = 'order-badge historical';
+    } else {
+      typeBadgeEl.textContent = '✨ طلب جديد بالمنظومة';
+      typeBadgeEl.className = 'order-badge new-system';
+    }
+  }
+
+  const noticeEl = document.getElementById('invClassificationNotice');
+  if (noticeEl) {
+    if (order.isHistorical || order.orderType === 'historical') {
+      noticeEl.innerHTML = `
+        <div style="background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-size: 1.25rem;">📦</span>
+          <div style="font-size: 0.8rem; color: #334155; line-height: 1.4;">
+            <strong style="color: #0F172A;">بيانات تاريخية (الـ Admin السابق):</strong>
+            تم تسجيل هذا الطلب بتاريخ <strong>${order.date || '-'}</strong> قبل نقطة بداية المنظومة (7 أكتوبر 2026 — 1:55 ص). الأسعار والإجماليات مجمدة ومحفوظة كما هي وقت الشراء، وهو <strong>معفى بالكامل من أي خصم من مخزون الوجبة الجديدة</strong> (رصيد البداية محمي 258 قطعة).
+          </div>
+        </div>
+      `;
+    } else {
+      noticeEl.innerHTML = `
+        <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-size: 1.25rem;">✨</span>
+          <div style="font-size: 0.8rem; color: #1E40AF; line-height: 1.4;">
+            <strong style="color: #1E3A8A;">طلب جديد بالمنظومة:</strong>
+            أُنشئ بعد نقطة البداية (7 أكتوبر 2026 — 1:55 ص). خاضع لمتابعة المخزون والأسعار المعتمدة، وتم خصم كمياته تلقائياً من رصيد المنظومة.
+          </div>
+        </div>
+      `;
+    }
+  }
 
   const docNum = document.getElementById('invDocNumber');
   if (docNum) docNum.textContent = invNumber;
