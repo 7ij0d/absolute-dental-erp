@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.07_CATALOG_BURS_INVENTORY_V4';
+const ERP_DATABASE_VERSION = '2026.10.08_UNIFIED_INVENTORY_ENGINE_V1';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
@@ -69,6 +69,193 @@ function getOrderStatusLabel(raw) {
 }
 
 // -------------------------------------------------------------
+// UNIFIED PRODUCT, INVENTORY, BUNDLE & MULTI-UNIT ENGINE
+// Single Source of Truth for Catalog, Stock & Deductions
+// -------------------------------------------------------------
+const CANONICAL_BUNDLES = {
+  'fa042791-6d8d-48c1-8f60-f1a103162a1e': {
+    id: 'fa042791-6d8d-48c1-8f60-f1a103162a1e',
+    nameAr: 'عرض كاست تدريب + قبضة NSK توربين سرعة عالية',
+    nameEn: 'Study cast + high-speed NSK hand piece',
+    bundlePrice: 250,
+    components: [
+      {
+        productId: 'ad31f7c7-d710-4622-8e3f-377b9c657818',
+        nameAr: 'قبضة NSK توربين سرعة عالية',
+        nameEn: 'NSK High speed handpiece',
+        quantity: 1,
+        normalPrice: 135
+      },
+      {
+        productId: '8f344bd9-91ec-4787-8371-f489cccf635e',
+        nameAr: 'كاست تدريب (Dental Cast)',
+        nameEn: 'dental cast',
+        quantity: 1,
+        normalPrice: 125
+      }
+    ]
+  }
+};
+
+const CANONICAL_MULTI_UNITS = {
+  '106ad65c-3074-4cfb-8643-840f36f833f5': {
+    isBase: true,
+    baseUnitNameAr: 'قطعة',
+    baseUnitNameEn: 'Piece',
+    boxSize: 3,
+    packProductId: '6c359465-a522-4654-933f-a64c627c6b38'
+  },
+  '6c359465-a522-4654-933f-a64c627c6b38': {
+    isBase: false,
+    baseProductId: '106ad65c-3074-4cfb-8643-840f36f833f5',
+    unitMultiplier: 3,
+    unitNameAr: 'علبة (3 قطع)',
+    unitNameEn: 'Box (3 Pieces)'
+  }
+};
+
+function isBundleProduct(productId) {
+  return Boolean(productId && CANONICAL_BUNDLES[productId]);
+}
+
+function calculateBundleAvailability(bundleId, allProducts) {
+  const bundle = CANONICAL_BUNDLES[bundleId];
+  if (!bundle) return { availableCount: 0, isAvailable: false, componentsStatus: [] };
+
+  const prods = Array.isArray(allProducts) ? allProducts : (ERP_STATE.products || []);
+  let minPossible = Infinity;
+  let normalTotalPrice = 0;
+  const componentsStatus = [];
+
+  for (const comp of bundle.components) {
+    const compProd = prods.find(p => p.id === comp.productId || (p.nameAr && p.nameAr === comp.nameAr) || (p.nameEn && p.nameEn === comp.nameEn));
+    const currentStock = compProd ? (Number(compProd.stock) || 0) : 0;
+    const possible = Math.floor(currentStock / comp.quantity);
+    if (possible < minPossible) minPossible = possible;
+
+    normalTotalPrice += (comp.normalPrice || (compProd ? (compProd.sellingPrice || compProd.retailPrice || 0) : 0)) * comp.quantity;
+    componentsStatus.push({
+      productId: comp.productId,
+      nameAr: comp.nameAr,
+      nameEn: comp.nameEn,
+      required: comp.quantity,
+      currentStock,
+      possibleBundles: possible,
+      isAvailable: currentStock >= comp.quantity
+    });
+  }
+
+  const availableCount = minPossible === Infinity ? 0 : Math.max(0, minPossible);
+  return {
+    bundleId,
+    nameAr: bundle.nameAr,
+    nameEn: bundle.nameEn,
+    bundlePrice: bundle.bundlePrice,
+    normalTotalPrice,
+    savings: Math.max(0, normalTotalPrice - bundle.bundlePrice),
+    availableCount,
+    isAvailable: availableCount > 0,
+    componentsStatus
+  };
+}
+
+function computeEffectiveStock(product, allProducts) {
+  if (!product) return 0;
+  const pId = product.id;
+  const prods = Array.isArray(allProducts) ? allProducts : (ERP_STATE.products || []);
+
+  if (isBundleProduct(pId)) {
+    return calculateBundleAvailability(pId, prods).availableCount;
+  }
+
+  const multiMeta = CANONICAL_MULTI_UNITS[pId];
+  const sharedMasterId = product.shared_inventory_product_id || (multiMeta && !multiMeta.isBase ? multiMeta.baseProductId : null);
+  if (sharedMasterId) {
+    const master = prods.find(p => p.id === sharedMasterId);
+    const multiplier = Number(product.unit_multiplier) || (multiMeta ? multiMeta.unitMultiplier : 1) || 1;
+    const masterStock = master ? (Number(master.stock) || 0) : 0;
+    return Math.floor(masterStock / multiplier);
+  }
+
+  return Number(product.stock) || 0;
+}
+
+function getPhysicalStockBreakdown(product, allProducts) {
+  if (!product) return null;
+  const prods = Array.isArray(allProducts) ? allProducts : (ERP_STATE.products || []);
+  const meta = CANONICAL_MULTI_UNITS[product.id];
+
+  let baseProduct = null;
+  let boxSize = 3;
+
+  if (meta) {
+    if (meta.isBase) {
+      baseProduct = product;
+      boxSize = meta.boxSize || 3;
+    } else {
+      baseProduct = prods.find(p => p.id === meta.baseProductId);
+      boxSize = meta.unitMultiplier || 3;
+    }
+  } else if (product.shared_inventory_product_id) {
+    baseProduct = prods.find(p => p.id === product.shared_inventory_product_id);
+    boxSize = Number(product.unit_multiplier) || 3;
+  }
+
+  if (!baseProduct) return null;
+  const totalPieces = Number(baseProduct.stock) || 0;
+  const fullBoxes = Math.floor(totalPieces / boxSize);
+  const loosePieces = totalPieces % boxSize;
+
+  let displayAr = loosePieces === 0 
+    ? `${fullBoxes} علبة (${totalPieces} قطعة)`
+    : `${fullBoxes} علبة و ${loosePieces} قطعة فرط (${totalPieces} قطعة إجمالي)`;
+
+  return { totalPieces, fullBoxes, loosePieces, boxSize, displayAr };
+}
+
+function calculateOrderDeductions(orderItems, allProducts) {
+  const prods = Array.isArray(allProducts) ? allProducts : (ERP_STATE.products || []);
+  const deductionsMap = new Map();
+
+  const record = (pId, units, reason) => {
+    if (!pId || units <= 0) return;
+    const existing = deductionsMap.get(pId) || { productId: pId, deductUnits: 0, reasons: [] };
+    existing.deductUnits += units;
+    existing.reasons.push(reason);
+    deductionsMap.set(pId, existing);
+  };
+
+  (orderItems || []).forEach(item => {
+    const pId = item.id || item.productId;
+    const qty = Number(item.qty || item.quantity) || 1;
+
+    if (isBundleProduct(pId)) {
+      const bundle = CANONICAL_BUNDLES[pId];
+      bundle.components.forEach(comp => {
+        const u = comp.quantity * qty;
+        record(comp.productId, u, `مكون عرض: ${bundle.nameEn} (×${qty}) -> ${comp.nameEn} ×${u}`);
+      });
+      return;
+    }
+
+    const multiMeta = CANONICAL_MULTI_UNITS[pId];
+    const prod = prods.find(p => p.id === pId || (p.nameAr && p.nameAr === item.name) || (p.nameEn && p.nameEn === item.name));
+    const sharedBaseId = (multiMeta && !multiMeta.isBase ? multiMeta.baseProductId : null) || (prod && prod.shared_inventory_product_id);
+    const multiplier = (multiMeta && !multiMeta.isBase ? multiMeta.unitMultiplier : null) || (prod && Number(prod.unit_multiplier)) || 1;
+
+    if (sharedBaseId && multiplier > 1) {
+      const baseUnits = qty * multiplier;
+      record(sharedBaseId, baseUnits, `عبوة متعددة: ${item.name || prod?.nameEn} (×${qty} علبة = ×${baseUnits} قطعة)`);
+      return;
+    }
+
+    record(pId || (prod && prod.id), qty, `بيع مباشر: ${item.name || prod?.nameEn} (×${qty})`);
+  });
+
+  return Array.from(deductionsMap.values());
+}
+
+// -------------------------------------------------------------
 // CENTRALIZED ORDER STATUS PERSISTENCE (SINGLE SOURCE OF TRUTH)
 // Synchronizes status directly with central Supabase database
 // -------------------------------------------------------------
@@ -110,14 +297,28 @@ async function persistOrderStatusChange(orderId, newStatusRaw, authorName) {
   order.status = canonicalNewStatus;
   order.originalStatus = canonicalNewStatus;
 
-  // 2. Inventory Deduction / Restoration Logic (Idempotent)
+  // 2. Inventory Deduction / Restoration Logic (Idempotent & Cloud-Synchronized)
   let deductionNotice = '';
   if ((canonicalNewStatus === 'out_for_delivery' || canonicalNewStatus === 'delivered') && !order.inventoryDeducted) {
-    (order.items || []).forEach(it => {
-      const prod = (ERP_STATE.products || []).find(p => p.id === it.id || (p.nameAr && p.nameAr === it.name) || (p.nameEn && p.nameEn === it.name));
+    const deductions = calculateOrderDeductions(order.items, ERP_STATE.products);
+    deductions.forEach(d => {
+      const prod = (ERP_STATE.products || []).find(p => p.id === d.productId);
       if (prod) {
-        const qtyToDeduct = Number(it.qty) || 1;
-        prod.stock = Math.max(0, (Number(prod.stock) || 0) - qtyToDeduct);
+        prod.stock = Math.max(0, (Number(prod.stock) || 0) - d.deductUnits);
+        if (prod.stock === 0) prod.status = 'نافد';
+        else if (prod.stock <= 10) prod.status = 'منخفض';
+        else prod.status = 'متوفر';
+
+        // Async patch central Supabase product stock
+        fetch(`${SUPABASE_CONFIG.url}/rest/v1/products?id=eq.${encodeURIComponent(prod.id)}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_CONFIG.anonKey,
+            'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+          },
+          body: JSON.stringify({ stock_quantity: prod.stock })
+        }).catch(err => console.warn('Supabase product stock sync warning:', err));
       }
     });
     order.inventoryDeducted = true;
@@ -131,16 +332,29 @@ async function persistOrderStatusChange(orderId, newStatusRaw, authorName) {
       orderNumber: order.orderNumber,
       customer: order.customerName,
       user: author,
-      itemsCount: (order.items || []).reduce((s, it) => s + (Number(it.qty) || 1), 0),
-      reason: `صرف بضاعة وخصم مخزون (${newMeta.label}) للطلب ${order.orderNumber}`
+      itemsCount: deductions.reduce((s, d) => s + d.deductUnits, 0),
+      reason: `صرف بضاعة وخصم مخزون (${newMeta.label}) للطلب ${order.orderNumber}: ${deductions.map(d => `${d.productId}: -${d.deductUnits}`).join(', ')}`
     });
-    deductionNotice = ' (تم خصم المخزون تلقائياً)';
+    deductionNotice = ' (تم خصم المخزون مركزياً وتحديث السحابة)';
   } else if ((canonicalNewStatus === 'cancelled' || canonicalNewStatus === 'rejected') && order.inventoryDeducted) {
-    (order.items || []).forEach(it => {
-      const prod = (ERP_STATE.products || []).find(p => p.id === it.id || (p.nameAr && p.nameAr === it.name) || (p.nameEn && p.nameEn === it.name));
+    const deductions = calculateOrderDeductions(order.items, ERP_STATE.products);
+    deductions.forEach(d => {
+      const prod = (ERP_STATE.products || []).find(p => p.id === d.productId);
       if (prod) {
-        const qtyToRestore = Number(it.qty) || 1;
-        prod.stock = (Number(prod.stock) || 0) + qtyToRestore;
+        prod.stock = (Number(prod.stock) || 0) + d.deductUnits;
+        if (prod.stock === 0) prod.status = 'نافد';
+        else if (prod.stock <= 10) prod.status = 'منخفض';
+        else prod.status = 'متوفر';
+
+        fetch(`${SUPABASE_CONFIG.url}/rest/v1/products?id=eq.${encodeURIComponent(prod.id)}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_CONFIG.anonKey,
+            'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+          },
+          body: JSON.stringify({ stock_quantity: prod.stock })
+        }).catch(err => console.warn('Supabase product stock sync warning:', err));
       }
     });
     order.inventoryDeducted = false;
@@ -154,10 +368,10 @@ async function persistOrderStatusChange(orderId, newStatusRaw, authorName) {
       orderNumber: order.orderNumber,
       customer: order.customerName,
       user: author,
-      itemsCount: (order.items || []).reduce((s, it) => s + (Number(it.qty) || 1), 0),
-      reason: `إرجاع مخزون لإلغاء الطلب ${order.orderNumber}`
+      itemsCount: deductions.reduce((s, d) => s + d.deductUnits, 0),
+      reason: `إرجاع واستعادة مخزون لإلغاء الطلب ${order.orderNumber}`
     });
-    deductionNotice = ' (تمت استعادة المخزون)';
+    deductionNotice = ' (تمت استعادة المخزون مركزياً وتحديث السحابة)';
   }
 
   if (canonicalNewStatus === 'delivered') {
@@ -1644,9 +1858,30 @@ function renderProductsTable(searchQuery = '') {
     const stock = Number(p.stock) || 0;
     const imgSrc = p.image || resolveProductImage(p);
 
+    let displayStock = stock;
     let statusPill = '<span class="status-pill new">نافد</span>';
-    if (stock > 10) statusPill = '<span class="status-pill completed">متوفر</span>';
-    else if (stock > 0) statusPill = '<span class="status-pill preparing">منخفض</span>';
+
+    if (isBundleProduct(p.id)) {
+      const bundleRes = calculateBundleAvailability(p.id, ERP_STATE.products);
+      displayStock = `<span title="عرض مركب يعتمد على مكوناته" style="color: ${bundleRes.isAvailable ? '#059669' : '#dc2626'}; font-weight: 800;">🎁 ${bundleRes.availableCount} عرض</span>`;
+      if (bundleRes.availableCount > 5) statusPill = '<span class="status-pill completed">متوفر</span>';
+      else if (bundleRes.availableCount > 0) statusPill = '<span class="status-pill preparing">منخفض</span>';
+    } else if (CANONICAL_MULTI_UNITS[p.id]?.isBase) {
+      const breakdown = getPhysicalStockBreakdown(p, ERP_STATE.products);
+      displayStock = `<span title="المخزون الأساسي: ${stock} قطعة">📦 ${breakdown ? breakdown.displayAr : `${stock} قطعة`}</span>`;
+      if (stock > 10) statusPill = '<span class="status-pill completed">متوفر</span>';
+      else if (stock > 0) statusPill = '<span class="status-pill preparing">منخفض</span>';
+    } else if (p.shared_inventory_product_id) {
+      const master = ERP_STATE.products.find(x => x.id === p.shared_inventory_product_id);
+      const mult = Number(p.unit_multiplier) || 3;
+      const eff = master ? Math.floor((Number(master.stock) || 0) / mult) : 0;
+      displayStock = `<span title="مرتبط بالأساسي">🔗 ${eff} علبة</span>`;
+      if (eff > 3) statusPill = '<span class="status-pill completed">متوفر</span>';
+      else if (eff > 0) statusPill = '<span class="status-pill preparing">منخفض</span>';
+    } else {
+      if (stock > 10) statusPill = '<span class="status-pill completed">متوفر</span>';
+      else if (stock > 0) statusPill = '<span class="status-pill preparing">منخفض</span>';
+    }
 
     return `
       <tr>
@@ -1664,7 +1899,7 @@ function renderProductsTable(searchQuery = '') {
         <td class="num-mono">${cost > 0 ? `${cost.toFixed(2)} د.ل` : '-'}</td>
         <td class="num-mono" style="font-weight: 700; color: var(--primary);">${wholesale > 0 ? `${wholesale} د.ل` : '-'}</td>
         <td class="num-mono" style="font-weight: 700; color: var(--text-body);">${retail > 0 ? `${retail} د.ل` : '-'}</td>
-        <td class="num-mono" style="font-weight: 800; text-align: center; color: ${stock <= 0 ? '#dc2626' : 'var(--text-main)'};">${stock}</td>
+        <td class="num-mono" style="font-weight: 800; text-align: center;">${displayStock}</td>
         <td>${statusPill}</td>
         <td style="text-align: center;">
           <div style="display: inline-flex; gap: 4px;">
@@ -3878,25 +4113,36 @@ async function submitStudentOrder() {
   const nowIso = new Date().toISOString();
   const txId = `TX-${orderNum}`;
 
-  // Automatically deduct stock and log inventory transaction immediately
-  STUDENT_ORDER_STATE.cart.forEach(item => {
-    const prod = ERP_STATE.products.find(p => p.id === item.productId || (p.nameAr && p.nameAr === item.name));
+  // Automatically deduct stock using Unified Engine and sync with cloud
+  const deductions = calculateOrderDeductions(STUDENT_ORDER_STATE.cart, ERP_STATE.products);
+  deductions.forEach(d => {
+    const prod = ERP_STATE.products.find(p => p.id === d.productId);
     if (prod) {
       const oldStock = Number(prod.stock) || 0;
-      const qty = Number(item.qty) || 1;
-      const newStock = Math.max(0, oldStock - qty);
+      const newStock = Math.max(0, oldStock - d.deductUnits);
       prod.stock = newStock;
       if (newStock === 0) prod.status = 'نافد';
       else if (newStock <= 10) prod.status = 'منخفض';
       else prod.status = 'متوفر';
 
+      // Async sync to central Supabase
+      fetch(`${SUPABASE_CONFIG.url}/rest/v1/products?id=eq.${encodeURIComponent(prod.id)}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_CONFIG.anonKey,
+          'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+        },
+        body: JSON.stringify({ stock_quantity: prod.stock })
+      }).catch(err => console.warn('Supabase product stock sync error:', err));
+
       logOperation({
         user: partnerName,
-        action: 'خصم مخزون لطلب جديد',
+        action: 'خصم مخزون لطلب جديد (مركزي)',
         target: `${prod.nameAr} (#${orderNum})`,
         oldVal: `${oldStock} قطعة`,
-        newVal: `${newStock} قطعة (-${qty})`,
-        details: `«خصم كمية (-${qty}) من ${prod.nameAr} للطلب الجديد #${orderNum} للطالب ${name} (المخزون: ${oldStock} ➔ ${newStock})»`
+        newVal: `${newStock} قطعة (-${d.deductUnits})`,
+        details: `«خصم كمية (-${d.deductUnits}) من ${prod.nameAr} للطلب الجديد #${orderNum} للطالب ${name} (المخزون: ${oldStock} ➔ ${newStock})»`
       });
     }
   });
@@ -5612,17 +5858,18 @@ function renderAddOrderProducts(searchVal = '') {
   }
 
   container.innerHTML = prods.map(p => {
-    const stock = Number(p.stock) || 0;
+    const effStock = computeEffectiveStock(p, ERP_STATE.products);
     const price = Number(p.sellingPrice || p.price || p.retailPrice || 0);
     const imgSrc = p.image || (typeof resolveProductImage === 'function' ? resolveProductImage(p) : 'assets/brand-logo-trimmed.png');
-    const isOut = stock === 0;
+    const isOut = effStock <= 0;
+    const stockLabel = isBundleProduct(p.id) ? `متوفر: ${effStock} عرض` : (p.shared_inventory_product_id ? `متوفر: ${effStock} علبة` : `المخزون: ${effStock} قطعة`);
 
     return `
       <div class="product-drawer-card">
         <img class="product-drawer-thumb" src="${imgSrc}" alt="${p.nameAr}" onerror="this.src='assets/brand-logo-trimmed.png'">
         <div>
           <div class="product-drawer-name">${p.nameAr}</div>
-          <div class="product-drawer-stock" style="color: ${isOut ? '#EF4444' : '#64748B'};">${isOut ? 'نافد بالمخزن' : `المخزون: ${stock} قطعة`}</div>
+          <div class="product-drawer-stock" style="color: ${isOut ? '#EF4444' : '#64748B'};">${isOut ? 'نافد بالمخزن' : stockLabel}</div>
         </div>
         <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.25rem;">
           <span class="product-drawer-price num-mono">${price} د.ل</span>
@@ -5637,16 +5884,20 @@ function addOrderItemToDrawer(productId) {
   const prod = (ERP_STATE.products || []).find(p => p.id === productId);
   if (!prod) return;
 
-  const stock = Number(prod.stock) || 0;
+  const effStock = computeEffectiveStock(prod, ERP_STATE.products);
   const existing = ADD_ORDER_STATE.items.find(i => i.product.id === productId);
 
   if (existing) {
-    if (existing.qty + 1 > stock && stock > 0) {
-      if (typeof showToast === 'function') showToast(`الكمية المطلوبة تتجاوز المخزون المتوفر (${stock} قطعة)`, 'warning');
+    if (existing.qty + 1 > effStock && effStock > 0) {
+      if (typeof showToast === 'function') showToast(`الكمية المطلوبة تتجاوز المخزون المتوفر (${effStock})`, 'warning');
       return;
     }
     existing.qty += 1;
   } else {
+    if (effStock <= 0) {
+      if (typeof showToast === 'function') showToast(`هذا الصنف غير متوفر بالمخزن حالياً`, 'warning');
+      return;
+    }
     ADD_ORDER_STATE.items.push({ product: prod, qty: 1 });
   }
 
