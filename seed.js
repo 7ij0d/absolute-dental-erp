@@ -336,7 +336,7 @@ const INITIAL_PRODUCTS = [
     "nameAr": "Torch 261 Jet Lighter",
     "nameEn": "Torch 261 Jet Lighter",
     "sku": "DEN-c944",
-    "category": "تشريح ومواد (سنة 1)",
+    "category": "صناعة الأسنان المتحركة (سنة 2)",
     "costPrice": 55,
     "sellingPrice": 60,
     "wholesalePrice": 55,
@@ -346,7 +346,7 @@ const INITIAL_PRODUCTS = [
     "supplier": "شركة سندس لمعدات طب الأسنان",
     "status": "متوفر",
     "image": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/c9442057-a22f-4ce8-a237-d37f2024146f.jpg",
-    "subject": "dental-anatomy",
+    "subject": "removable-prosthodontics",
     "price": 60
   },
   {
@@ -388,7 +388,7 @@ const INITIAL_PRODUCTS = [
     "nameAr": "Wax sheet",
     "nameEn": "Wax sheet",
     "sku": "DEN-72e1",
-    "category": "تشريح الأسنان (سنة 1)",
+    "category": "صناعة الأسنان المتحركة (سنة 2)",
     "costPrice": 0,
     "sellingPrice": 0,
     "wholesalePrice": 0,
@@ -398,7 +398,7 @@ const INITIAL_PRODUCTS = [
     "supplier": "",
     "status": "نافد",
     "image": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/72e1069c-4319-42ff-a38c-2af8f8e4e546.jpg",
-    "subject": "dental-anatomy"
+    "subject": "removable-prosthodontics"
   },
   {
     "id": "d2a56c58-bf46-47aa-b803-6546aa7491c5",
@@ -422,7 +422,7 @@ const INITIAL_PRODUCTS = [
     "nameAr": "Wide spatula",
     "nameEn": "Wide spatula",
     "sku": "DEN-2a8f",
-    "category": "مواد طب الأسنان (سنة 1)",
+    "category": "صناعة الأسنان المتحركة (سنة 2)",
     "costPrice": 0,
     "sellingPrice": 0,
     "wholesalePrice": 0,
@@ -432,7 +432,7 @@ const INITIAL_PRODUCTS = [
     "supplier": "",
     "status": "نافد",
     "image": "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/smylodent-products/2a8f9bde-fb3f-485d-a1bd-d62aa0b83556.jpg",
-    "subject": "dental-materials"
+    "subject": "removable-prosthodontics"
   },
   {
     "id": "8f344bd9-91ec-4787-8371-f489cccf635e",

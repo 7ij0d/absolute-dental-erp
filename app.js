@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.08_UNIFIED_INVENTORY_ENGINE_V1';
+const ERP_DATABASE_VERSION = '2026.10.08_UNIFIED_INVENTORY_ENGINE_V2';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
@@ -476,12 +476,12 @@ const VERIFIED_PRODUCT_CATALOG_DATA = {
   "75fb4e12-d06f-4a0e-b7ac-d571b9e996ab": { cost: 11, sellingPrice: 15, supplier: "شركة اللامعة للأدوية والمعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
   "0c18deeb-a571-419b-adf2-8060db42d8cf": { cost: 1, sellingPrice: 3, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
   "fa042791-6d8d-48c1-8f60-f1a103162a1e": { cost: 0, sellingPrice: 0, supplier: "شركة باب الشفاء ومورد معتمد", category: "كاستات وقبضات (سنة 2)", subject: "fixed-prosthodontics" },
-  "c9442057-a22f-4ce8-a237-d37f2024146f": { cost: 55, sellingPrice: 60, wholesalePrice: 55, retailPrice: 60, supplier: "شركة سندس لمعدات طب الأسنان", category: "تشريح ومواد (سنة 1)", subject: "dental-anatomy" },
+  "c9442057-a22f-4ce8-a237-d37f2024146f": { cost: 55, sellingPrice: 60, wholesalePrice: 55, retailPrice: 60, supplier: "شركة سندس لمعدات طب الأسنان", category: "صناعة الأسنان المتحركة (سنة 2)", subject: "removable-prosthodontics" },
   "e009eaf4-f041-4706-b27d-daa394e512d3": { cost: 12, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
   "c554e6ff-3a55-4e36-aed6-562f70601342": { cost: 12, sellingPrice: 15, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
-  "72e1069c-4319-42ff-a38c-2af8f8e4e546": { cost: 0, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "تشريح الأسنان (سنة 1)", subject: "dental-anatomy" },
+  "72e1069c-4319-42ff-a38c-2af8f8e4e546": { cost: 0, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "صناعة الأسنان المتحركة (سنة 2)", subject: "removable-prosthodontics" },
   "d2a56c58-bf46-47aa-b803-6546aa7491c5": { cost: 1.20, sellingPrice: 2, wholesalePrice: 1.20, retailPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "صناعة الأسنان الثابتة (سنة 2)", subject: "fixed-prosthodontics" },
-  "2a8f9bde-fb3f-485d-a1bd-d62aa0b83556": { cost: 0, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "مواد طب الأسنان (سنة 1)", subject: "dental-materials" },
+  "2a8f9bde-fb3f-485d-a1bd-d62aa0b83556": { cost: 0, sellingPrice: 0, supplier: "أوراكير للتوريدات الطبية", category: "صناعة الأسنان المتحركة (سنة 2)", subject: "removable-prosthodontics" },
   "8f344bd9-91ec-4787-8371-f489cccf635e": { cost: 105, sellingPrice: 125, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "كاستات تعليمية (سنة 2)", subject: "fixed-prosthodontics" },
   "187f6429-fee1-4f50-8edc-2a18bac1de35": { cost: 1.20, sellingPrice: 2, wholesalePrice: 1.20, retailPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "صناعة الأسنان الثابتة (سنة 2)", subject: "fixed-prosthodontics" },
   "627bdb62-3364-497b-8aa6-3b911ad78f26": { cost: 1.20, sellingPrice: 2, wholesalePrice: 1.20, retailPrice: 2, supplier: "شركة باب الشفاء لاستيراد المعدات", category: "صناعة الأسنان الثابتة (سنة 2)", subject: "fixed-prosthodontics" },
@@ -5277,6 +5277,8 @@ function openInvoiceModal(orderId) {
       const secondaryName = (it.nameEn && it.name && it.nameEn !== it.name) ? it.name : (it.sku || '');
       const imgUrl = it.image || resolveProductImage({ id: it.id, sku: it.sku, image: it.image });
 
+      const unitBadge = (it.selling_unit || it.sellingUnit) ? `<span style="font-size: 0.7rem; background: #e6f6f4; color: #00a896; padding: 1px 5px; border-radius: 4px; font-weight: 600; margin-inline-start: 4px;">${it.selling_unit || it.sellingUnit}</span>` : '';
+
       return `
         <tr class="invoice-table-row">
           <td style="text-align: center; color: #64748b; font-weight: 600;">${idx + 1}</td>
@@ -5286,7 +5288,7 @@ function openInvoiceModal(orderId) {
                 <img src="${imgUrl}" alt="${primaryName}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format';">
               </div>
               <div class="inv-item-titles">
-                <span class="inv-item-name-en">${primaryName}</span>
+                <span class="inv-item-name-en">${primaryName} ${unitBadge}</span>
                 ${secondaryName ? `<span class="inv-item-name-sub">${secondaryName}</span>` : ''}
               </div>
             </div>
@@ -5377,7 +5379,6 @@ async function downloadInvoicePDFFromModal() {
         ignoreElements: (el) => el.classList?.contains('no-print')
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.96);
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -5388,19 +5389,44 @@ async function downloadInvoicePDFFromModal() {
       const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
       const margin = 10;
       const printWidth = pageWidth - (margin * 2);
-      const printHeight = (canvas.height * printWidth) / canvas.width;
+      const printableHeightMm = pageHeight - (margin * 2);
 
-      let heightLeft = printHeight;
-      let position = margin;
+      // Check if discrete page containers exist
+      const discretePages = sheetElement.querySelectorAll('.erp-invoice-page');
+      if (discretePages && discretePages.length > 0) {
+        for (let i = 0; i < discretePages.length; i++) {
+          if (i > 0) pdf.addPage();
+          const pageCanvas = await html2canvas(discretePages[i], {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            imageTimeout: 5000,
+            ignoreElements: (el) => el.classList?.contains('no-print')
+          });
+          const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.96);
+          const pagePrintH = Math.min((pageCanvas.height * printWidth) / pageCanvas.width, printableHeightMm);
+          pdf.addImage(pageImgData, 'JPEG', margin, margin, printWidth, pagePrintH, undefined, 'FAST');
+        }
+      } else {
+        // Zero-overlap discrete pixel slicing (prevents bottom line duplication on subsequent pages)
+        const sliceHeightPx = (printableHeightMm * canvas.width) / printWidth;
+        const totalPages = Math.ceil(canvas.height / sliceHeightPx);
 
-      pdf.addImage(imgData, 'JPEG', margin, position, printWidth, printHeight, undefined, 'FAST');
-      heightLeft -= (pageHeight - (margin * 2));
-
-      while (heightLeft > 0) {
-        position = heightLeft - printHeight + margin;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', margin, position, printWidth, printHeight, undefined, 'FAST');
-        heightLeft -= (pageHeight - (margin * 2));
+        for (let p = 0; p < totalPages; p++) {
+          if (p > 0) pdf.addPage();
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = canvas.width;
+          const currentSliceH = Math.min(sliceHeightPx, canvas.height - (p * sliceHeightPx));
+          pageCanvas.height = currentSliceH;
+          const ctx = pageCanvas.getContext('2d');
+          // STRICT ZERO OVERLAP: source Y coordinate is exact multiple of sliceHeightPx
+          ctx.drawImage(canvas, 0, p * sliceHeightPx, canvas.width, currentSliceH, 0, 0, canvas.width, currentSliceH);
+          const sliceData = pageCanvas.toDataURL('image/jpeg', 0.96);
+          const sliceMmH = (currentSliceH * printWidth) / canvas.width;
+          pdf.addImage(sliceData, 'JPEG', margin, margin, printWidth, sliceMmH, undefined, 'FAST');
+        }
       }
 
       pdf.save(pdfFileName);
