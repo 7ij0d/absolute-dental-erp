@@ -203,7 +203,7 @@ const INITIAL_PRODUCTS = [
     "sellingPrice": 2,
     "wholesalePrice": 1.2,
     "retailPrice": 2,
-    "stock": 29,
+    "stock": 34,
     "minStock": 0,
     "supplier": "",
     "status": "متوفر",

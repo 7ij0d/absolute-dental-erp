@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.08_UNIFIED_INVENTORY_ENGINE_V2';
+const ERP_DATABASE_VERSION = '2026.10.08_UNIFIED_INVENTORY_ENGINE_V3';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
