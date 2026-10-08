@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.08_UNIFIED_INVENTORY_ENGINE_V3';
+const ERP_DATABASE_VERSION = '2026.10.08_CANONICAL_ORDERS_UNIFIED_V1';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
@@ -3716,8 +3716,91 @@ function showToast(message, type = 'info') {
 // -------------------------------------------------------------
 // 16. LIVE SERVER SYNC (api.kurofangs.id.ly)
 // -------------------------------------------------------------
-// 16. LIVE SERVER SYNC (api.kurofangs.id.ly — Dual System Sync)
 // -------------------------------------------------------------
+// 16. LIVE SERVER SYNC (api.kurofangs.id.ly — Authoritative Canonical Database Sync)
+// -------------------------------------------------------------
+function normalizeServerOrder(ord, cutoffTime = ERP_CUTOFF_TIMESTAMP) {
+  const createdAtTime = new Date(ord.created_at).getTime();
+  const isHistorical = createdAtTime < cutoffTime;
+  const canonicalStatus = normalizeOrderStatus(ord.status);
+
+  const d = new Date(ord.created_at);
+  const dateFormatted = d.toLocaleDateString('ar-LY', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' +
+                        d.toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' });
+
+  let items = [];
+  if (Array.isArray(ord.items) && ord.items.length > 0) {
+    items = ord.items.map(it => ({
+      id: it.id || it.product_id || null,
+      name: it.name_ar || it.name || it.name_en || 'منتج طبي',
+      nameEn: it.name_en || it.name || it.name_ar,
+      qty: Number(it.quantity || it.qty || 1),
+      price: Number(it.price || 0),
+      imageUrl: it.image_url || it.image || null
+    }));
+  } else if (Array.isArray(ord.order_items) && ord.order_items.length > 0) {
+    items = ord.order_items.map(it => ({
+      id: it.product_id || (it.products ? it.products.id : null),
+      name: (it.products ? (it.products.name_ar || it.products.name_en) : null) || it.name_ar || it.name_en || 'منتج طبي',
+      nameEn: (it.products ? it.products.name_en : null) || it.name_en,
+      qty: Number(it.quantity || 1),
+      price: Number(it.price || (it.products ? it.products.price : 0) || 0),
+      imageUrl: it.products ? (it.products.main_image_url || it.products.image_url) : null
+    }));
+  }
+
+  const totalQty = items.reduce((sum, it) => sum + it.qty, 0);
+  const itemsSum = items.reduce((sum, it) => sum + (it.qty * it.price), 0);
+  const rawTotal = Number(ord.total_price != null ? ord.total_price : (ord.total != null ? ord.total : 0));
+  const finalTotal = rawTotal > 0 ? rawTotal : itemsSum;
+
+  let statusHistory = [];
+  if (ord.status_note) {
+    try {
+      const parsed = JSON.parse(ord.status_note);
+      if (parsed && Array.isArray(parsed.status_history)) {
+        statusHistory = parsed.status_history;
+      }
+    } catch (_) {}
+  }
+
+  const rawNum = ord.order_number ? String(ord.order_number).replace(/\D/g, '') : ord.id.slice(0, 8);
+  const isAdminCreated = ord.notes && (ord.notes.includes('Admin') || ord.notes.includes('أنشأه الأدمن'));
+
+  return {
+    id: ord.id,
+    orderNumber: '#' + rawNum,
+    rawOrderNumber: ord.order_number || rawNum,
+    invoiceNumber: isHistorical ? ('#INV-HIST-' + rawNum) : ('#INV-2026-' + rawNum),
+    orderType: isHistorical ? 'historical' : 'new',
+    isHistorical: isHistorical,
+    inventoryDeduction: isHistorical ? 'historical_exempt' : 'applied',
+    customerName: ord.customer_name || 'عميل المتجر',
+    phone: ord.customer_phone || '-',
+    secondaryPhone: ord.customer_phone_secondary || null,
+    email: ord.customer_email || null,
+    university: ord.university || 'جامعة طرابلس',
+    college: ord.college || 'كلية طب الأسنان',
+    address: ord.address_text || 'طرابلس',
+    latitude: ord.latitude || null,
+    longitude: ord.longitude || null,
+    itemsCount: totalQty || 1,
+    items: items,
+    total: finalTotal,
+    discountAmount: Number(ord.discount_amount || 0),
+    shippingFee: Number(ord.shipping_fee || 0),
+    status: canonicalStatus,
+    originalStatus: ord.status,
+    date: dateFormatted,
+    created_at: ord.created_at,
+    notes: ord.notes || null,
+    system_scope: isHistorical ? 'LEGACY' : 'NEW',
+    orderSource: isAdminCreated ? 'admin' : (ord.source === 'أنشأه الأدمن' ? 'admin' : 'website'),
+    source: isHistorical ? 'Admin الأرشيف التاريخي (جرد قديم)' : (isAdminCreated ? 'أنشأه الأدمن' : 'متجر Absolute Dental'),
+    statusHistory: statusHistory
+  };
+}
+
 async function syncWithUserServer() {
   try {
     const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders?select=*,order_items(*,products(*))&order=created_at.desc`, {
@@ -3734,10 +3817,6 @@ async function syncWithUserServer() {
     let stateChanged = false;
 
     serverOrders.forEach(ord => {
-      const createdAtTime = new Date(ord.created_at).getTime();
-      const isHistorical = createdAtTime < cutoffTime;
-
-      // Canonical shared status
       const canonicalStatus = normalizeOrderStatus(ord.status);
 
       // Check if order already exists in ERP_STATE.orders
@@ -3749,12 +3828,43 @@ async function syncWithUserServer() {
       );
 
       if (existingIdx >= 0) {
-        // Order exists: the SERVER database is authoritative
+        // Order exists: synchronize authoritative server updates
         const existing = ERP_STATE.orders[existingIdx];
         if (existing.status !== canonicalStatus) {
           existing.status = canonicalStatus;
           existing.originalStatus = ord.status;
           if (canonicalStatus === 'delivered') existing.saleFinalized = true;
+          stateChanged = true;
+        }
+        if (ord.customer_name && existing.customerName !== ord.customer_name) {
+          existing.customerName = ord.customer_name;
+          stateChanged = true;
+        }
+        if (ord.customer_phone && existing.phone !== ord.customer_phone) {
+          existing.phone = ord.customer_phone;
+          stateChanged = true;
+        }
+        if (ord.customer_phone_secondary && existing.secondaryPhone !== ord.customer_phone_secondary) {
+          existing.secondaryPhone = ord.customer_phone_secondary;
+          stateChanged = true;
+        }
+        if (ord.address_text && existing.address !== ord.address_text) {
+          existing.address = ord.address_text;
+          stateChanged = true;
+        }
+        if (ord.notes && existing.notes !== ord.notes) {
+          existing.notes = ord.notes;
+          stateChanged = true;
+        }
+        const serverTotal = Number(ord.total_price != null ? ord.total_price : (ord.total != null ? ord.total : 0));
+        if (serverTotal > 0 && existing.total !== serverTotal) {
+          existing.total = serverTotal;
+          stateChanged = true;
+        }
+        if ((!existing.items || existing.items.length === 0) && (ord.items || ord.order_items)) {
+          const normalizedTemp = normalizeServerOrder(ord, cutoffTime);
+          existing.items = normalizedTemp.items;
+          existing.itemsCount = normalizedTemp.itemsCount;
           stateChanged = true;
         }
         if (ord.status_note) {
@@ -3766,68 +3876,12 @@ async function syncWithUserServer() {
           } catch (_) {}
         }
       } else {
-        // New order from server: parse and integrate
-        const d = new Date(ord.created_at);
-        const dateFormatted = d.toLocaleDateString('ar-LY', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' +
-                              d.toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' });
-
-        let items = [];
-        if (Array.isArray(ord.items) && ord.items.length > 0) {
-          items = ord.items.map(it => ({
-            id: it.id || null,
-            name: it.name_ar || it.name_en || 'منتج طبي',
-            nameEn: it.name_en || it.name_ar,
-            qty: Number(it.quantity || 1),
-            price: Number(it.price || 0),
-            imageUrl: it.image_url || null
-          }));
-        } else if (Array.isArray(ord.order_items) && ord.order_items.length > 0) {
-          items = ord.order_items.map(it => ({
-            id: it.product_id || (it.products ? it.products.id : null),
-            name: (it.products ? (it.products.name_ar || it.products.name_en) : null) || it.name_ar || it.name_en || 'منتج طبي',
-            nameEn: (it.products ? it.products.name_en : null) || it.name_en,
-            qty: Number(it.quantity || 1),
-            price: Number(it.price || 0),
-            imageUrl: it.products ? it.products.image_url : null
-          }));
-        }
-
-        const totalQty = items.reduce((sum, it) => sum + it.qty, 0);
-
-        const newOrdObj = {
-          id: ord.id,
-          orderNumber: '#' + (ord.order_number ? ord.order_number.replace(/\D/g, '') : ord.id.slice(0, 8)),
-          rawOrderNumber: ord.order_number,
-          invoiceNumber: isHistorical 
-            ? ('#INV-HIST-' + (ord.order_number ? ord.order_number.replace(/\D/g, '') : ord.id.slice(0, 8)))
-            : ('#INV-2026-' + (ord.order_number ? ord.order_number.replace(/\D/g, '') : ord.id.slice(0, 8))),
-          orderType: isHistorical ? 'historical' : 'new',
-          isHistorical: isHistorical,
-          inventoryDeduction: isHistorical ? 'historical_exempt' : 'applied',
-          customerName: ord.customer_name || 'عميل المتجر',
-          phone: ord.customer_phone || '-',
-          secondaryPhone: ord.customer_phone_secondary || null,
-          email: ord.customer_email || null,
-          university: ord.university || 'جامعة طرابلس',
-          college: ord.college || 'كلية طب الأسنان',
-          address: ord.address_text || 'طرابلس',
-          itemsCount: totalQty,
-          items: items,
-          total: Number(ord.total_price || 0),
-          discountAmount: Number(ord.discount_amount || 0),
-          shippingFee: Number(ord.shipping_fee || 0),
-          status: canonicalStatus,
-          originalStatus: ord.status,
-          date: dateFormatted,
-          created_at: ord.created_at,
-          notes: ord.notes || null,
-          system_scope: isHistorical ? 'LEGACY' : 'NEW',
-          source: isHistorical ? 'Admin الأرشيف التاريخي (جرد قديم)' : 'متجر Absolute Dental'
-        };
+        // New order from server: normalize and integrate
+        const newOrdObj = normalizeServerOrder(ord, cutoffTime);
 
         // If order was created AFTER cutoff, auto-deduct stock immediately!
-        if (!isHistorical) {
-          items.forEach(it => {
+        if (!newOrdObj.isHistorical) {
+          newOrdObj.items.forEach(it => {
             const prod = ERP_STATE.products.find(p => p.id === it.id || (p.nameAr && p.nameAr === it.name));
             if (prod) {
               const oldStock = Number(prod.stock) || 0;
@@ -3850,8 +3904,8 @@ async function syncWithUserServer() {
             date: new Date().toLocaleDateString('ar-LY', { month: '2-digit', day: '2-digit' }),
             time: new Date().toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' }),
             user: 'سيرفر المتجر المباشر',
-            items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
-            totalQty: totalQty,
+            items: newOrdObj.items.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+            totalQty: newOrdObj.itemsCount,
             notes: 'خصم تلقائي لمخزون طلب جديد وارد بعد نقطة البداية'
           };
           ERP_STATE.inventoryTransactions.unshift(invTx);
@@ -3864,6 +3918,9 @@ async function syncWithUserServer() {
     });
 
     if (stateChanged) {
+      // Keep orders sorted chronologically descending
+      ERP_STATE.orders.sort((a, b) => new Date(b.created_at || b.date || 0) - new Date(a.created_at || a.date || 0));
+
       try {
         localStorage.setItem('abs_erp_orders', JSON.stringify(ERP_STATE.orders));
         localStorage.setItem('abs_erp_products', JSON.stringify(ERP_STATE.products));
@@ -3883,9 +3940,48 @@ async function syncWithUserServer() {
       }
     }
   } catch (err) {
-    console.warn('Sync with user server notice:', err);
+    console.warn('syncWithUserServer warning:', err);
   }
 }
+
+// Global Browser Reconciliation Utility
+window.runOrdersReconciliation = async function() {
+  console.log('🔄 Running Orders Reconciliation against canonical database...');
+  await syncWithUserServer();
+  const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders?select=id,order_number,status,total_price,total,customer_name`, {
+    headers: {
+      'apikey': SUPABASE_CONFIG.anonKey,
+      'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+    }
+  });
+  const dbOrders = await res.json();
+  const erpOrders = ERP_STATE.orders || [];
+  
+  const missing = dbOrders.filter(db => !erpOrders.some(e => e.id === db.id || e.rawOrderNumber === db.order_number));
+  const mismatches = [];
+  
+  dbOrders.forEach(db => {
+    const match = erpOrders.find(e => e.id === db.id || e.rawOrderNumber === db.order_number);
+    if (match) {
+      const canonicalDbStatus = normalizeOrderStatus(db.status);
+      const canonicalErpStatus = normalizeOrderStatus(match.status);
+      if (canonicalDbStatus !== canonicalErpStatus) {
+        mismatches.push({ id: db.id, number: db.order_number, dbStatus: canonicalDbStatus, erpStatus: canonicalErpStatus });
+      }
+    }
+  });
+
+  const report = {
+    supabaseCount: dbOrders.length,
+    erpCount: erpOrders.length,
+    missingCount: missing.length,
+    statusMismatchCount: mismatches.length,
+    missingOrders: missing,
+    mismatches: mismatches
+  };
+  console.log('📊 Reconciliation Report:', report);
+  return report;
+};
 
 // -------------------------------------------------------------
 // 18. ASSISTED STUDENT ORDER SYSTEM (+ طلب لطالب بالنيابة)
@@ -5754,18 +5850,38 @@ function renderOrdersCardsList() {
 
   let orders = Array.isArray(ERP_STATE.orders) ? [...ERP_STATE.orders] : [];
 
-  // Filter out legacy archive orders unless explicitly toggled
-  if (!ERP_STATE.showLegacyArchive) {
-    orders = orders.filter(o => o.system_scope !== 'LEGACY');
-  }
-
-  // Filter by Source
-  if (sourceFilter === 'website') {
-    orders = orders.filter(o => (o.orderSource === 'website' || (!o.orderSource && o.source !== 'أنشأه الأدمن')) && o.system_scope !== 'LEGACY');
+  // Filter by Source / Scope
+  if (sourceFilter === 'current_cycle') {
+    orders = orders.filter(o => o.system_scope !== 'LEGACY' && !o.isHistorical && o.orderType !== 'historical');
+  } else if (sourceFilter === 'website') {
+    orders = orders.filter(o => (o.orderSource === 'website' || (!o.orderSource && o.source !== 'أنشأه الأدمن')));
   } else if (sourceFilter === 'admin') {
-    orders = orders.filter(o => (o.orderSource === 'admin' || o.source === 'أنشأه الأدمن') && o.system_scope !== 'LEGACY');
+    orders = orders.filter(o => (o.orderSource === 'admin' || o.source === 'أنشأه الأدمن'));
   } else if (sourceFilter === 'legacy') {
-    orders = (Array.isArray(ERP_STATE.orders) ? [...ERP_STATE.orders] : []).filter(o => o.system_scope === 'LEGACY');
+    orders = orders.filter(o => o.system_scope === 'LEGACY' || o.isHistorical || o.orderType === 'historical');
+  }
+  // When sourceFilter === 'all', all canonical orders are displayed
+
+  // Filter by Date
+  if (dateFilter && dateFilter !== 'all') {
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000;
+    orders = orders.filter(o => {
+      const orderTime = new Date(o.created_at || o.date || 0).getTime();
+      if (!orderTime) return true;
+      if (dateFilter === 'today') {
+        const orderDate = new Date(orderTime);
+        const today = new Date();
+        return orderDate.getFullYear() === today.getFullYear() &&
+               orderDate.getMonth() === today.getMonth() &&
+               orderDate.getDate() === today.getDate();
+      } else if (dateFilter === 'week') {
+        return (now - orderTime) <= (7 * oneDay);
+      } else if (dateFilter === 'month') {
+        return (now - orderTime) <= (30 * oneDay);
+      }
+      return true;
+    });
   }
 
   // Filter by Status
