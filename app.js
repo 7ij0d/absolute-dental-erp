@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.08_CANONICAL_ORDERS_UNIFIED_V1';
+const ERP_DATABASE_VERSION = '2026.10.08_CANONICAL_TEETH_FIXED_PROSTHO_V2';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
@@ -4796,10 +4796,10 @@ function renderPosProductsCatalog(query = posCatalogSearchFilter, category = pos
         return subject === 'dental-materials' || cat.includes('مواد') || name.includes('spatula') || name.includes('bowl') || name.includes('glass slab') || name.includes('alginate');
       }
       if (category === 'restorative-dentistry') {
-        return subject === 'restorative-dentistry' || cat.includes('تحفظي') || cat.includes('كونس') || name.includes('bur') || name.includes('coxo') || name.includes('teeth') || name.includes('incisor') || name.includes('molar');
+        return subject === 'restorative-dentistry' || cat.includes('تحفظي') || cat.includes('كونس') || name.includes('bur') || name.includes('coxo');
       }
       if (category === 'fixed-prosthodontics') {
-        return subject === 'fixed-prosthodontics' || cat.includes('كراون') || cat.includes('ثابتة') || cat.includes('كاست') || name.includes('cast') || name.includes('wheel') || name.includes('wr 13') || name.includes('mirror');
+        return subject === 'fixed-prosthodontics' || cat.includes('كراون') || cat.includes('ثابتة') || cat.includes('كاست') || name.includes('cast') || name.includes('wheel') || name.includes('wr 13') || name.includes('mirror') || name.includes('teeth') || name.includes('incisor') || name.includes('molar') || name.includes('أسنان صناعية');
       }
       if (category === 'removable-prosthodontics') {
         return subject === 'removable-prosthodontics' || cat.includes('متحركة') || name.includes('baseplate') || name.includes('acrylic');
