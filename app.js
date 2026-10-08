@@ -1650,9 +1650,13 @@ function renderOrdersTable(filterStatus = 'all', searchQuery = '') {
           ? `<span class="stock-impact-badge deducted" title="مخصوم من المخزون">📦 مخصوم</span>`
           : `<span class="stock-impact-badge pending" title="بانتظار الخصم">⏳ قيد الخصم</span>`);
 
+    const modificationBadge = (order.hasPendingModification || order.pendingVersionId)
+      ? '<span style="display:inline-block; margin-inline-start:4px; padding:2px 6px; border-radius:12px; font-size:0.68rem; font-weight:800; background-color:#ffedd5; color:#c2410c; border:1px solid #fed7aa;" title="قام الزبون بتعديل الطلبية وهو قيد مراجعة الإدارة">🟠 تعديل مقترح</span>'
+      : '';
+
     return `
       <tr>
-        <td class="num-mono" style="font-weight: 800; color: var(--primary);">${order.orderNumber}</td>
+        <td class="num-mono" style="font-weight: 800; color: var(--primary);">${order.orderNumber} ${modificationBadge}</td>
         <td>${typeBadge}</td>
         <td>
           <div style="font-weight: 700; color: var(--text-main); line-height: 1.3;">${order.customerName}</div>
@@ -3755,11 +3759,27 @@ function normalizeServerOrder(ord, cutoffTime = ERP_CUTOFF_TIMESTAMP) {
   const finalTotal = rawTotal > 0 ? rawTotal : itemsSum;
 
   let statusHistory = [];
+  let hasPendingModification = false;
+  let pendingVersionId = null;
+  let orderVersions = null;
+  let currentVersionId = null;
   if (ord.status_note) {
     try {
       const parsed = JSON.parse(ord.status_note);
-      if (parsed && Array.isArray(parsed.status_history)) {
-        statusHistory = parsed.status_history;
+      if (parsed) {
+        if (Array.isArray(parsed.status_history)) {
+          statusHistory = parsed.status_history;
+        }
+        if (parsed.pending_version_id) {
+          hasPendingModification = true;
+          pendingVersionId = parsed.pending_version_id;
+        }
+        if (Array.isArray(parsed.order_versions)) {
+          orderVersions = parsed.order_versions;
+        }
+        if (parsed.current_version_id) {
+          currentVersionId = parsed.current_version_id;
+        }
       }
     } catch (_) {}
   }
@@ -3797,7 +3817,11 @@ function normalizeServerOrder(ord, cutoffTime = ERP_CUTOFF_TIMESTAMP) {
     system_scope: isHistorical ? 'LEGACY' : 'NEW',
     orderSource: isAdminCreated ? 'admin' : (ord.source === 'أنشأه الأدمن' ? 'admin' : 'website'),
     source: isHistorical ? 'Admin الأرشيف التاريخي (جرد قديم)' : (isAdminCreated ? 'أنشأه الأدمن' : 'متجر Absolute Dental'),
-    statusHistory: statusHistory
+    statusHistory: statusHistory,
+    hasPendingModification: hasPendingModification,
+    pendingVersionId: pendingVersionId,
+    orderVersions: orderVersions,
+    currentVersionId: currentVersionId
   };
 }
 
@@ -3870,8 +3894,14 @@ async function syncWithUserServer() {
         if (ord.status_note) {
           try {
             const parsed = JSON.parse(ord.status_note);
-            if (parsed && Array.isArray(parsed.status_history)) {
-              existing.statusHistory = parsed.status_history;
+            if (parsed) {
+              if (Array.isArray(parsed.status_history)) {
+                existing.statusHistory = parsed.status_history;
+              }
+              existing.hasPendingModification = Boolean(parsed.pending_version_id);
+              existing.pendingVersionId = parsed.pending_version_id || null;
+              existing.orderVersions = Array.isArray(parsed.order_versions) ? parsed.order_versions : null;
+              existing.currentVersionId = parsed.current_version_id || null;
             }
           } catch (_) {}
         }
@@ -5318,6 +5348,18 @@ function openInvoiceModal(orderId) {
           <div style="font-size: 0.8rem; color: #1E40AF; line-height: 1.4;">
             <strong style="color: #1E3A8A;">طلب جديد بالمنظومة:</strong>
             أُنشئ بعد نقطة البداية (7 أكتوبر 2026 — 1:55 ص). خاضع لمتابعة المخزون والأسعار المعتمدة، وتم خصم كمياته تلقائياً من رصيد المنظومة.
+          </div>
+        </div>
+      `;
+    }
+
+    if (order.hasPendingModification || order.pendingVersionId) {
+      noticeEl.innerHTML += `
+        <div style="margin-top: 0.6rem; background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-size: 1.25rem;">🟠</span>
+          <div style="font-size: 0.8rem; color: #9A3412; line-height: 1.4;">
+            <strong style="color: #C2410C;">تنبيه تعديل معلق من الزبون:</strong>
+            قام الزبون بتقديم تعديل مباشر على هذا الطلب وهو بانتظار مراجعة واعتماد الإدارة عبر لوحة التحكم. الفاتورة المعروضة حالياً تمثل الإصدار الرسمي المعتمد حتى يتم البت في التعديل.
           </div>
         </div>
       `;
