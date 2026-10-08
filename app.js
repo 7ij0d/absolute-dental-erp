@@ -3825,9 +3825,12 @@ function normalizeServerOrder(ord, cutoffTime = ERP_CUTOFF_TIMESTAMP) {
   };
 }
 
+let isSyncingWithServer = false;
 async function syncWithUserServer() {
+  if (isSyncingWithServer) return;
+  isSyncingWithServer = true;
   try {
-    const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders?select=*,order_items(*,products(*))&order=created_at.desc`, {
+    const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders?select=*,order_items(id,product_id,quantity,price,products(id,name_ar,name_en,image_url,price))&order=created_at.desc`, {
       headers: {
         'apikey': SUPABASE_CONFIG.anonKey,
         'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
@@ -3971,6 +3974,8 @@ async function syncWithUserServer() {
     }
   } catch (err) {
     console.warn('syncWithUserServer warning:', err);
+  } finally {
+    isSyncingWithServer = false;
   }
 }
 
