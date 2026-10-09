@@ -174,6 +174,53 @@ const INITIAL_PRODUCTS = [
     "year": "year3"
   },
   {
+    "id": "33000000-0000-0000-0000-000000000109",
+    "nameAr": "قفازات نايتريل طبية فاحصة OverseasGlove (غير معقمة)",
+    "nameEn": "OverseasGlove Disposable Nitrile Gloves (Non-Sterile)",
+    "sku": "DEN-GLV-OVG",
+    "category": "مستلزمات عامة ووقائية (سنة 3 - جميع المواد)",
+    "costPrice": 0.56,
+    "sellingPrice": 1.00,
+    "wholesalePrice": 0.56,
+    "retailPrice": 1.00,
+    "stock": 100,
+    "minStock": 20,
+    "supplier": "توريد معدات طب أسنان",
+    "status": "متوفر",
+    "image": "assets/overseasglove-nitrile-gloves-black-s.png",
+    "subject": "year3-all",
+    "year": "year3",
+    "year3All": true,
+    "variants": [
+      {
+        "key": "black-s",
+        "color": "Black",
+        "colorAr": "أسود",
+        "size": "S",
+        "sizeAr": "صغير (S)",
+        "labelAr": "أسود - مقاس S",
+        "labelEn": "Black - Size S",
+        "stock": 50,
+        "costPrice": 0.56,
+        "sellingPrice": 1.00,
+        "image": "assets/overseasglove-nitrile-gloves-black-s.png"
+      },
+      {
+        "key": "blue-m",
+        "color": "Blue",
+        "colorAr": "أزرق",
+        "size": "M",
+        "sizeAr": "متوسط (M)",
+        "labelAr": "أزرق - مقاس M",
+        "labelEn": "Blue - Size M",
+        "stock": 50,
+        "costPrice": 0.56,
+        "sellingPrice": 1.00,
+        "image": "assets/overseasglove-nitrile-gloves-blue-m.png"
+      }
+    ]
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",
