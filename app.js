@@ -1,17 +1,11 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.08_CANONICAL_TEETH_FIXED_PROSTHO_V2';
+const ERP_DATABASE_VERSION = '2026.10.09_SURGICAL_FACE_MASKS_ALL_SUBJECTS_V1';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
     localStorage.removeItem('abs_erp_products');
-    localStorage.removeItem('abs_erp_orders');
-    localStorage.removeItem('abs_erp_purchases');
-    localStorage.removeItem('abs_erp_expenses');
-    localStorage.removeItem('abs_erp_inventory_transactions');
-    localStorage.removeItem('abs_erp_audit');
-    localStorage.removeItem('abs_erp_invoices');
     localStorage.setItem('abs_erp_data_version', ERP_DATABASE_VERSION);
   }
 }
@@ -903,6 +897,8 @@ const ERP_STATE = {
         p.subject = sp.subject;
         p.nameAr = sp.nameAr;
         p.nameEn = sp.nameEn;
+        if (sp.allSubjects !== undefined) p.allSubjects = sp.allSubjects;
+        if (sp.color) p.color = sp.color;
         if (sp.sizes) p.sizes = sp.sizes;
         if (sp.image) p.image = sp.image;
       }
@@ -2386,6 +2382,22 @@ function getProductAcademicTaxonomy(p) {
   const subj = (p.subject || '').toLowerCase();
   const name = ((p.nameAr || '') + ' ' + (p.nameEn || '')).toLowerCase();
 
+  // 0. General Supplies Across All Subjects (مستلزمات عامة ووقائية لجميع المواد)
+  if (p.allSubjects || p.all_subjects || p.id === '99000000-0000-0000-0000-000000000001' || p.id === '99000000-0000-0000-0000-000000000002' || cat.includes('جميع المواد') || name.includes('surgical face masks') || name.includes('كمامات')) {
+    return {
+      yearKey: 'all',
+      yearNameAr: 'جميع السنوات الدراسية',
+      yearTagClass: 'y-all',
+      yearIcon: '🌐',
+      subjectKey: 'all_subjects',
+      subjectNameAr: 'مستلزمات عامة ووقائية (جميع المواد)',
+      subjectShortName: 'وقاية ومستلزمات عامة',
+      subjectIcon: '😷',
+      tagClass: 'general-safety',
+      orderIndex: 0
+    };
+  }
+
   // 1. Year 1 Tools (أدوات سنة أولى)
   if (cat.includes('سنة 1') || cat.includes('سنة أولى') || subj === 'dental-materials' || (subj === 'dental-anatomy' && !cat.includes('سنة 2') && !cat.includes('سنة 3'))) {
     let subjectKey = 'anatomy';
@@ -2670,12 +2682,13 @@ function renderInventoryTable() {
   // Filter Catalog
   let filteredProducts = catalog.filter(p => {
     const tax = getProductAcademicTaxonomy(p);
+    const isGeneralSupply = tax.yearKey === 'all' || p.allSubjects || p.all_subjects;
 
-    if (CURRENT_INVENTORY_YEAR !== 'all' && tax.yearKey !== CURRENT_INVENTORY_YEAR) {
+    if (CURRENT_INVENTORY_YEAR !== 'all' && tax.yearKey !== CURRENT_INVENTORY_YEAR && !isGeneralSupply) {
       return false;
     }
 
-    if (CURRENT_INVENTORY_SUBJECT !== 'all' && tax.subjectKey !== CURRENT_INVENTORY_SUBJECT) {
+    if (CURRENT_INVENTORY_SUBJECT !== 'all' && tax.subjectKey !== CURRENT_INVENTORY_SUBJECT && !isGeneralSupply) {
       return false;
     }
 
@@ -6286,6 +6299,7 @@ function renderAddOrderProducts(searchVal = '') {
   // Filter products by subject
   if (ADD_ORDER_STATE.subject) {
     prods = prods.filter(p => {
+      if (p.allSubjects || p.all_subjects || p.id === '99000000-0000-0000-0000-000000000001' || p.id === '99000000-0000-0000-0000-000000000002') return true;
       if (p.subject === ADD_ORDER_STATE.subject) return true;
       if (p.id === '33000000-0000-0000-0000-000000000101' && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics-2')) return true;
       if (!p.subject && ADD_ORDER_STATE.subject === 'dental-anatomy') return true;
