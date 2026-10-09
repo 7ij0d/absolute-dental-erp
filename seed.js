@@ -307,6 +307,24 @@ const INITIAL_PRODUCTS = [
     ]
   },
   {
+    "id": "33000000-0000-0000-0000-000000000113",
+    "nameAr": "خيط أسنان طبي عيادي (Dental Floss Dispenser)",
+    "nameEn": "Clinical Dental Floss (Dispenser Box)",
+    "sku": "DEN-FLOSS-DSP",
+    "category": "طب أسنان الأطفال والوقائي (سنة 3)",
+    "costPrice": 8.00,
+    "sellingPrice": 10.00,
+    "wholesalePrice": 8.00,
+    "retailPrice": 10.00,
+    "stock": 10,
+    "minStock": 2,
+    "supplier": "توريد معدات طب أسنان",
+    "status": "متوفر",
+    "image": "assets/dental-floss-dispenser.png",
+    "subject": "preventive-dentistry",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",
