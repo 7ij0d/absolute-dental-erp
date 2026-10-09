@@ -903,6 +903,15 @@ const ERP_STATE = {
         p.subject = sp.subject;
         p.nameAr = sp.nameAr;
         p.nameEn = sp.nameEn;
+        if (sp.sizes) p.sizes = sp.sizes;
+        if (sp.image) p.image = sp.image;
+      }
+    });
+
+    // Ensure any new products added to seed are included in the catalog
+    sourceSeed.forEach(sp => {
+      if (!list.some(p => p.id === sp.id)) {
+        list.push(JSON.parse(JSON.stringify(sp)));
       }
     });
 
@@ -6276,7 +6285,12 @@ function renderAddOrderProducts(searchVal = '') {
 
   // Filter products by subject
   if (ADD_ORDER_STATE.subject) {
-    prods = prods.filter(p => (p.subject === ADD_ORDER_STATE.subject) || (!p.subject && ADD_ORDER_STATE.subject === 'dental-anatomy'));
+    prods = prods.filter(p => {
+      if (p.subject === ADD_ORDER_STATE.subject) return true;
+      if (p.id === '33000000-0000-0000-0000-000000000101' && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics-2')) return true;
+      if (!p.subject && ADD_ORDER_STATE.subject === 'dental-anatomy') return true;
+      return false;
+    });
   }
 
   if (q) {
@@ -6304,19 +6318,41 @@ function renderAddOrderProducts(searchVal = '') {
         </div>
         <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.25rem;">
           <span class="product-drawer-price num-mono">${price} د.ل</span>
-          <button type="button" class="btn-add-item-drawer" onclick="addOrderItemToDrawer('${p.id}')" title="إضافة للطلب" ${isOut ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''}>+</button>
+          ${p.sizes ? `
+            <div style="display: flex; gap: 4px;">
+              <button type="button" class="btn-add-item-drawer" onclick="addOrderItemToDrawer('${p.id}', 'M')" title="إضافة مقاس M" ${isOut ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : 'style="font-size: 0.725rem; padding: 2px 6px; min-width: 28px;"'}>+M</button>
+              <button type="button" class="btn-add-item-drawer" onclick="addOrderItemToDrawer('${p.id}', 'L')" title="إضافة مقاس L" ${isOut ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : 'style="font-size: 0.725rem; padding: 2px 6px; min-width: 28px;"'}>+L</button>
+            </div>
+          ` : `
+            <button type="button" class="btn-add-item-drawer" onclick="addOrderItemToDrawer('${p.id}')" title="إضافة للطلب" ${isOut ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''}>+</button>
+          `}
         </div>
       </div>
     `;
   }).join('');
 }
 
-function addOrderItemToDrawer(productId) {
+function addOrderItemToDrawer(productId, size = null) {
   const prod = (ERP_STATE.products || []).find(p => p.id === productId);
   if (!prod) return;
 
   const effStock = computeEffectiveStock(prod, ERP_STATE.products);
-  const existing = ADD_ORDER_STATE.items.find(i => i.product.id === productId);
+  let itemId = productId;
+  let targetProd = prod;
+
+  if (size) {
+    itemId = `${productId}-${size}`;
+    targetProd = {
+      ...prod,
+      id: itemId,
+      base_product_id: productId,
+      nameAr: `${prod.nameAr} (مقاس ${size})`,
+      nameEn: `${prod.nameEn} (Size ${size})`,
+      selected_size: size
+    };
+  }
+
+  const existing = ADD_ORDER_STATE.items.find(i => i.product.id === itemId);
 
   if (existing) {
     if (existing.qty + 1 > effStock && effStock > 0) {
@@ -6329,11 +6365,11 @@ function addOrderItemToDrawer(productId) {
       if (typeof showToast === 'function') showToast(`هذا الصنف غير متوفر بالمخزن حالياً`, 'warning');
       return;
     }
-    ADD_ORDER_STATE.items.push({ product: prod, qty: 1 });
+    ADD_ORDER_STATE.items.push({ product: targetProd, qty: 1 });
   }
 
   renderAddOrderSummary();
-  if (typeof showToast === 'function') showToast(`تمت إضافة ${prod.nameAr} للطلب`, 'info');
+  if (typeof showToast === 'function') showToast(`تمت إضافة ${targetProd.nameAr} للطلب`, 'info');
 }
 
 function removeOrderItemFromDrawer(productId) {

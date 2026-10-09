@@ -4,6 +4,29 @@ if (typeof window !== 'undefined') {
 }
 const INITIAL_PRODUCTS = [
   {
+    "id": "33000000-0000-0000-0000-000000000101",
+    "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
+    "nameEn": "Dental impression tray (Blue)",
+    "sku": "DEN-TRAY-BLU",
+    "category": "صناعة الأسنان الثابتة والمتحركة (سنة 3)",
+    "costPrice": 1,
+    "sellingPrice": 2,
+    "wholesalePrice": 1,
+    "retailPrice": 2,
+    "stock": 48,
+    "minStock": 5,
+    "supplier": "توريد معدات طب أسنان",
+    "status": "متوفر",
+    "image": "assets/dental-impression-tray-blue.png",
+    "subject": "fixed-prosthodontics-2",
+    "year": "year3",
+    "color": "Blue",
+    "sizes": [
+      { "size": "M", "stock": 24, "costPrice": 1, "sellingPrice": 2 },
+      { "size": "L", "stock": 24, "costPrice": 1, "sellingPrice": 2 }
+    ]
+  },
+  {
     "id": "d02e821e-91e3-4ed4-869e-f636142d8247",
     "nameAr": "Artificial Teeth - Central Incisor",
     "nameEn": "Artificial Teeth - Central Incisor",
