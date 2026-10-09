@@ -120,6 +120,24 @@ const INITIAL_PRODUCTS = [
     "year": "year3"
   },
   {
+    "id": "33000000-0000-0000-0000-000000000106",
+    "nameAr": "مادة طبعة الجينات آي كيو - IQ Alginate (50g)",
+    "nameEn": "IQ Alginate | Impression Material (50g)",
+    "sku": "DEN-ALG-IQ50",
+    "category": "صناعة الأسنان المتحركة (سنة 3)",
+    "costPrice": 6.125,
+    "sellingPrice": 7.00,
+    "wholesalePrice": 6.125,
+    "retailPrice": 7.00,
+    "stock": 9,
+    "minStock": 2,
+    "supplier": "توريد معدات طب أسنان",
+    "status": "متوفر",
+    "image": "assets/iq-alginate-impression-material-50g.png",
+    "subject": "removable-prosthodontics-2",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",
