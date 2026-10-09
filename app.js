@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.09_IQ_ALGINATE_REMOVABLE_V1';
+const ERP_DATABASE_VERSION = '2026.10.09_LASCOD_ALGINATE_450G_V1';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
@@ -6312,7 +6312,8 @@ function renderAddOrderProducts(searchVal = '') {
       if (p.id === '33000000-0000-0000-0000-000000000101' && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics-2')) return true;
       if (p.id === '33000000-0000-0000-0000-000000000102' && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics-2' || ADD_ORDER_STATE.subject === 'fixed-prosthodontics' || ADD_ORDER_STATE.subject === 'removable-prosthodontics')) return true;
       if (p.year3All || p.id === '33000000-0000-0000-0000-000000000103' || p.id === '33000000-0000-0000-0000-000000000104') return true;
-      if ((p.id === '33000000-0000-0000-0000-000000000105' || p.id === '33000000-0000-0000-0000-000000000106') && (ADD_ORDER_STATE.subject === 'removable-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics')) return true;
+      if ((p.id === '33000000-0000-0000-0000-000000000105' || p.id === '33000000-0000-0000-0000-000000000106' || p.id === '33000000-0000-0000-0000-000000000107') && (ADD_ORDER_STATE.subject === 'removable-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics')) return true;
+      if (p.id === '33000000-0000-0000-0000-000000000107' && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'fixed-prosthodontics')) return true;
       if (!p.subject && ADD_ORDER_STATE.subject === 'dental-anatomy') return true;
       return false;
     });

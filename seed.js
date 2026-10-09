@@ -138,6 +138,24 @@ const INITIAL_PRODUCTS = [
     "year": "year3"
   },
   {
+    "id": "33000000-0000-0000-0000-000000000107",
+    "nameAr": "مادة طبعة الجينات لاسكود آي كيو - Lascod iQ Alginate (450g)",
+    "nameEn": "Lascod iQ Alginate | Impression Material (450g)",
+    "sku": "DEN-ALG-LSC450",
+    "category": "صناعة الأسنان الثابتة والمتحركة (سنة 3)",
+    "costPrice": 45.00,
+    "sellingPrice": 50.00,
+    "wholesalePrice": 45.00,
+    "retailPrice": 50.00,
+    "stock": 1,
+    "minStock": 1,
+    "supplier": "توريد معدات طب أسنان",
+    "status": "متوفر",
+    "image": "assets/lascod-iq-alginate-impression-material-450g.png",
+    "subject": "removable-prosthodontics-2",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",
