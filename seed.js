@@ -156,6 +156,24 @@ const INITIAL_PRODUCTS = [
     "year": "year3"
   },
   {
+    "id": "33000000-0000-0000-0000-000000000108",
+    "nameAr": "شاش طبي معقم لايف سبورت - Life Support Sterile Gauze Swab",
+    "nameEn": "Life Support Sterile Gauze Swab (10cm x 10cm)",
+    "sku": "DEN-GAUZE-LF10",
+    "category": "طب أسنان الأطفال والوقائي (سنة 3)",
+    "costPrice": 0.20,
+    "sellingPrice": 0.50,
+    "wholesalePrice": 0.20,
+    "retailPrice": 0.50,
+    "stock": 200,
+    "minStock": 20,
+    "supplier": "توريد معدات طب أسنان",
+    "status": "متوفر",
+    "image": "assets/life-support-sterile-gauze-swab.png",
+    "subject": "preventive-dentistry",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",
