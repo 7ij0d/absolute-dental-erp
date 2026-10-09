@@ -102,6 +102,24 @@ const INITIAL_PRODUCTS = [
     "year3All": true
   },
   {
+    "id": "33000000-0000-0000-0000-000000000105",
+    "nameAr": "مادة طبعة الجينات زيرماك - Zhermack Alginate (50g)",
+    "nameEn": "Zhermack Alginate | Impression Material (50g)",
+    "sku": "DEN-ALG-ZHM50",
+    "category": "صناعة الأسنان المتحركة (سنة 3)",
+    "costPrice": 7.52,
+    "sellingPrice": 10.00,
+    "wholesalePrice": 7.52,
+    "retailPrice": 10.00,
+    "stock": 9,
+    "minStock": 2,
+    "supplier": "توريد معدات طب أسنان",
+    "status": "متوفر",
+    "image": "assets/zhermack-alginate-impression-material-50g.png",
+    "subject": "removable-prosthodontics-2",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",
