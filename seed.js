@@ -44,6 +44,24 @@ const INITIAL_PRODUCTS = [
     "allSubjects": true
   },
   {
+    "id": "33000000-0000-0000-0000-000000000102",
+    "nameAr": "شفرات جراحية معقمة L+F Support (مقاس 22)",
+    "nameEn": "L+F Support Surgical Blades (Size 22)",
+    "sku": "DEN-BLADE-LF22",
+    "category": "صناعة الأسنان الثابتة والمتحركة (سنة 3)",
+    "costPrice": 0.20,
+    "sellingPrice": 0.50,
+    "wholesalePrice": 0.20,
+    "retailPrice": 0.50,
+    "stock": 300,
+    "minStock": 20,
+    "supplier": "توريد معدات طب أسنان",
+    "status": "متوفر",
+    "image": "assets/surgical-blades-lf-support.png",
+    "subject": "removable-prosthodontics-2",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",

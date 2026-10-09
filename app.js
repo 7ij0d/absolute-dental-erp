@@ -6302,6 +6302,7 @@ function renderAddOrderProducts(searchVal = '') {
       if (p.allSubjects || p.all_subjects || p.id === '99000000-0000-0000-0000-000000000001' || p.id === '99000000-0000-0000-0000-000000000002') return true;
       if (p.subject === ADD_ORDER_STATE.subject) return true;
       if (p.id === '33000000-0000-0000-0000-000000000101' && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics-2')) return true;
+      if (p.id === '33000000-0000-0000-0000-000000000102' && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics-2' || ADD_ORDER_STATE.subject === 'fixed-prosthodontics' || ADD_ORDER_STATE.subject === 'removable-prosthodontics')) return true;
       if (!p.subject && ADD_ORDER_STATE.subject === 'dental-anatomy') return true;
       return false;
     });
