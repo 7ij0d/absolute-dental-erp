@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.09_SURGICAL_FACE_MASKS_ALL_SUBJECTS_V1';
+const ERP_DATABASE_VERSION = '2026.10.09_DENTAL_BIBS_YEAR3_ALL_V1';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
@@ -898,6 +898,7 @@ const ERP_STATE = {
         p.nameAr = sp.nameAr;
         p.nameEn = sp.nameEn;
         if (sp.allSubjects !== undefined) p.allSubjects = sp.allSubjects;
+        if (sp.year3All !== undefined) p.year3All = sp.year3All;
         if (sp.color) p.color = sp.color;
         if (sp.sizes) p.sizes = sp.sizes;
         if (sp.image) p.image = sp.image;
@@ -2467,6 +2468,13 @@ function getProductAcademicTaxonomy(p) {
       subjectIcon = '🧰';
       tagClass = 'y3-remov';
       orderIndex = 23;
+    } else if (p.year3All || p.id === '33000000-0000-0000-0000-000000000103' || p.id === '33000000-0000-0000-0000-000000000104' || name.includes('bib') || name.includes('مفرش')) {
+      subjectKey = 'year3_all';
+      subjectNameAr = 'مستلزمات العيادة والمواد (سنة 3 - عام)';
+      subjectShortName = 'مستلزمات عيادة 3';
+      subjectIcon = '🛡️';
+      tagClass = 'y3-all';
+      orderIndex = 25;
     }
 
     return {
@@ -6303,6 +6311,7 @@ function renderAddOrderProducts(searchVal = '') {
       if (p.subject === ADD_ORDER_STATE.subject) return true;
       if (p.id === '33000000-0000-0000-0000-000000000101' && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics-2')) return true;
       if (p.id === '33000000-0000-0000-0000-000000000102' && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics-2' || ADD_ORDER_STATE.subject === 'fixed-prosthodontics' || ADD_ORDER_STATE.subject === 'removable-prosthodontics')) return true;
+      if (p.year3All || p.id === '33000000-0000-0000-0000-000000000103' || p.id === '33000000-0000-0000-0000-000000000104') return true;
       if (!p.subject && ADD_ORDER_STATE.subject === 'dental-anatomy') return true;
       return false;
     });
