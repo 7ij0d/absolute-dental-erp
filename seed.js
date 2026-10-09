@@ -239,6 +239,24 @@ const INITIAL_PRODUCTS = [
     "year": "year3"
   },
   {
+    "id": "33000000-0000-0000-0000-000000000111",
+    "nameAr": "رول تغليف وعزل عيادي واقي (أزرق) - Dental Barrier Wrapping Roll",
+    "nameEn": "Dental Barrier Film Wrapping Roll (Blue)",
+    "sku": "DEN-WRAP-BLU",
+    "category": "صناعة الأسنان المتحركة (سنة 3)",
+    "costPrice": 23.00,
+    "sellingPrice": 28.00,
+    "wholesalePrice": 23.00,
+    "retailPrice": 28.00,
+    "stock": 5,
+    "minStock": 1,
+    "supplier": "توريد معدات طب أسنان",
+    "status": "متوفر",
+    "image": "assets/dental-barrier-wrapping-roll-blue.png",
+    "subject": "removable-prosthodontics-2",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",
