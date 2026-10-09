@@ -764,19 +764,23 @@
           </div>
         </div>
 
-        <!-- Academic Classification Tabs (Year 1 / Year 2 / All) -->
+        <!-- Academic Classification Tabs (Year 1 / Year 2 / Year 3 / All) -->
         <div class="inv-year-tabs-nav" id="invYearFilterTabs">
           <button type="button" class="inv-year-tab active" data-year="all" onclick="filterInventoryByYear('all', this)">
             <span class="tab-label">📦 جميع الأصناف</span>
-            <span class="tab-count-badge" id="invYearCountAll">29</span>
+            <span class="tab-count-badge" id="invYearCountAll">0</span>
           </button>
           <button type="button" class="inv-year-tab" data-year="year1" onclick="filterInventoryByYear('year1', this)">
             <span class="tab-label">🎓 أدوات سنة أولى</span>
-            <span class="tab-count-badge" id="invYearCountY1">10</span>
+            <span class="tab-count-badge" id="invYearCountY1">0</span>
           </button>
           <button type="button" class="inv-year-tab" data-year="year2" onclick="filterInventoryByYear('year2', this)">
             <span class="tab-label">🦷 أدوات سنة ثانية</span>
-            <span class="tab-count-badge" id="invYearCountY2">19</span>
+            <span class="tab-count-badge" id="invYearCountY2">0</span>
+          </button>
+          <button type="button" class="inv-year-tab" data-year="year3" onclick="filterInventoryByYear('year3', this)">
+            <span class="tab-label">🏥 أدوات سنة ثالثة</span>
+            <span class="tab-count-badge" id="invYearCountY3">0</span>
           </button>
         </div>
 
@@ -1769,6 +1773,7 @@
       <div class="year-segmented-tabs">
         <button type="button" class="year-tab-btn active" id="yearTabBtn1" onclick="switchAddOrderYear('1st-year', this)">السنة الأولى</button>
         <button type="button" class="year-tab-btn" id="yearTabBtn2" onclick="switchAddOrderYear('2nd-year', this)">السنة الثانية</button>
+        <button type="button" class="year-tab-btn" id="yearTabBtn3" onclick="switchAddOrderYear('3rd-year', this)">السنة الثالثة</button>
       </div>
     </div>
 

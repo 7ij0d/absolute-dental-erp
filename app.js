@@ -2378,7 +2378,7 @@ function getProductAcademicTaxonomy(p) {
   const name = ((p.nameAr || '') + ' ' + (p.nameEn || '')).toLowerCase();
 
   // 1. Year 1 Tools (أدوات سنة أولى)
-  if (cat.includes('سنة 1') || cat.includes('سنة أولى') || subj === 'dental-materials' || (subj === 'dental-anatomy' && !cat.includes('سنة 2'))) {
+  if (cat.includes('سنة 1') || cat.includes('سنة أولى') || subj === 'dental-materials' || (subj === 'dental-anatomy' && !cat.includes('سنة 2') && !cat.includes('سنة 3'))) {
     let subjectKey = 'anatomy';
     let subjectNameAr = 'تشريح الأسنان (Dental Anatomy)';
     let subjectShortName = 'تشريح أسنان';
@@ -2409,7 +2409,60 @@ function getProductAcademicTaxonomy(p) {
     };
   }
 
-  // 2. Year 2 Tools (أدوات سنة ثانية)
+  // 2. Year 3 Tools (أدوات سنة ثالثة)
+  if (cat.includes('سنة 3') || cat.includes('سنة ثالثة') || 
+      subj === 'conservative-dentistry-2' || subj === 'preventive-dentistry' || 
+      subj === 'fixed-prosthodontics-2' || subj === 'removable-prosthodontics-2' ||
+      name.includes('conservative 2') || name.includes('كونس 2') ||
+      name.includes('preventive') || name.includes('وقائي') ||
+      name.includes('fixed 2') || name.includes('ثابتة 2') ||
+      name.includes('removable 2') || name.includes('متحركة 2')) {
+    
+    let subjectKey = 'cons2';
+    let subjectNameAr = 'علاج الأسنان التحفظي 2 (Conservative Dentistry 2)';
+    let subjectShortName = 'كونس 2';
+    let subjectIcon = '🦷';
+    let tagClass = 'y3-cons';
+    let orderIndex = 20;
+
+    if (subj === 'preventive-dentistry' || name.includes('preventive') || name.includes('وقائي') || cat.includes('وقائي')) {
+      subjectKey = 'preventive';
+      subjectNameAr = 'طب الأسنان الوقائي (Preventive Dentistry)';
+      subjectShortName = 'وقائي';
+      subjectIcon = '🛡️';
+      tagClass = 'y3-prev';
+      orderIndex = 21;
+    } else if (subj === 'fixed-prosthodontics-2' || name.includes('fixed 2') || name.includes('ثابتة 2') || cat.includes('ثابتة 2')) {
+      subjectKey = 'fixed2';
+      subjectNameAr = 'صناعة الأسنان الثابتة 2 (Fixed Prosthodontics 2)';
+      subjectShortName = 'ثابتة 2';
+      subjectIcon = '👑';
+      tagClass = 'y3-fixed';
+      orderIndex = 22;
+    } else if (subj === 'removable-prosthodontics-2' || name.includes('removable 2') || name.includes('متحركة 2') || cat.includes('متحركة 2')) {
+      subjectKey = 'remov2';
+      subjectNameAr = 'صناعة الأسنان المتحركة 2 (Removable Prosthodontics 2)';
+      subjectShortName = 'متحركة 2';
+      subjectIcon = '🧰';
+      tagClass = 'y3-remov';
+      orderIndex = 23;
+    }
+
+    return {
+      yearKey: 'year3',
+      yearNameAr: 'أدوات سنة ثالثة',
+      yearTagClass: 'y3',
+      yearIcon: '🏥',
+      subjectKey,
+      subjectNameAr,
+      subjectShortName,
+      subjectIcon,
+      tagClass,
+      orderIndex
+    };
+  }
+
+  // 3. Year 2 Tools (أدوات سنة ثانية)
   let subjectKey = 'restorative';
   let subjectNameAr = 'علاج تحفظي / كونس (Restorative)';
   let subjectShortName = 'علاج تحفظي / كونس';
@@ -2552,6 +2605,7 @@ function renderInventorySubjectChips() {
   let allLabel = 'جميع المواد';
   if (CURRENT_INVENTORY_YEAR === 'year1') allLabel = 'جميع مواد سنة أولى';
   else if (CURRENT_INVENTORY_YEAR === 'year2') allLabel = 'جميع مواد سنة ثانية';
+  else if (CURRENT_INVENTORY_YEAR === 'year3') allLabel = 'جميع مواد سنة ثالثة';
 
   const isAllActive = (CURRENT_INVENTORY_SUBJECT === 'all');
 
@@ -2589,13 +2643,16 @@ function renderInventoryTable() {
   const countAll = catalog.length;
   const countY1 = catalog.filter(p => getProductAcademicTaxonomy(p).yearKey === 'year1').length;
   const countY2 = catalog.filter(p => getProductAcademicTaxonomy(p).yearKey === 'year2').length;
+  const countY3 = catalog.filter(p => getProductAcademicTaxonomy(p).yearKey === 'year3').length;
 
   const elCountAll = document.getElementById('invYearCountAll');
   const elCountY1 = document.getElementById('invYearCountY1');
   const elCountY2 = document.getElementById('invYearCountY2');
+  const elCountY3 = document.getElementById('invYearCountY3');
   if (elCountAll) elCountAll.textContent = countAll;
   if (elCountY1) elCountY1.textContent = countY1;
   if (elCountY2) elCountY2.textContent = countY2;
+  if (elCountY3) elCountY3.textContent = countY3;
 
   if (!document.getElementById('invSubjectChipsContainer')?.children.length) {
     renderInventorySubjectChips();
@@ -5859,6 +5916,12 @@ const OFFICIAL_NAV_SUBJECTS = {
     { id: 'fixed-prosthodontics', nameAr: 'صناعة الأسنان الثابتة', nameEn: 'Fixed Prosthodontics', artwork: 'assets/fixed-prosthodontics-faded.png' },
     { id: 'removable-prosthodontics', nameAr: 'صناعة الأسنان المتحركة', nameEn: 'Removable Prosthodontics', artwork: 'assets/removable-prosthodontics-faded.png' },
     { id: 'restorative-dentistry', nameAr: 'علاج الأسنان التحفظي', nameEn: 'Restorative Dentistry', artwork: 'assets/operative-dentistry-faded.png' }
+  ],
+  '3rd-year': [
+    { id: 'conservative-dentistry-2', nameAr: 'علاج الأسنان التحفظي 2', nameEn: 'Conservative Dentistry 2', artwork: 'assets/operative-dentistry-faded.png' },
+    { id: 'preventive-dentistry', nameAr: 'طب الأسنان الوقائي', nameEn: 'Preventive Dentistry', artwork: 'assets/preventive-dentistry-faded.png' },
+    { id: 'fixed-prosthodontics-2', nameAr: 'صناعة الأسنان الثابتة 2', nameEn: 'Fixed Prosthodontics 2', artwork: 'assets/fixed-prosthodontics-faded.png' },
+    { id: 'removable-prosthodontics-2', nameAr: 'صناعة الأسنان المتحركة 2', nameEn: 'Removable Prosthodontics 2', artwork: 'assets/removable-prosthodontics-faded.png' }
   ]
 };
 
