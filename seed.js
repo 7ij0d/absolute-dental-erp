@@ -221,6 +221,24 @@ const INITIAL_PRODUCTS = [
     ]
   },
   {
+    "id": "33000000-0000-0000-0000-000000000110",
+    "nameAr": "رول شاش طبي قطني GM (وزن 500 جرام)",
+    "nameEn": "GM Medical Gauze Roll (500g)",
+    "sku": "DEN-GROLL-GM500",
+    "category": "طب أسنان الأطفال والوقائي (سنة 3)",
+    "costPrice": 22.00,
+    "sellingPrice": 26.00,
+    "wholesalePrice": 22.00,
+    "retailPrice": 26.00,
+    "stock": 2,
+    "minStock": 1,
+    "supplier": "توريد معدات طب أسنان",
+    "status": "متوفر",
+    "image": "assets/gauze-roll-500g.png",
+    "subject": "preventive-dentistry",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",
