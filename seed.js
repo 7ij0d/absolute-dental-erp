@@ -381,6 +381,25 @@ const INITIAL_PRODUCTS = [
     "year": "year3"
   },
   {
+    "id": "33000000-0000-0000-0000-000000000117",
+    "nameAr": "معجون مصلب سيليكون لاصقود إنرسيل (Lascod Enersyl Activator Paste – 60ml)",
+    "nameEn": "Lascod Enersyl Activator Paste – Catalyst (60 ml)",
+    "sku": "DEN-ENERSYL-60",
+    "category": "مواد الطبعات والسيليكون (سنة 3)",
+    "costPrice": 58.00,
+    "sellingPrice": 65.00,
+    "wholesalePrice": 58.00,
+    "retailPrice": 65.00,
+    "stock": 0,
+    "minStock": 1,
+    "supplier": "Lascod Italy",
+    "status": "متوفر بالطلب",
+    "isByOrder": true,
+    "image": "assets/lascod-enersyl-activator-paste-60ml.png",
+    "subject": "fixed-prosthodontics-2",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",
