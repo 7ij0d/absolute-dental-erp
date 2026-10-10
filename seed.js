@@ -343,6 +343,25 @@ const INITIAL_PRODUCTS = [
     "year": "year3"
   },
   {
+    "id": "33000000-0000-0000-0000-000000000115",
+    "nameAr": "مطاط سيليكون عيادي لاصقود سيلاكسيل (Lascod Silaxil Putty – 900ml)",
+    "nameEn": "Lascod Silaxil Putty – C-Silicone (900 ml)",
+    "sku": "DEN-SILAXIL-900",
+    "category": "مواد الطبعات والسيليكون (سنة 3)",
+    "costPrice": 185.00,
+    "sellingPrice": 192.00,
+    "wholesalePrice": 185.00,
+    "retailPrice": 192.00,
+    "stock": 0,
+    "minStock": 1,
+    "supplier": "Lascod Italy",
+    "status": "متوفر بالطلب",
+    "isByOrder": true,
+    "image": "assets/lascod-silaxil-putty-900ml.png",
+    "subject": "fixed-prosthodontics-2",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",
