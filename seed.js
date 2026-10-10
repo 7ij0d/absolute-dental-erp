@@ -325,6 +325,24 @@ const INITIAL_PRODUCTS = [
     "year": "year3"
   },
   {
+    "id": "33000000-0000-0000-0000-000000000114",
+    "nameAr": "طقم فحص أسنان عيادي معقم أحادي الاستخدام (Disposable Dental Examination Kit)",
+    "nameEn": "Disposable Dental Examination Kit (Sterile Clinical Set)",
+    "sku": "DEN-EXAM-KIT",
+    "category": "أطقم ومستلزمات الفحص العيادي",
+    "costPrice": 2.25,
+    "sellingPrice": 2.25,
+    "wholesalePrice": 2.25,
+    "retailPrice": 2.25,
+    "stock": 10,
+    "minStock": 2,
+    "supplier": "توريد معدات طب أسنان",
+    "status": "متوفر",
+    "image": "assets/disposable-dental-examination-kit.png",
+    "subject": "conservative-dentistry-2",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",
