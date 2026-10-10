@@ -362,6 +362,25 @@ const INITIAL_PRODUCTS = [
     "year": "year3"
   },
   {
+    "id": "33000000-0000-0000-0000-000000000116",
+    "nameAr": "مطاط سيليكون لايت بودي لاصقود سيلاكسيل (Lascod Silaxil Light Body)",
+    "nameEn": "Lascod Silaxil Light Body – C-Silicone",
+    "sku": "DEN-SILAXIL-LB",
+    "category": "مواد الطبعات والسيليكون (سنة 3)",
+    "costPrice": 62.00,
+    "sellingPrice": 70.00,
+    "wholesalePrice": 62.00,
+    "retailPrice": 70.00,
+    "stock": 0,
+    "minStock": 1,
+    "supplier": "Lascod Italy",
+    "status": "متوفر بالطلب",
+    "isByOrder": true,
+    "image": "assets/lascod-silaxil-light-body.png",
+    "subject": "fixed-prosthodontics-2",
+    "year": "year3"
+  },
+  {
     "id": "33000000-0000-0000-0000-000000000101",
     "nameAr": "قالب طبعة الأسنان (Dental impression tray) - أزرق",
     "nameEn": "Dental impression tray (Blue)",

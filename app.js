@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // 0. CACHE VERSION BUSTER & COMPLETE CLEAN SLATE INITIALIZATION
 // -------------------------------------------------------------
-const ERP_DATABASE_VERSION = '2026.10.10_SILAXIL_PUTTY_BY_ORDER_V1';
+const ERP_DATABASE_VERSION = '2026.10.10_SILAXIL_LIGHT_BODY_BY_ORDER_V1';
 const ERP_CUTOFF_TIMESTAMP = new Date((typeof window !== 'undefined' && window.ERP_CUTOFF_DATE) || '2026-10-07T01:55:00+02:00').getTime();
 if (typeof localStorage !== 'undefined') {
   if (localStorage.getItem('abs_erp_data_version') !== ERP_DATABASE_VERSION) {
@@ -6316,7 +6316,7 @@ function renderAddOrderProducts(searchVal = '') {
       if ((p.id === '33000000-0000-0000-0000-000000000107' || p.id === '33000000-0000-0000-0000-000000000112') && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'fixed-prosthodontics' || ADD_ORDER_STATE.subject === 'removable-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics')) return true;
       if ((p.id === '33000000-0000-0000-0000-000000000108' || p.id === '33000000-0000-0000-0000-000000000110' || p.id === '33000000-0000-0000-0000-000000000113') && (ADD_ORDER_STATE.subject === 'preventive-dentistry' || ADD_ORDER_STATE.subject === 'pediatric-preventive-dentistry-1')) return true;
       if (p.id === '33000000-0000-0000-0000-000000000114' && (ADD_ORDER_STATE.subject === 'conservative-dentistry-2' || ADD_ORDER_STATE.subject === 'restorative-dentistry' || ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'fixed-prosthodontics' || ADD_ORDER_STATE.subject === 'removable-prosthodontics-2' || ADD_ORDER_STATE.subject === 'removable-prosthodontics')) return true;
-      if (p.id === '33000000-0000-0000-0000-000000000115' && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'fixed-prosthodontics')) return true;
+      if ((p.id === '33000000-0000-0000-0000-000000000115' || p.id === '33000000-0000-0000-0000-000000000116') && (ADD_ORDER_STATE.subject === 'fixed-prosthodontics-2' || ADD_ORDER_STATE.subject === 'fixed-prosthodontics')) return true;
       if (!p.subject && ADD_ORDER_STATE.subject === 'dental-anatomy') return true;
       return false;
     });
